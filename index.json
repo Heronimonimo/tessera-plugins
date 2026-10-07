@@ -1,0 +1,191 @@
+{
+ "format": 1,
+ "generated": "2026-10-07T15:52:59Z",
+ "plugin_api": "0.1",
+ "blocked": [],
+ "plugins": [
+  {
+   "id": "ov_departures",
+   "repo": "https://github.com/MaxGramser/tessera-plugins",
+   "path": "plugins/ov_departures",
+   "label": "tessera",
+   "status": "ok",
+   "release": {
+    "version": "1.0.0",
+    "sha": "f2e7ec69df7e181f97ddfd45c452891e46f16098",
+    "date": "2026-10-07"
+   },
+   "manifest": {
+    "id": "ov_departures",
+    "version": "1.0.0",
+    "api": "0.1",
+    "icon": "bus",
+    "maintainer": "MaxGramser",
+    "license": "MIT",
+    "requires": {
+     "esphome": "2026.6.2"
+    },
+    "boards": "any",
+    "flash_kb": 12,
+    "permissions": {
+     "network": [
+      "v0.ovapi.nl"
+     ]
+    },
+    "attributes": [
+     "cloud"
+    ],
+    "privacy": "https://github.com/MaxGramser/tessera-plugins/tree/main/plugins/ov_departures#privacy",
+    "tiles": [
+     {
+      "id": "next",
+      "name": "tile_name",
+      "icon": "bus",
+      "sizes": {
+       "min": "1x1",
+       "max": "3x2"
+      },
+      "memory": 1200,
+      "data": "departures",
+      "example": "tile_example",
+      "options": [
+       {
+        "id": "stop",
+        "kind": "text",
+        "label": "stop",
+        "hint": "stop_hint"
+       },
+       {
+        "id": "line",
+        "kind": "choice",
+        "options_from": "lines",
+        "label": "line",
+        "hint": "line_hint"
+       },
+       {
+        "id": "walk",
+        "kind": "number",
+        "min": 0,
+        "max": 30,
+        "step": 1,
+        "unit": "min",
+        "default": 0,
+        "label": "walk",
+        "hint": "walk_hint"
+       }
+      ]
+     }
+    ],
+    "fetch": [
+     {
+      "id": "departures",
+      "url": "http://v0.ovapi.nl/tpc/{stop}",
+      "every": "60s",
+      "map": {
+       "items": "$.{stop}.Passes[*]",
+       "fields": {
+        "line": "LinePublicNumber",
+        "to": "DestinationName50",
+        "at": {
+         "path": "ExpectedDepartureTime",
+         "as": "epoch",
+         "tz": "Europe/Amsterdam"
+        },
+        "plan": {
+         "path": "TargetDepartureTime",
+         "as": "epoch",
+         "tz": "Europe/Amsterdam"
+        },
+        "state": "TripStopStatus"
+       },
+       "where": {
+        "line": "{line}"
+       },
+       "skip": {
+        "state": [
+         "PASSED",
+         "CANCEL"
+        ]
+       },
+       "sort": "at",
+       "limit": 6
+      }
+     },
+     {
+      "id": "lines",
+      "url": "http://v0.ovapi.nl/tpc/{stop}",
+      "every": "1h",
+      "map": {
+       "items": "$.{stop}.Passes[*]",
+       "value": "LinePublicNumber",
+       "label": [
+        "LinePublicNumber",
+        "DestinationName50"
+       ]
+      }
+     }
+    ]
+   },
+   "translations": {
+    "en": {
+     "_meta": {
+      "name": "English"
+     },
+     "screen": {
+      "now": "now",
+      "minutes": "{n} min",
+      "then": "then {list}",
+      "none": "No departures",
+      "waiting": "Asking for times",
+      "choose_stop": "Choose a stop",
+      "failed": "No times right now",
+      "old": "Times may be old"
+     },
+     "app": {
+      "name": "Public transport (NL)",
+      "summary": "When the next bus, tram, metro or ferry leaves your stop, live from OVapi.",
+      "tile_name": "Next departure",
+      "tile_example": "12 min to Centraal Station",
+      "stop": "Stop code",
+      "stop_hint": "The stop's timing point code, eight digits. The README says where to find it.",
+      "line": "Line",
+      "line_hint": "Empty shows every line that stops here.",
+      "walk": "Walk to the stop",
+      "walk_hint": "Departures you can no longer make are skipped."
+     }
+    },
+    "nl": {
+     "_meta": {
+      "name": "Nederlands"
+     },
+     "screen": {
+      "now": "nu",
+      "minutes": "{n} min",
+      "then": "daarna {list}",
+      "none": "Geen vertrek",
+      "waiting": "Tijden opvragen",
+      "choose_stop": "Kies een halte",
+      "failed": "Nu geen tijden",
+      "old": "Tijden mogelijk oud"
+     },
+     "app": {
+      "name": "Openbaar vervoer (NL)",
+      "summary": "Wanneer de volgende bus, tram, metro of veerboot bij jouw halte vertrekt, live via OVapi.",
+      "tile_name": "Eerstvolgende vertrek",
+      "tile_example": "Over 12 min naar Centraal Station",
+      "stop": "Haltecode",
+      "stop_hint": "De timing point code van de halte, acht cijfers. In de README staat waar je hem vindt.",
+      "line": "Lijn",
+      "line_hint": "Leeg toont elke lijn die hier stopt.",
+      "walk": "Lopen naar de halte",
+      "walk_hint": "Vertrekken die je niet meer haalt, worden overgeslagen."
+     }
+    }
+   },
+   "readme": {
+    "en": "# Public transport (NL)\n\nA tile that shows when the next bus, tram, metro or ferry leaves your stop, with the walk to the stop already taken off.\nThe times are live from [OVapi](http://v0.ovapi.nl), the open service behind many Dutch departure boards. It needs no\naccount and no key.\n\nOn a single cell the tile shows the next departure big, with its line and destination above it and the two after it\nbelow. On a tile of two columns or more it is a list, one row per departure, as many as fit.\n\n## Set up\n\n1. Find the code of your stop. Open [ovzoeker.nl](https://www.ovzoeker.nl), click your stop on the map, and copy the\n   number after *haltenummer* (eight digits, such as `30003025`). A stop has a code per direction: pick the side of the\n   street you leave from.\n2. Add the plugin to a screen in Tessera (Plugins, or the Plugins tab of the screen). The screen builds once.\n3. In Layout, place the **Next departure** tile from the library's Plugins group.\n4. In the inspector, fill in the stop code. The **Line** list then fills with the lines that stop there; leave it empty\n   for every line.\n5. Set **Walk to the stop** to the minutes you need. Departures you can no longer make are skipped.\n\n## Good to know\n\n- Tessera asks OVapi once a minute per stop, for every screen and tile together. The screen counts down on its own\n  clock in between.\n- A time an hour or more away is shown as a time of day.\n- When OVapi does not answer, the tile keeps the last times it had and says they may be old.\n- Works on every board, the CYD included.\n\n## Privacy\n\nTessera (the app in Home Assistant, not the screen) asks `v0.ovapi.nl` for the departures of the stop codes you fill\nin. OVapi sees the address of your Home Assistant and those stop codes, nothing else. No key, account or personal data\nis sent. The request goes over plain http, because OVapi's https certificate does not match its name; the plugin sends\nnothing secret.\n\n## How it works\n\n- `tessera-plugin.yaml`: the tile, its options, and two fetches the app carries out: the departures of a stop, mapped to\n  line, destination and time, and the lines of a stop for the list in the inspector.\n- `components/ov_departures/`: the ESPHome component that draws the tile and counts down.\n- `translations/`: the words on the screen (`screen`) and in the app (`app`).\n",
+    "nl": "# Openbaar vervoer (NL)\n\nEen tegel die laat zien wanneer de volgende bus, tram, metro of veerboot bij jouw halte vertrekt, met de looptijd naar\nde halte er al af. De tijden komen live van [OVapi](http://v0.ovapi.nl), de open dienst achter veel Nederlandse\nvertrekborden. Er is geen account of sleutel voor nodig.\n\nOp één cel toont de tegel het eerstvolgende vertrek groot, met lijn en bestemming erboven en de twee daarna eronder. Op\neen tegel van twee kolommen of breder is het een lijst, een regel per vertrek, zoveel als er passen.\n\n## Instellen\n\n1. Zoek de code van je halte. Open [ovzoeker.nl](https://www.ovzoeker.nl), klik je halte op de kaart aan en kopieer het\n   nummer achter *haltenummer* (acht cijfers, zoals `30003025`). Een halte heeft een code per richting: kies de kant\n   van de straat waar je vertrekt.\n2. Voeg de plugin in Tessera toe aan een scherm (Plugins, of de tab Plugins van het scherm). Het scherm wordt één keer\n   gebouwd.\n3. Zet in Indeling de tegel **Eerstvolgende vertrek** uit de groep Plugins van de bibliotheek op een pagina.\n4. Vul in de inspector de haltecode in. De lijst **Lijn** vult zich dan met de lijnen die daar stoppen; laat hem leeg\n   voor alle lijnen.\n5. Stel bij **Lopen naar de halte** in hoeveel minuten je nodig hebt. Vertrekken die je niet meer haalt, worden\n   overgeslagen.\n\n## Goed om te weten\n\n- Tessera vraagt OVapi één keer per minuut per halte op, voor alle schermen en tegels samen. Daartussen telt het\n  scherm zelf af.\n- Een vertrek over een uur of meer staat er als tijdstip.\n- Antwoordt OVapi niet, dan houdt de tegel de laatste tijden en zegt hij dat ze oud kunnen zijn.\n- Werkt op elk bordje, ook op de CYD.\n\n## Privacy\n\nTessera (de app in Home Assistant, niet het scherm) vraagt `v0.ovapi.nl` om de vertrektijden van de haltecodes die je\ninvult. OVapi ziet het adres van je Home Assistant en die haltecodes, verder niets. Er gaat geen sleutel, account of\npersoonlijke informatie mee. De vraag gaat over gewoon http, omdat het https-certificaat van OVapi niet bij zijn naam\npast; de plugin stuurt niets geheims.\n"
+   }
+  }
+ ]
+}

@@ -1,0 +1,25 @@
+{
+  "_meta": { "name": "English" },
+  "screen": {
+    "now": "now",
+    "minutes": "{n} min",
+    "then": "then {list}",
+    "none": "No departures",
+    "waiting": "Asking for times",
+    "choose_stop": "Choose a stop",
+    "failed": "No times right now",
+    "old": "Times may be old"
+  },
+  "app": {
+    "name": "Public transport (NL)",
+    "summary": "When the next bus, tram, metro or ferry leaves your stop, live from OVapi.",
+    "tile_name": "Next departure",
+    "tile_example": "12 min to Centraal Station",
+    "stop": "Stop code",
+    "stop_hint": "The stop's timing point code, eight digits. The README says where to find it.",
+    "line": "Line",
+    "line_hint": "Empty shows every line that stops here.",
+    "walk": "Walk to the stop",
+    "walk_hint": "Departures you can no longer make are skipped."
+  }
+}

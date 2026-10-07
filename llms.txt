@@ -1,0 +1,32 @@
+# Tessera plugins
+
+> Plugins for Tessera, the ESP32 touch screens for Home Assistant. A plugin is an ESPHome component (C++) built into a
+> screen's firmware plus a manifest the Tessera app reads; the app fetches web data for it. Plugin API 0.1.
+
+Start with AGENTS.md (rules for AI assistants), then docs/MAKING_A_PLUGIN.md.
+
+## Docs
+- [AGENTS.md](AGENTS.md): rules, the reading order, what "done" means
+- [docs/MAKING_A_PLUGIN.md](docs/MAKING_A_PLUGIN.md): files, steps, how the pieces meet, common mistakes
+- [docs/MANIFEST.md](docs/MANIFEST.md): every field of tessera-plugin.yaml, limits
+- [docs/FIRMWARE_API.md](docs/FIRMWARE_API.md): tessera::Plugin, tessera::Tile, drawing helpers, rules
+- [docs/FETCH.md](docs/FETCH.md): data from a web service, the map language
+- [docs/TRANSLATIONS.md](docs/TRANSLATIONS.md): screen and app texts, plurals
+- [docs/TESTING.md](docs/TESTING.md): check.py, a test folder in Home Assistant, a local build
+- [docs/PUBLISHING.md](docs/PUBLISHING.md): the index, labels, versions, blocked versions
+- [docs/LIMITS.md](docs/LIMITS.md): what fits and what does not
+
+## Examples
+- [template/](template): the smallest complete plugin, a countdown tile without data
+- [plugins/ov_departures/](plugins/ov_departures): a tile with fetched data, a list of choices and a countdown
+
+## Tools
+- tools/new_plugin.py <id>: copy the template under a new id
+- tools/check.py [folder]: the app's manifest check plus folder, translation, README and code rules
+- tools/build_index.py: write index.json
+
+## The core
+- Tessera repository: https://github.com/MaxGramser/homeassistant_espscreen (branch dev while plugins are new)
+- The API header: components/smart_display/plugin_api.h
+- The manifest check: screen_manager/app/plugin_manifest.py
+- How the core handles plugins: docs/PLUGINS.md

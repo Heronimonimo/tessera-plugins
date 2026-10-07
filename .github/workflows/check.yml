@@ -1,0 +1,18 @@
+# Every push and pull request: every plugin and the template pass the Tessera app's own manifest check and the rules
+# of tools/check.py, and index.json is what tools/build_index.py writes (on main, after the index job).
+name: check
+on:
+  push:
+  pull_request:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml
+      - run: python3 tools/check.py

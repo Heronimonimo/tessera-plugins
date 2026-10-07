@@ -1,0 +1,5 @@
+# Plugin versions the Tessera app refuses to build, with the reason (docs/PUBLISHING.md, "Blocked").
+# - plugin: some_plugin
+#   versions: ["1.0.0"]
+#   reason: Sends the API key to a host it does not name.
+[]

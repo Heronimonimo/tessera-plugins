@@ -1,0 +1,25 @@
+{
+  "_meta": { "name": "Nederlands" },
+  "screen": {
+    "now": "nu",
+    "minutes": "{n} min",
+    "then": "daarna {list}",
+    "none": "Geen vertrek",
+    "waiting": "Tijden opvragen",
+    "choose_stop": "Kies een halte",
+    "failed": "Nu geen tijden",
+    "old": "Tijden mogelijk oud"
+  },
+  "app": {
+    "name": "Openbaar vervoer (NL)",
+    "summary": "Wanneer de volgende bus, tram, metro of veerboot bij jouw halte vertrekt, live via OVapi.",
+    "tile_name": "Eerstvolgende vertrek",
+    "tile_example": "Over 12 min naar Centraal Station",
+    "stop": "Haltecode",
+    "stop_hint": "De timing point code van de halte, acht cijfers. In de README staat waar je hem vindt.",
+    "line": "Lijn",
+    "line_hint": "Leeg toont elke lijn die hier stopt.",
+    "walk": "Lopen naar de halte",
+    "walk_hint": "Vertrekken die je niet meer haalt, worden overgeslagen."
+  }
+}

@@ -1,0 +1,31 @@
+# After a push to main that changes a plugin: index.json again, committed by the workflow, so the app sees the new
+# release. Each plugin is pinned to the last commit that changed its folder (tools/build_index.py).
+name: index
+on:
+  push:
+    branches: [main]
+    paths: ["plugins/**", "blocked.yaml", "tools/build_index.py"]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  index:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml
+      - run: python3 tools/build_index.py
+      - name: Commit index.json when it changed
+        run: |
+          if ! git diff --quiet index.json; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add index.json
+            git commit -m "Index: rebuilt for ${GITHUB_SHA::7}"
+            git push
+          fi

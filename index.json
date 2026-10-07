@@ -1,6 +1,6 @@
 {
  "format": 1,
- "generated": "2026-10-07T18:48:30Z",
+ "generated": "2026-10-07T19:26:37Z",
  "plugin_api": "0.2",
  "blocked": [],
  "plugins": [
@@ -212,13 +212,13 @@
    "label": "tessera",
    "status": "ok",
    "release": {
-    "version": "1.0.0",
-    "sha": "059aad2a51a5a2198799d57d3590830d6aa736bf",
+    "version": "1.0.1",
+    "sha": "8a2d86bbbefd7c97e1a962e076b3043819d70d32",
     "date": "2026-10-07"
    },
    "manifest": {
     "id": "waste_collection",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "api": "0.2",
     "icon": "recycle",
     "maintainer": "MaxGramser",
@@ -294,6 +294,18 @@
       "icon": "recycle",
       "example": "bar_example"
      }
+    ],
+    "settings": [
+     {
+      "key": "waste_in_top_bar",
+      "label": "setting_in_bar",
+      "hint": "setting_in_bar_hint"
+     },
+     {
+      "key": "waste_days_ahead",
+      "label": "setting_days_ahead",
+      "hint": "setting_days_ahead_hint"
+     }
     ]
    },
    "translations": {
@@ -325,7 +337,11 @@
       "card_name": "Coming collections",
       "tap_upcoming": "Show coming collections",
       "bar_soon": "Next collection",
-      "bar_example": "Tomorrow: Paper"
+      "bar_example": "Tomorrow: Paper",
+      "setting_in_bar": "In the top bar",
+      "setting_in_bar_hint": "Whether the top bar says when the next bin goes out.",
+      "setting_days_ahead": "Days ahead",
+      "setting_days_ahead_hint": "From how many days before a collection the top bar says it."
      }
     },
     "nl": {
@@ -356,7 +372,11 @@
       "card_name": "Komende ophaaldagen",
       "tap_upcoming": "Komende ophaaldagen tonen",
       "bar_soon": "Volgende ophaaldag",
-      "bar_example": "Morgen: Papier"
+      "bar_example": "Morgen: Papier",
+      "setting_in_bar": "In de bovenbalk",
+      "setting_in_bar_hint": "Of de bovenbalk zegt wanneer de volgende container buiten moet.",
+      "setting_days_ahead": "Dagen vooruit",
+      "setting_days_ahead_hint": "Vanaf hoeveel dagen voor een ophaaldag de bovenbalk het zegt."
      }
     }
    },

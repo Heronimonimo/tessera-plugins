@@ -1,11 +1,17 @@
-# After a push to main that changes a plugin: index.json again, committed by the workflow, so the app sees the new
-# release. Each plugin is pinned to the last commit that changed its folder (tools/build_index.py).
+# index.json again, committed by the workflow when it changed, so the app sees a new release: after a push to main that
+# changes a plugin, a community entry or the blocked list, and every hour for the community plugins that follow their
+# newest release, so a maker's release reaches the app without a pull request. Each plugin of plugins/ is pinned to
+# the last commit that changed its folder, each community plugin to its release's commit (tools/build_index.py).
 name: index
 on:
   push:
     branches: [main]
-    paths: ["plugins/**", "blocked.yaml", "tools/build_index.py"]
+    paths: ["plugins/**", "community/**", "blocked.yaml", "tools/build_index.py"]
+  schedule:
+    - cron: "17 * * * *"
   workflow_dispatch:
+concurrency:
+  group: index
 permissions:
   contents: write
 jobs:
@@ -20,6 +26,8 @@ jobs:
           python-version: "3.12"
       - run: pip install pyyaml
       - run: python3 tools/build_index.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # GitHub's API for the newest releases, without its hourly limit
       - name: Commit index.json when it changed
         run: |
           if ! git diff --quiet index.json; then

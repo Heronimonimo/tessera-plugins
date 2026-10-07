@@ -1,5 +1,6 @@
 # Every push and pull request: every plugin and the template pass the Tessera app's own manifest check and the rules
-# of tools/check.py, and index.json is what tools/build_index.py writes (on main, after the index job).
+# of tools/check.py. A pull request that lists a plugin in community/ also has it checked at its release, and is made
+# by the owner of the repository it names (docs/PUBLISHING.md, "Your own plugin").
 name: check
 on:
   push:
@@ -17,3 +18,19 @@ jobs:
           python-version: "3.12"
       - run: pip install pyyaml
       - run: python3 tools/check.py
+      - name: Community entries of this pull request
+        if: github.event_name == 'pull_request'
+        env:
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          changed=$(git diff --name-only --diff-filter=AM "$BASE" HEAD -- 'community/*.yaml')
+          [ -z "$changed" ] && exit 0
+          for entry in $changed; do
+            owner=$(python3 -c "import sys, yaml; print(str(yaml.safe_load(open(sys.argv[1]))['maintainer']).lower())" "$entry")
+            if [ "$owner" != "$(echo "$AUTHOR" | tr 'A-Z' 'a-z')" ] && [ "$AUTHOR" != "MaxGramser" ]; then
+              echo "$entry: only the maintainer ($owner) lists their own plugin"; exit 1
+            fi
+          done
+          python3 tools/build_index.py --entries $changed

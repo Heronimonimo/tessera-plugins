@@ -24,39 +24,52 @@ screen by itself.
 ## Your own plugin, in a repository of your own
 
 A plugin can live in a repository of its own, made from [`template/`](../template)
-(`python3 tools/new_plugin.py <id> ../my-plugin`). The index will list such plugins through a file per plugin in
-`community/`:
+(`python3 tools/new_plugin.py <id> ../my-plugin`). It stays yours: you publish its releases, you answer its issues, and
+Tessera never needs a pull request for a new version.
 
-```yaml
-# community/bin_day.yaml
-repo: https://github.com/someone/tessera-bin-day
-path: .                        # the folder with tessera-plugin.yaml
-ref: v1.2.0                    # a tag of a release; the index pins its commit
-maintainer: someone            # the owner of the repository
-```
+There are two ways for people to find it:
 
-**This part is not open yet.** The plugin API is 0.1 and may still change, and an open index is a promise to the people
-who build on it. It opens once three of Tessera's own plugins run on plugin API 1.0. Until then a plugin of your own
-runs on your screens as a test folder ([TESTING.md](TESTING.md), part 2), and a pull request that adds it to
-`plugins/` is welcome when it is useful to others.
+- **A link.** Anyone can add it in the app under Plugins, Add with a link: `https://github.com/<you>/<repo>`, or
+  `https://github.com/<you>/<repo>/tree/main/<folder>` when the plugin is in a folder. The app takes your newest
+  release, and asks your repository for a newer one every hour: when you publish a release, the people who added it
+  see an update. Nothing goes through this repository.
+- **The community list.** List it once, and the Plugins page shows it to everyone with the label Community:
 
-What a community entry will need to pass, from the start:
+  1. Make a release in your repository (a tag with a GitHub release).
+  2. Open a pull request here that adds one file, `community/<id>.yaml`, named after the plugin's id:
 
-1. The person who adds it owns the repository (or is a member of its organisation).
+     ```yaml
+     repo: https://github.com/someone/tessera-bin-day
+     path: .                        # the folder with tessera-plugin.yaml
+     maintainer: someone            # you: the owner of the repository
+     ```
+
+  3. CI checks that you own the repository and that your release passes `tools/check.py`. Once it is merged, the
+     index follows your releases by itself: it is built again every hour and takes your newest release, checked with
+     the same rules, pinned to its commit. A release that does not pass stays out, and the one before it stays listed.
+
+  Add `ref: v1.2.0` only to hold the list at one release; without it the list follows your newest.
+
+What a community plugin needs:
+
+1. The person who lists it owns the repository (or is a member of its organisation).
 2. The repository is public, has issues on, and has at least one release.
 3. `tools/check.py` passes on the release.
 4. Its licence goes with AGPL-3.0.
 5. It builds on the boards it names (or on Tessera's sample boards for `boards: any`).
 6. Its permissions name everything its code does.
 
-Tessera does not review community plugins: the app says so before anyone adds one, and asks them to trust the maker.
+Tessera does not review community plugins or their releases: the app says so before anyone adds one, and asks them to
+trust the maker. What it can do is stop a version: `blocked.yaml` (below) refuses it in every app, and a plugin that
+breaks the rules leaves the list. The plugin API is 0.x while it settles: a change that breaks a plugin raises its
+major, and the app refuses a plugin written for another major instead of building it.
 
 ## Labels in the app
 
 | Label | Means |
 |---|---|
 | From Tessera | In `plugins/` of this repository: made and reviewed by Tessera. |
-| Community | Listed through `community/`: checked automatically, not reviewed. |
+| Community | Listed through `community/`, or added with a link to its repository: checked automatically, not reviewed. Its maker publishes its updates. |
 | Test | A folder in Home Assistant's config: someone's work in progress, never in the index. |
 
 ## Blocked versions

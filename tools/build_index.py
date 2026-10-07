@@ -3,17 +3,19 @@
 
     python3 tools/build_index.py            # writes index.json
     python3 tools/build_index.py --check    # fails when index.json is not what it would write
+    python3 tools/build_index.py --entries [community/<id>.yaml ...]   # checks community entries at their release
 
 Two kinds of entry:
 - plugins/<id>/ in this repository. Each is pinned to the last commit that changed its folder, so a change elsewhere
   in the repository never makes a screen build something new.
-- community/<id>.yaml: a plugin in its own repository (repo, path, maintainer, and a release tag or none for the newest).
-  It is cloned at that release, checked with the same rules as Tessera's own (tools/check.py), and pinned to the commit.
-  One that fails is left out of the index with the reason on stderr; the others still go in. Pull requests for new
-  entries open once Tessera's own plugins run on plugin API 1 (docs/PUBLISHING.md).
+- community/<id>.yaml: a plugin in its own repository (repo, path, maintainer, and a release tag, or none to follow the
+  newest release). It is cloned at that release, checked with the same rules as Tessera's own (tools/check.py), and
+  pinned to the commit. One that fails is left out of the index with the reason on stderr; the others still go in, and
+  a release that fails leaves the plugin out until a release passes.
 
 The app reads index.json from raw.githubusercontent.com (main), at most every ten minutes, and runs nothing from it: a
-manifest is a description (docs/MANIFEST.md). CI runs this script after every merge (.github/workflows/index.yml).
+manifest is a description (docs/MANIFEST.md). CI runs this script after every merge and every hour, so a maker's new
+release reaches the app within the hour without a pull request (.github/workflows/index.yml).
 """
 import json
 import os
@@ -100,7 +102,19 @@ def build():
     return {'format': 1, 'plugin_api': plugin_api(), 'blocked': blocked, 'plugins': plugins}
 
 
+def entries(paths):
+    """--entries: every community entry named (all without names) passes at its release, else SystemExit."""
+    paths = [Path(p) for p in paths] or sorted((ROOT / 'community').glob('*.yaml'))
+    failed = [path.stem for path in paths if community_plugin(path) is None]
+    if failed:
+        raise SystemExit(f'not listed: {", ".join(failed)} (the reasons are above)')
+    print(f'{len(paths)} community entries pass')
+
+
 def main():
+    if '--entries' in sys.argv:
+        entries([arg for arg in sys.argv[1:] if arg != '--entries'])
+        return
     index = build()
     path = ROOT / 'index.json'
     old = json.loads(path.read_text()) if path.is_file() else {}

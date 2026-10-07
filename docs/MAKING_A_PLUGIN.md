@@ -153,12 +153,28 @@ Screen
 - A screen that does not have a plugin draws its tiles as a plain card with the tile's name and "Plugin missing". It
   never fails or restarts over it.
 
+## Names a plugin.yaml may use
+
+`plugin.yaml` is merged into the screen's own configuration, so it can point at parts the board already has. Only these
+names stay the same on every board and in every update (Tessera's docs/PROFILES.md, "What an override may rely on"):
+
+| Name | What |
+|---|---|
+| `my_display` | the display |
+| `ts_touch` | the touch panel |
+| `gpio_backlight_pwm`, `back_light` | the output that drives the backlight, and the light on it |
+| `touch_bus` | the I2C bus the touch panel is on, on every board that has one (the M5Stack Tab5: `tab5_bus`) |
+
+A chip on the touch panel's bus (the audio codecs of the Waveshare P4 panel, in `plugins/p4_audio/plugin.yaml`) takes
+`i2c_id: touch_bus`. Any other id of a board file can change in an update; give your own parts ids that start with your
+plugin's id (`p4_audio_amp`), so they never meet one of Tessera's.
+
 ## Common mistakes
 
 | What happens | Why | Fix |
 |---|---|---|
 | The build says "No tessera-plugin.yaml above ..." | The component is not in `components/<id>/` next to the manifest. | Keep the folder layout of the template. |
-| The build says the plugin wants another plugin API | `api:` in the manifest is not the screen's. | Use the API the core offers (`0.1` now). |
+| The build says the plugin wants another plugin API | `api:` in the manifest is not the screen's. | Use the API the core offers (`0.3` now). |
 | The tile shows "Plugin missing" | The screen was not built with the plugin, or the tile id differs from `add_tile("...")`. | Build again; make the ids match. |
 | The tile stays empty | `on_state` got `{"wait": ...}`: the fetch is not filled in or failed. | Show the reason (see the bus plugin); check the options. |
 | Text cut with dots | The label is wider than its room. | Take a smaller font from `tessera::Font`, or give the label more width. |

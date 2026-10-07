@@ -12,7 +12,7 @@ page explains it. Everything is in namespace `tessera`.
 **Versions.** A manifest names the API it was written for (`api: "0.2"`). A plugin builds on every core with the same
 major and at least its minor: something new raises the minor, only a break raises the major. 0.1 has tiles and the
 moments; 0.2 adds tiles of an entity, cards, tap actions, top bar items, settings rows, questions to the app and the
-date words; 0.3 adds `on_touch` and a settings action that says how it is going. Name the lowest minor whose parts you use, so the plugin builds on as many screens as possible.
+date words; 0.3 adds `on_touch`, and a settings action that says how it is going and is lit while it runs. Name the lowest minor whose parts you use, so the plugin builds on as many screens as possible.
 
 ## The component: `__init__.py`
 
@@ -79,7 +79,7 @@ The moments every plugin can hear (override what you need; each has an empty def
 | `on_message(message)` | An answer of the app to `tessera::send()` (0.2, below). |
 | `on_cards_closed()` | The cards closed: Back, standby, Back to page 1, another card (0.2). |
 | `on_alert()` | An alert is about to show, a doorbell for example (0.2). |
-| `on_touch()` | A tap the screen took, on a tile, a key or a button, after the touch filter (0.3): for a click or a buzz. It runs inside the touch event, so start a sound there and never wait for it. A slider's release and a refused tap do not count. |
+| `on_touch()` | A tap the screen took, after the touch filter (0.3): a tile, a key, a button, a row of the settings, Back or the pager. For a click or a buzz. It runs inside the touch event, so start a sound there and never wait for it. A slider's release, a refused tap and the repeat of a held key do not count. |
 
 ## A tile: `tessera::Tile`
 
@@ -240,11 +240,14 @@ bool settings(tessera::SettingsPage &page) override {
 
 Also `choice(label, {words...}, read, write)`, `action(label, icon, run, confirm, text)` and `info(label, text)`. At
 most twelve rows. An action with `confirm` asks once, as Restart does. With `text` (0.3) it says how it is going on its
-right, read again every second while the page shows: a test that runs, a countdown.
+right, read again every second while the page shows: a test that runs, a countdown. `.active(running)` after it
+lights the row in the accent while `running` says so (0.3), the way a row that asks is lit; a tap on it is yours to
+stop what runs.
 
 ```cpp
 page.action(text("tone"), "\U000F0387", [this] { tone_ ? stop() : play_tone(); }, nullptr,
-            [this]() -> std::string { return tone_ ? text("playing") : ""; });
+            [this]() -> std::string { return tone_ ? text("playing") : ""; })
+    .active([this] { return tone_; });
 ```
 
 ## Questions to the app (0.2)

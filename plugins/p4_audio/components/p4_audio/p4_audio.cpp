@@ -210,7 +210,8 @@ bool P4Audio::settings(tessera::SettingsPage &page) {
         sine(tone, count, 1000.0f, 12000.0f);
         play(tone, count, Job::TONE, tone);
       },
-      nullptr, [this]() -> std::string { return job_ == Job::TONE ? text("playing") : ""; });
+      nullptr, [this]() -> std::string { return job_ == Job::TONE ? text("playing") : ""; })
+      .active([this]() { return job_ == Job::TONE; });
   page.action(
       text("record"), "\U000F036C",
       [this]() {
@@ -224,7 +225,8 @@ bool P4Audio::settings(tessera::SettingsPage &page) {
           return tessera::format(text("recording"), left);
         }
         return job_ == Job::PLAYBACK ? text("playing") : "";
-      });
+      })
+      .active([this]() { return job_ == Job::RECORD || job_ == Job::PLAYBACK; });
   return true;
 }
 

@@ -1,7 +1,7 @@
 {
  "format": 1,
- "generated": "2026-10-07T19:26:37Z",
- "plugin_api": "0.2",
+ "generated": "2026-10-07T20:03:19Z",
+ "plugin_api": "0.3",
  "blocked": [],
  "plugins": [
   {
@@ -203,6 +203,106 @@
    "readme": {
     "en": "# Public transport (NL)\n\nA tile that shows when the next bus, tram, metro or ferry leaves your stop, with the walk to the stop already taken off.\nThe times are live from [OVapi](http://v0.ovapi.nl), the open service behind many Dutch departure boards. It needs no\naccount and no key.\n\nOn a single cell the tile shows the next departure as big as the cell allows, with its line and destination above it.\nWhere that leaves room, the two after it stand below; on a small screen such as the CYD the time keeps the room. On a\ntile of two columns or more it is a list, one row per departure, as many as fit.\n\n## Set up\n\n1. Find the code of your stop. Open [ovzoeker.nl](https://www.ovzoeker.nl), click your stop on the map, and copy the\n   number after *haltenummer* (eight digits, such as `30003025`). A stop has a code per direction: pick the side of the\n   street you leave from.\n2. Add the plugin to a screen in Tessera (Plugins, or the Plugins tab of the screen). The screen builds once.\n3. In Layout, place the **Next departure** tile from the library's Plugins group.\n4. In the inspector, fill in the stop code. The **Line** list then fills with the lines that stop there; leave it empty\n   for every line.\n5. Set **Walk to the stop** to the minutes you need. Departures you can no longer make are skipped.\n\n## Good to know\n\n- Tessera asks OVapi once a minute per stop, for every screen and tile together. The screen counts down on its own\n  clock in between.\n- A time an hour or more away is shown as a time of day.\n- A departure that runs a minute or more late gets \"+2\" behind where it goes. Turn **Show delays** off in the\n  inspector to leave that out.\n- When OVapi does not answer, the tile keeps the last times it had and says they may be old.\n- Works on every board, the CYD included.\n\n## Privacy\n\nTessera (the app in Home Assistant, not the screen) asks `v0.ovapi.nl` for the departures of the stop codes you fill\nin. OVapi sees the address of your Home Assistant and those stop codes, nothing else. No key, account or personal data\nis sent. The request goes over plain http, because OVapi's https certificate does not match its name; the plugin sends\nnothing secret.\n\n## How it works\n\n- `tessera-plugin.yaml`: the tile, its options, and two fetches the app carries out: the departures of a stop, mapped to\n  line, destination and time, and the lines of a stop for the list in the inspector.\n- `components/ov_departures/`: the ESPHome component that draws the tile and counts down.\n- `translations/`: the words on the screen (`screen`) and in the app (`app`).\n",
     "nl": "# Openbaar vervoer (NL)\n\nEen tegel die laat zien wanneer de volgende bus, tram, metro of veerboot bij jouw halte vertrekt, met de looptijd naar\nde halte er al af. De tijden komen live van [OVapi](http://v0.ovapi.nl), de open dienst achter veel Nederlandse\nvertrekborden. Er is geen account of sleutel voor nodig.\n\nOp één cel toont de tegel het eerstvolgende vertrek zo groot als de cel toelaat, met lijn en bestemming erboven. Is er\ndan nog ruimte, dan staan de twee daarna eronder; op een klein scherm zoals de CYD houdt de tijd de ruimte. Op een\ntegel van twee kolommen of breder is het een lijst, een regel per vertrek, zoveel als er passen.\n\n## Instellen\n\n1. Zoek de code van je halte. Open [ovzoeker.nl](https://www.ovzoeker.nl), klik je halte op de kaart aan en kopieer het\n   nummer achter *haltenummer* (acht cijfers, zoals `30003025`). Een halte heeft een code per richting: kies de kant\n   van de straat waar je vertrekt.\n2. Voeg de plugin in Tessera toe aan een scherm (Plugins, of de tab Plugins van het scherm). Het scherm wordt één keer\n   gebouwd.\n3. Zet in Indeling de tegel **Eerstvolgende vertrek** uit de groep Plugins van de bibliotheek op een pagina.\n4. Vul in de inspector de haltecode in. De lijst **Lijn** vult zich dan met de lijnen die daar stoppen; laat hem leeg\n   voor alle lijnen.\n5. Stel bij **Lopen naar de halte** in hoeveel minuten je nodig hebt. Vertrekken die je niet meer haalt, worden\n   overgeslagen.\n\n## Goed om te weten\n\n- Een vertrek dat een minuut of meer later is, krijgt \"+2\" achter de bestemming. Zet **Vertraging tonen** uit in de\n  inspector om dat weg te laten.\n- Tessera vraagt OVapi één keer per minuut per halte op, voor alle schermen en tegels samen. Daartussen telt het\n  scherm zelf af.\n- Een vertrek over een uur of meer staat er als tijdstip.\n- Antwoordt OVapi niet, dan houdt de tegel de laatste tijden en zegt hij dat ze oud kunnen zijn.\n- Werkt op elk bordje, ook op de CYD.\n\n## Privacy\n\nTessera (de app in Home Assistant, niet het scherm) vraagt `v0.ovapi.nl` om de vertrektijden van de haltecodes die je\ninvult. OVapi ziet het adres van je Home Assistant en die haltecodes, verder niets. Er gaat geen sleutel, account of\npersoonlijke informatie mee. De vraag gaat over gewoon http, omdat het https-certificaat van OVapi niet bij zijn naam\npast; de plugin stuurt niets geheims.\n"
+   }
+  },
+  {
+   "id": "p4_audio",
+   "repo": "https://github.com/MaxGramser/tessera-plugins",
+   "path": "plugins/p4_audio",
+   "label": "tessera",
+   "status": "ok",
+   "release": {
+    "version": "1.0.0",
+    "sha": "3a8dd8c0c33b7a795f132371683e6f5d8c9d86ec",
+    "date": "2026-10-07"
+   },
+   "manifest": {
+    "id": "p4_audio",
+    "version": "1.0.0",
+    "api": "0.3",
+    "icon": "volume-high",
+    "maintainer": "MaxGramser",
+    "license": "MIT",
+    "requires": {
+     "esphome": "2026.9.0",
+     "psram": true
+    },
+    "boards": [
+     "wavesharep4"
+    ],
+    "flash_kb": 80,
+    "settings": [
+     {
+      "key": "microphone_mute",
+      "label": "setting_mute",
+      "hint": "setting_mute_hint"
+     },
+     {
+      "key": "speaker_volume",
+      "label": "setting_volume",
+      "hint": "setting_volume_hint"
+     },
+     {
+      "key": "tap_sound",
+      "label": "setting_tap_sound",
+      "hint": "setting_tap_sound_hint"
+     }
+    ]
+   },
+   "translations": {
+    "en": {
+     "_meta": {
+      "name": "English"
+     },
+     "screen": {
+      "name": "Audio",
+      "mute": "Microphone off",
+      "volume": "Speaker volume",
+      "tap_sound": "Tap sound",
+      "tone": "Test the speaker",
+      "record": "Test the microphone",
+      "playing": "Playing",
+      "recording": "Listening, {n} s"
+     },
+     "app": {
+      "name": "P4 panel audio",
+      "summary": "The speaker and microphone of the Waveshare ESP32-P4 86 panel: a click on every tap, a volume, and tests on the screen.",
+      "setting_mute": "Microphone off",
+      "setting_mute_hint": "The microphone hears nothing while this is on.",
+      "setting_volume": "Speaker volume",
+      "setting_volume_hint": "How loud the speaker plays, the tap sound included.",
+      "setting_tap_sound": "Tap sound",
+      "setting_tap_sound_hint": "A short click on every tap the screen takes."
+     }
+    },
+    "nl": {
+     "_meta": {
+      "name": "Nederlands"
+     },
+     "screen": {
+      "name": "Geluid",
+      "mute": "Microfoon uit",
+      "volume": "Volume luidspreker",
+      "tap_sound": "Tikgeluid",
+      "tone": "Luidspreker testen",
+      "record": "Microfoon testen",
+      "playing": "Speelt af",
+      "recording": "Luistert, {n} s"
+     },
+     "app": {
+      "name": "Geluid P4-paneel",
+      "summary": "De luidspreker en microfoon van het Waveshare ESP32-P4 86-paneel: een klik bij elke tik, een volume, en tests op het scherm.",
+      "setting_mute": "Microfoon uit",
+      "setting_mute_hint": "De microfoon hoort niets zolang dit aan staat.",
+      "setting_volume": "Volume luidspreker",
+      "setting_volume_hint": "Hoe hard de luidspreker speelt, het tikgeluid ook.",
+      "setting_tap_sound": "Tikgeluid",
+      "setting_tap_sound_hint": "Een korte klik bij elke tik die het scherm aanneemt."
+     }
+    }
+   },
+   "readme": {
+    "en": "# P4 panel audio\n\nThe speaker and the microphone of the Waveshare ESP32-P4-86-Panel-ETH-2RO: a short click on every tap the screen takes,\na speaker volume, a switch that turns the microphone off, and two tests on the screen's settings page. Only screens of\nthat board are offered it, and only the screens that take it carry the audio code.\n\nThe microphone and the speaker are ESPHome's own components (`microphone`, `speaker`, the ES7210 and ES8311 codecs), so\nanything else that uses them, a voice assistant of your own in the screen's Override YAML for example, finds them as\n`p4_microphone` and `p4_speaker`.\n\n## Set up\n\n1. Have a screen of the Waveshare ESP32-P4 86 panel (board `wavesharep4`) in Tessera.\n2. Open **Plugins**, choose **P4 panel audio** and tick the screen. It builds once with the plugin.\n3. On the screen: hold the top bar, then **Settings**, **Plugins**, **Audio**, and tap **Test the speaker**.\n\n## On the screen\n\n- **Microphone off**: the microphone hears nothing while it is on.\n- **Speaker volume**: 0 to 100 %, the tap sound included.\n- **Tap sound**: a 60 ms click on every tap of a tile, a key or a button. It never interrupts a test or a recording.\n- **Test the speaker**: a tone of 600 ms. A second tap stops it.\n- **Test the microphone**: listens for five seconds, then plays what it heard. A second tap stops it. The recording\n  stays in the screen's memory and is gone once it has played.\n\nThe three settings are entities of the screen in Home Assistant too (\"Microphone mute\", \"Speaker volume\", \"Tap sound\"),\nand stand under Screen settings in the editor.\n\n## Good to know\n\n- Capture and playback take turns on the panel's one I2S bus: the screen does not listen while it plays.\n- The microphone's gain is fixed at 30 dB. Nothing listens or records unless you start the microphone test.\n- The panel routes the speaker's signal back to a second input of the ES7210, which makes echo cancellation possible.\n  That needs another audio stack than ESPHome's own, and is not in this version.\n- Built for the pre-v3 ESP32-P4 the board file targets; tried in a build, not yet on the panel itself.\n\n## Credits\n\nThe wiring, the codec settings and the first audio for this panel come from pull request\n[#142](https://github.com/MaxGramser/homeassistant_espscreen/pull/142) by [@woozer](https://github.com/woozer), who made\nthe panel play and listen first, echo cancellation included.\n\n## How it works\n\n- `tessera-plugin.yaml`: the board it is for (`boards: [wavesharep4]`), plugin API 0.3, and the three settings.\n- `plugin.yaml`: the codecs on the touch panel's I2C bus, the I2S bus, the microphone and the speaker, the speaker's\n  amplifier on GPIO53, and the settings as two template switches and a number.\n- `components/p4_audio/`: the settings page, the click (`on_touch`), and the two tests, played from PSRAM without ever\n  waiting in the screen's loop.\n"
    }
   },
   {

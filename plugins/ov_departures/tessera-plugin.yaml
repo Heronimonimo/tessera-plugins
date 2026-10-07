@@ -1,7 +1,7 @@
 # The plugin's manifest: who made it, what it may do, and what the app shows. No code and no words: every name, label
 # and hint is a key into translations/<language>.json, part "app". docs/MANIFEST.md has every field.
 id: ov_departures
-version: 1.0.0
+version: 1.1.0
 api: "0.1"
 icon: bus
 maintainer: MaxGramser
@@ -31,6 +31,7 @@ tiles:
       - { id: stop, kind: text, label: stop, hint: stop_hint }
       - { id: line, kind: choice, options_from: lines, label: line, hint: line_hint }
       - { id: walk, kind: number, min: 0, max: 30, step: 1, unit: min, default: 0, label: walk, hint: walk_hint }
+      - { id: late, kind: toggle, default: true, label: late, hint: late_hint }
 
 fetch:
   # The departures of one stop, every minute. OVapi answers with every vehicle that passes the stop in the next hour

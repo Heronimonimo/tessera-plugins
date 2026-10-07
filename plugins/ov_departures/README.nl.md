@@ -23,6 +23,8 @@ tegel van twee kolommen of breder is het een lijst, een regel per vertrek, zovee
 
 ## Goed om te weten
 
+- Een vertrek dat een minuut of meer later is, krijgt "+2" achter de bestemming. Zet **Vertraging tonen** uit in de
+  inspector om dat weg te laten.
 - Tessera vraagt OVapi één keer per minuut per halte op, voor alle schermen en tegels samen. Daartussen telt het
   scherm zelf af.
 - Een vertrek over een uur of meer staat er als tijdstip.

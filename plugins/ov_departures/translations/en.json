@@ -1,5 +1,7 @@
 {
-  "_meta": { "name": "English" },
+  "_meta": {
+    "name": "English"
+  },
   "screen": {
     "now": "now",
     "minutes": "{n} min",
@@ -8,7 +10,8 @@
     "waiting": "Asking for times",
     "choose_stop": "Choose a stop",
     "failed": "No times right now",
-    "old": "Times may be old"
+    "old": "Times may be old",
+    "late": "+{n}"
   },
   "app": {
     "name": "Public transport (NL)",
@@ -20,6 +23,8 @@
     "line": "Line",
     "line_hint": "Empty shows every line that stops here.",
     "walk": "Walk to the stop",
-    "walk_hint": "Departures you can no longer make are skipped."
+    "walk_hint": "Departures you can no longer make are skipped.",
+    "late": "Show delays",
+    "late_hint": "A departure that runs a minute or more late gets \"+2\" behind where it goes."
   }
 }

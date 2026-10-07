@@ -27,6 +27,7 @@ class NextTile : public tessera::Tile {
     height_ = c.height;
     walk_ = c.options["walk"] | 0;
     has_stop_ = !std::string(c.options["stop"] | "").empty();
+    late_ = c.options["late"] | true;
     list_ = c.columns >= 2;
     head_ = std::max(ui::line_height(Font::TITLE), ui::line_height(Font::BODY)) + ui::px(4);
     gap_ = ui::px(ui::large() ? 8 : 5);
@@ -129,6 +130,12 @@ class NextTile : public tessera::Tile {
     lv_obj_set_pos(r.to, x, r.y + (head_ - ui::line_height(Font::BODY)) / 2);
   }
 
+  // Where it goes, and how late it runs when that is a minute or more (OVapi's expected time against the timetable's).
+  std::string with_delay(const Departure &d) const {
+    if (!late_ || !d.plan || d.at < d.plan + 60) return d.to;
+    return d.to + "  " + tessera::format(plugin_->text("late"), static_cast<long>((d.at - d.plan) / 60));
+  }
+
   std::string when_text(uint32_t at, uint32_t now) const {
     if (at <= now + 59) return plugin_->text("now");
     const uint32_t minutes = (at - now) / 60;
@@ -145,7 +152,7 @@ class NextTile : public tessera::Tile {
       return;
     }
     const Departure &d = *next[0];
-    place_row(r, d.line, d.to, "");
+    place_row(r, d.line, with_delay(d), "");
     // The time takes the largest face that fits the card. The line with the next times stays only where it costs the
     // time nothing: on a small cell (the CYD's) it goes, and the time is as large as the cell allows.
     const std::string when = when_text(d.at, now);
@@ -191,7 +198,7 @@ class NextTile : public tessera::Tile {
         place_row(rows_[i], "", "", "");
         continue;
       }
-      place_row(rows_[i], next[i]->line, next[i]->to, when_text(next[i]->at, now));
+      place_row(rows_[i], next[i]->line, with_delay(*next[i]), when_text(next[i]->at, now));
     }
     // The bottom row says when the times are old, if there is room below the rows.
     const int used = static_cast<int>(rows_.size()) * (head_ + gap_);
@@ -200,7 +207,7 @@ class NextTile : public tessera::Tile {
 
   const tessera::Plugin *plugin_;
   int width_ = 0, height_ = 0, head_ = 0, gap_ = 0, walk_ = 0;
-  bool list_ = false, has_stop_ = false, stale_ = false;
+  bool list_ = false, has_stop_ = false, stale_ = false, late_ = true;
   std::string wait_;
   std::vector<Row> rows_;
   lv_obj_t *big_{}, *later_{}, *note_{};

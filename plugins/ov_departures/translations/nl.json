@@ -1,5 +1,7 @@
 {
-  "_meta": { "name": "Nederlands" },
+  "_meta": {
+    "name": "Nederlands"
+  },
   "screen": {
     "now": "nu",
     "minutes": "{n} min",
@@ -8,7 +10,8 @@
     "waiting": "Tijden opvragen",
     "choose_stop": "Kies een halte",
     "failed": "Nu geen tijden",
-    "old": "Tijden mogelijk oud"
+    "old": "Tijden mogelijk oud",
+    "late": "+{n}"
   },
   "app": {
     "name": "Openbaar vervoer (NL)",
@@ -20,6 +23,8 @@
     "line": "Lijn",
     "line_hint": "Leeg toont elke lijn die hier stopt.",
     "walk": "Lopen naar de halte",
-    "walk_hint": "Vertrekken die je niet meer haalt, worden overgeslagen."
+    "walk_hint": "Vertrekken die je niet meer haalt, worden overgeslagen.",
+    "late": "Vertraging tonen",
+    "late_hint": "Een vertrek dat een minuut of meer later is, krijgt \"+2\" achter de bestemming."
   }
 }

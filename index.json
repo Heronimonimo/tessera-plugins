@@ -1,6 +1,6 @@
 {
  "format": 1,
- "generated": "2026-10-07T20:03:19Z",
+ "generated": "2026-10-07T20:41:03Z",
  "plugin_api": "0.3",
  "blocked": [],
  "plugins": [
@@ -212,13 +212,13 @@
    "label": "tessera",
    "status": "ok",
    "release": {
-    "version": "1.0.0",
-    "sha": "3a8dd8c0c33b7a795f132371683e6f5d8c9d86ec",
+    "version": "1.0.1",
+    "sha": "f2d866ee51375817401901a677c58e90d3ad2070",
     "date": "2026-10-07"
    },
    "manifest": {
     "id": "p4_audio",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "api": "0.3",
     "icon": "volume-high",
     "maintainer": "MaxGramser",

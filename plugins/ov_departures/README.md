@@ -4,8 +4,9 @@ A tile that shows when the next bus, tram, metro or ferry leaves your stop, with
 The times are live from [OVapi](http://v0.ovapi.nl), the open service behind many Dutch departure boards. It needs no
 account and no key.
 
-On a single cell the tile shows the next departure big, with its line and destination above it and the two after it
-below. On a tile of two columns or more it is a list, one row per departure, as many as fit.
+On a single cell the tile shows the next departure as big as the cell allows, with its line and destination above it.
+Where that leaves room, the two after it stand below; on a small screen such as the CYD the time keeps the room. On a
+tile of two columns or more it is a list, one row per departure, as many as fit.
 
 ## Set up
 

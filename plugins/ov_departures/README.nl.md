@@ -4,8 +4,9 @@ Een tegel die laat zien wanneer de volgende bus, tram, metro of veerboot bij jou
 de halte er al af. De tijden komen live van [OVapi](http://v0.ovapi.nl), de open dienst achter veel Nederlandse
 vertrekborden. Er is geen account of sleutel voor nodig.
 
-Op één cel toont de tegel het eerstvolgende vertrek groot, met lijn en bestemming erboven en de twee daarna eronder. Op
-een tegel van twee kolommen of breder is het een lijst, een regel per vertrek, zoveel als er passen.
+Op één cel toont de tegel het eerstvolgende vertrek zo groot als de cel toelaat, met lijn en bestemming erboven. Is er
+dan nog ruimte, dan staan de twee daarna eronder; op een klein scherm zoals de CYD houdt de tijd de ruimte. Op een
+tegel van twee kolommen of breder is het een lijst, een regel per vertrek, zoveel als er passen.
 
 ## Instellen
 

@@ -27,7 +27,9 @@ plugin is done.
 
 The two plugins to copy from: [`template/`](template) (a tile without data, the smallest complete plugin) and
 [`plugins/ov_departures/`](plugins/ov_departures) (a tile with data from a web service, a list of choices and a
-countdown).
+countdown). For the other parts: [`plugins/waste_collection/`](plugins/waste_collection) (a tile of an entity, a card,
+a tap action, a top bar item, settings rows) and [`plugins/p4_audio/`](plugins/p4_audio) (one board's hardware, a click
+on every tap).
 
 ## Rules that are never optional
 

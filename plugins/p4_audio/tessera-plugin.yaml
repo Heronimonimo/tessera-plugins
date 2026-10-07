@@ -1,0 +1,20 @@
+# Audio on the Waveshare ESP32-P4 86 panel: its speaker and microphone with ESPHome's own components, a click on every
+# tap, and two tests on the screen's settings page. A board's own hardware as a plugin (docs/MANIFEST.md): only screens
+# of the boards below are offered it, and only the screens that take it carry the codecs.
+id: p4_audio
+version: 1.0.0
+api: "0.3"
+icon: volume-high
+maintainer: MaxGramser
+license: MIT
+requires:
+  esphome: 2026.9.0
+  psram: true
+boards: [wavesharep4]
+flash_kb: 80
+
+# The three settings of plugin.yaml, also under Screen settings in the editor (the ends of their entity ids).
+settings:
+  - { key: microphone_mute, label: setting_mute, hint: setting_mute_hint }
+  - { key: speaker_volume, label: setting_volume, hint: setting_volume_hint }
+  - { key: tap_sound, label: setting_tap_sound, hint: setting_tap_sound_hint }

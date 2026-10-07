@@ -1,4 +1,4 @@
-# The firmware API (plugin API 0.2)
+# The firmware API (plugin API 0.3)
 
 A plugin's code runs on the screen as an ESPHome component. It talks to Tessera's core through one header:
 
@@ -12,7 +12,7 @@ page explains it. Everything is in namespace `tessera`.
 **Versions.** A manifest names the API it was written for (`api: "0.2"`). A plugin builds on every core with the same
 major and at least its minor: something new raises the minor, only a break raises the major. 0.1 has tiles and the
 moments; 0.2 adds tiles of an entity, cards, tap actions, top bar items, settings rows, questions to the app and the
-date words. Name the lowest minor whose parts you use, so the plugin builds on as many screens as possible.
+date words; 0.3 adds `on_touch` and a settings action that says how it is going. Name the lowest minor whose parts you use, so the plugin builds on as many screens as possible.
 
 ## The component: `__init__.py`
 
@@ -77,6 +77,9 @@ The moments every plugin can hear (override what you need; each has an empty def
 | `before_update()` | A firmware update starts: let go of large buffers. |
 | `settings(page)` | Once, when the interface is up: add rows to the screen's settings page (0.2, below). Return true when you added some. |
 | `on_message(message)` | An answer of the app to `tessera::send()` (0.2, below). |
+| `on_cards_closed()` | The cards closed: Back, standby, Back to page 1, another card (0.2). |
+| `on_alert()` | An alert is about to show, a doorbell for example (0.2). |
+| `on_touch()` | A tap the screen took, on a tile, a key or a button, after the touch filter (0.3): for a click or a buzz. It runs inside the touch event, so start a sound there and never wait for it. A slider's release and a refused tap do not count. |
 
 ## A tile: `tessera::Tile`
 
@@ -235,8 +238,14 @@ bool settings(tessera::SettingsPage &page) override {
 }
 ```
 
-Also `choice(label, {words...}, read, write)`, `action(label, icon, run, confirm)` (with `confirm` it asks once, as
-Restart does) and `info(label, text)`. At most twelve rows.
+Also `choice(label, {words...}, read, write)`, `action(label, icon, run, confirm, text)` and `info(label, text)`. At
+most twelve rows. An action with `confirm` asks once, as Restart does. With `text` (0.3) it says how it is going on its
+right, read again every second while the page shows: a test that runs, a countdown.
+
+```cpp
+page.action(text("tone"), "\U000F0387", [this] { tone_ ? stop() : play_tone(); }, nullptr,
+            [this]() -> std::string { return tone_ ? text("playing") : ""; });
+```
 
 ## Questions to the app (0.2)
 
@@ -323,7 +332,8 @@ screen's look. The ones a tile needs most:
 2. **No font of your own**: use `tessera::Font`. Every font costs flash, and the 4 MB boards are close to full.
 3. **No LVGL click handlers** (`LV_EVENT_CLICKED`, `LV_EVENT_PRESSED`): use `on_tap`, which has the touch filter in
    front of it.
-4. **No timers, tasks or waits** (`lv_timer_create`, `xTaskCreate`, `delay`): use `on_tick` and `on_state`.
+4. **No timers, tasks or waits** (`lv_timer_create`, `xTaskCreate`, `delay`): use `on_tick` and `on_state`. A plugin
+   that streams (sound to a speaker) may use its ESPHome component's own `loop()`, as long as nothing in it waits.
 5. **No network from the screen** (`http_request`, an HTTP client): data comes through the app's `fetch`.
 6. **No walk of the heap** (`heap_caps_get_largest_free_block`, `heap_caps_get_info`): it shifts the picture of an
    RGB panel while it runs.
@@ -341,9 +351,12 @@ screen's look. The ones a tile needs most:
 - [`plugins/waste_collection/components/waste_collection/waste_collection.cpp`](../plugins/waste_collection/components/waste_collection/waste_collection.cpp):
   everything of 0.2 in one plugin: a tile of a calendar entity, a card that asks Home Assistant for the coming events, a
   tap action, a top bar item, two settings rows backed by ESPHome entities of `plugin.yaml`, and an input of kind entity.
+- [`plugins/p4_audio/components/p4_audio/p4_audio.cpp`](../plugins/p4_audio/components/p4_audio/p4_audio.cpp): a board's
+  own hardware as a plugin (`boards: [wavesharep4]`): ESPHome's speaker and microphone from `plugin.yaml`, a click in
+  `on_touch`, settings actions that say how they are going, and sound streamed from PSRAM in `loop()` without a wait.
 
 ## What changes in later versions
 
-Not in the API yet: a plugin's own messages beyond Home Assistant commands, pictures (a camera of the plugin's own), and
-moving Tessera's own board features (the camera, the backlight) onto these lists. Each will raise the minor; a plugin
+Not in the API yet: a plugin's own messages beyond Home Assistant commands, and pictures (a camera of the plugin's
+own). Each will raise the minor; a plugin
 raises its `api` only when it uses one.

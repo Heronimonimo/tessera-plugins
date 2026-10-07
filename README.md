@@ -20,6 +20,8 @@ This repository holds:
 | Plugin | What it does | Boards |
 |---|---|---|
 | [Public transport (NL)](plugins/ov_departures) | The next bus, tram, metro or ferry from your stop, live from OVapi, counted down on the screen. | All |
+| [Waste collection](plugins/waste_collection) | When the next bin goes out, from a calendar in Home Assistant, on a tile, a card and in the top bar. | All |
+| [P4 panel audio](plugins/p4_audio) | The speaker and microphone of the Waveshare ESP32-P4 86 panel: a click on every tap, a volume, tests on the screen. | Waveshare ESP32-P4 86 panel |
 
 ## Using a plugin
 

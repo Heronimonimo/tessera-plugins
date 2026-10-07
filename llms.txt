@@ -19,6 +19,8 @@ Start with AGENTS.md (rules for AI assistants), then docs/MAKING_A_PLUGIN.md.
 ## Examples
 - [template/](template): the smallest complete plugin, a countdown tile without data
 - [plugins/ov_departures/](plugins/ov_departures): a tile with fetched data, a list of choices and a countdown
+- [plugins/waste_collection/](plugins/waste_collection): a tile of an entity, a card, a tap action, a top bar item, settings rows
+- [plugins/p4_audio/](plugins/p4_audio): one board's hardware (speaker, microphone) as a plugin, a click on every tap
 
 ## Tools
 - tools/new_plugin.py <id>: copy the template under a new id

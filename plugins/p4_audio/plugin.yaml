@@ -1,0 +1,99 @@
+# What a screen gets when it takes this plugin: the panel's two audio codecs on the touch panel's I2C bus, one I2S bus
+# for both, the speaker's amplifier, and three settings. The pins are Waveshare's ESP32-P4-WIFI6-Touch-LCD-4B schematic,
+# page 1, the main board of the 86 panel as well. Capture and playback take turns on the one bus.
+
+# The microphone side: an ES7210 at 0x40. Its analogue gain is fixed here; 30 dB suits speech at arm's length.
+audio_adc:
+  - platform: es7210
+    id: p4_audio_adc
+    i2c_id: touch_bus
+    address: 0x40
+    sample_rate: 16000
+    bits_per_sample: 16bit
+    mic_gain: 30db
+
+# The speaker side: an ES8311 at 0x18, clocked from MCLK. Its own volume stays at 0 dB; Speaker volume scales the sound.
+audio_dac:
+  - platform: es8311
+    id: p4_audio_dac
+    i2c_id: touch_bus
+    address: 0x18
+    sample_rate: 16000
+    bits_per_sample: 16bit
+    use_mclk: true
+    use_microphone: false
+
+i2s_audio:
+  - id: p4_audio_bus
+    i2s_mclk_pin: GPIO13
+    i2s_bclk_pin: GPIO12
+    i2s_lrclk_pin: GPIO10
+
+# The ES7210 sends two channels; the panel's microphone is the first.
+microphone:
+  - platform: i2s_audio
+    id: p4_microphone
+    i2s_audio_id: p4_audio_bus
+    adc_type: external
+    i2s_din_pin: GPIO11
+    sample_rate: 16000
+    bits_per_sample: 16bit
+    channel: stereo
+
+speaker:
+  - platform: i2s_audio
+    id: p4_speaker
+    i2s_audio_id: p4_audio_bus
+    dac_type: external
+    i2s_dout_pin: GPIO9
+    sample_rate: 16000
+    bits_per_sample: 16bit
+    channel: mono
+    buffer_duration: 500ms
+    timeout: 500ms
+
+# The settings, kept on the screen and shown in Home Assistant, on the screen's settings page and in the editor.
+switch:
+  # The speaker's amplifier: on only while something plays, so the speaker never hisses.
+  - platform: gpio
+    id: p4_audio_amp
+    internal: true
+    pin: GPIO53
+    restore_mode: ALWAYS_OFF
+  - platform: template
+    id: p4_microphone_mute
+    name: "Microphone mute"
+    icon: mdi:microphone-off
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    entity_category: config
+  - platform: template
+    id: p4_tap_sound
+    name: "Tap sound"
+    icon: mdi:gesture-tap
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    entity_category: config
+
+number:
+  - platform: template
+    id: p4_speaker_volume
+    name: "Speaker volume"
+    icon: mdi:volume-high
+    optimistic: true
+    min_value: 0
+    max_value: 100
+    step: 5
+    initial_value: 50
+    restore_value: true
+    unit_of_measurement: "%"
+    entity_category: config
+
+p4_audio:
+  speaker: p4_speaker
+  microphone: p4_microphone
+  dac: p4_audio_dac
+  amplifier: p4_audio_amp
+  mute: p4_microphone_mute
+  tap_sound: p4_tap_sound
+  volume: p4_speaker_volume

@@ -15,6 +15,7 @@ flash_kb: 4
 tiles:
   # A tile that counts the days until a date. It draws on the screen alone: no Home Assistant entity, no data from
   # the internet. To show data from a web service, add a `fetch` and point the tile's `data` at it (docs/FETCH.md).
+  # With data, a `preview` lets the editor draw the tile from it as well (docs/MANIFEST.md, "A tile").
   - id: days_until
     name: tile_name
     icon: calendar

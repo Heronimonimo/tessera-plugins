@@ -34,6 +34,7 @@ tiles:
     memory: 1200
     data: departures
     example: tile_example
+    preview: { badge: "{line}", title: "{to}", countdown: at }
     options:
       - { id: stop, kind: text, label: stop, hint: stop_hint }
       - { id: line, kind: choice, options_from: lines, label: line, hint: line_hint }
@@ -143,6 +144,7 @@ parts:
 | `entity` | no | A Home Assistant domain (or a list) when the tile belongs to an entity. Not used by the app yet in API 0.1. |
 | `data` | no | The id of the fetch whose answer the tile gets in `on_state`. |
 | `example` | no | Text key: a line the editor shows on the tile's placeholder. |
+| `preview` | no | How the editor draws the tile from its data, so the page in the editor looks like the glass (it cannot run your C++). Only with `data`. `badge`, `title` and `value` are templates of the first item's fields (`"{line}"`, `"{to}"`); `countdown` names a field with `as: epoch`, and the editor counts down to it in minutes the way the screen does. `value` or `countdown`, not both. Without a preview the editor shows the icon, the name and `example`. |
 | `options` | no | At most 12 options the inspector shows, below. |
 
 An option:

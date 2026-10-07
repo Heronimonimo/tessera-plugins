@@ -146,31 +146,38 @@ class NextTile : public tessera::Tile {
     }
     const Departure &d = *next[0];
     place_row(r, d.line, d.to, "");
-    // The largest face the time fits in: a big number on a wide cell, smaller where "12:05 PM" would not fit.
+    // The time takes the largest face that fits the card. The line with the next times stays only where it costs the
+    // time nothing: on a small cell (the CYD's) it goes, and the time is as large as the cell allows.
     const std::string when = when_text(d.at, now);
-    Font face = Font::VALUE;
-    for (Font f : {Font::VALUE, Font::HEADLINE, Font::TITLE}) {
-      face = f;
-      if (ui::text_width(when, f) <= width_) break;
-    }
-    big_text(when, face, theme::INK);
+    const Font alone = fitting(when, height_ - head_);
+    const bool with_later = fitting(when, height_ - head_ - ui::line_height(Font::BODY)) == alone;
+    const Font face = alone;
+    big_text(when, face, theme::INK, with_later);
     std::string list;
     for (size_t i = 1; i < next.size() && i < 3; ++i) {
-      if (!list.empty()) list += " · ";
+      if (!list.empty()) list += " \u00B7 ";
       list += when_text(next[i]->at, now);
     }
-    if (stale_) ui::set_text(later_, plugin_->text("old"));
+    if (!with_later) ui::set_text(later_, "");
+    else if (stale_) ui::set_text(later_, plugin_->text("old"));
     else ui::set_text(later_, list.empty() ? std::string() : tessera::fill(plugin_->text("then"), "list", list));
   }
 
-  void big_text(const std::string &text, Font face, theme::Role role) {
+  // The largest of the big faces `text` fits in, `room` high and the card wide; BODY_LARGE when none does.
+  Font fitting(const std::string &text, int room) const {
+    for (Font f : {Font::VALUE, Font::HEADLINE, Font::TITLE})
+      if (ui::text_width(text, f) <= width_ && ui::line_height(f) <= room) return f;
+    return Font::BODY_LARGE;
+  }
+
+  void big_text(const std::string &text, Font face, theme::Role role, bool with_later = true) {
     ui::set_font(big_, face);
     ui::set_color(big_, role);
     ui::set_text(big_, text);
     const int h = ui::line_height(face);
     lv_obj_set_height(big_, h);
-    // Between the head and the line under it, a little above the middle.
-    const int top = head_, bottom = height_ - ui::line_height(Font::BODY);
+    // Between the head and the line under it (or the card's foot without that line), in the middle.
+    const int top = head_, bottom = height_ - (with_later ? ui::line_height(Font::BODY) : 0);
     lv_obj_set_pos(big_, 0, top + std::max(0, (bottom - top - h) / 2));
   }
 

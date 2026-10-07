@@ -24,6 +24,9 @@ tiles:
     memory: 1200
     data: departures
     example: tile_example
+    # How the editor draws the tile from its data (it cannot run the C++): the first departure's line in a badge,
+    # where it goes, and the minutes until it leaves.
+    preview: { badge: "{line}", title: "{to}", countdown: at }
     options:
       - { id: stop, kind: text, label: stop, hint: stop_hint }
       - { id: line, kind: choice, options_from: lines, label: line, hint: line_hint }

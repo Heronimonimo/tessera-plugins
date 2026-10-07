@@ -1,0 +1,29 @@
+{
+  "_meta": { "name": "Nederlands" },
+  "screen": {
+    "name": "Afvalkalender",
+    "today": "Vandaag",
+    "none": "Niets gepland",
+    "waiting": "Kalender opvragen",
+    "upcoming": "Komende ophaaldagen",
+    "failed": "De kalender antwoordde niet",
+    "in_bar": "In de bovenbalk",
+    "days_ahead": "Dagen vooruit",
+    "open_card": "Komende ophaaldagen",
+    "bar_today": "Vandaag: {what}",
+    "bar_tomorrow": "Morgen: {what}",
+    "bar_later": "{when}: {what}"
+  },
+  "app": {
+    "name": "Afvalkalender",
+    "summary": "Wanneer de volgende container buiten moet, uit een kalender in Home Assistant, op een tegel en in de bovenbalk.",
+    "input_calendar": "Afvalkalender",
+    "input_calendar_hint": "De kalender met de ophaaldagen (Waste Collection Schedule, Afvalwijzer of een eigen kalender).",
+    "tile_name": "Volgende ophaaldag",
+    "tile_example": "Papier, morgen",
+    "card_name": "Komende ophaaldagen",
+    "tap_upcoming": "Komende ophaaldagen tonen",
+    "bar_soon": "Volgende ophaaldag",
+    "bar_example": "Morgen: Papier"
+  }
+}

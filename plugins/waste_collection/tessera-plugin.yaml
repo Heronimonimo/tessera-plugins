@@ -1,0 +1,43 @@
+# Waste collection: when the next bin goes out, from a calendar in Home Assistant. It uses most of what a plugin can
+# add (docs/MANIFEST.md): a tile that belongs to an entity, a card, a tap action for calendar tiles, an item for the top
+# bar, rows on the screen's settings page, and a Home Assistant command asked through the app.
+id: waste_collection
+version: 1.0.0
+api: "0.2"
+icon: recycle
+maintainer: MaxGramser
+license: MIT
+requires:
+  esphome: 2026.6.2
+boards: any
+flash_kb: 18
+
+permissions:
+  # The card asks for the coming collections; the top bar's item reads the calendar chosen when the plugin was added.
+  ha_commands: ["call_service:calendar.get_events"]
+  read_entities: ["{calendar}"]
+
+inputs:
+  - { id: calendar, kind: entity, domains: [calendar], scope: screen, label: input_calendar, hint: input_calendar_hint }
+
+tiles:
+  - id: next
+    name: tile_name
+    icon: recycle
+    sizes: { min: 1x1, max: 2x2 }
+    memory: 700
+    entity: calendar
+    attributes: [message, start_time]
+    example: tile_example
+    # How the editor draws it: what goes out, and the calendar it comes from.
+    preview: { title: "{name}", value: "{message}" }
+
+cards:
+  - { id: upcoming, name: card_name }
+
+tap_actions:
+  # Tessera draws no tile for a calendar, but the waste integrations also make sensors: a sensor tile can open the card.
+  - { id: upcoming, label: tap_upcoming, domains: [calendar, sensor], card: upcoming }
+
+bar_items:
+  - { id: soon, label: bar_soon, icon: recycle, example: bar_example }

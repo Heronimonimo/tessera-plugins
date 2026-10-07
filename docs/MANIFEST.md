@@ -73,7 +73,7 @@ starting with a letter.
 |---|---|---|
 | `id` | yes | The plugin's id. Unique in the index, the same as its folder and its component. |
 | `version` | yes | Three numbers, `1.0.0`. Raise it for every change that reaches screens. |
-| `api` | yes | The plugin API it was written for, in quotes: `"0.1"`. While the API is 0.x a plugin builds on its own minor only; from 1.0 on every core with the same major and at least that minor. |
+| `api` | yes | The plugin API it was written for, in quotes: `"0.2"`. It builds on every core with the same major and at least that minor. Name the lowest minor whose parts you use ([FIRMWARE_API.md](FIRMWARE_API.md), "Versions"). |
 | `icon` | yes | <a id="icon"></a>A Material Design Icons name from Tessera's icon set (`screen_manager/app/tile_icons.py` in the Tessera repository, such as `bus`, `train`, `calendar`, `thermometer`, `lightbulb`). The screen's icon font holds only that set. |
 | `maintainer` | yes | The GitHub name of whoever looks after the plugin. |
 | `license` | yes | An SPDX name that goes with AGPL-3.0: `MIT`, `Apache-2.0`, `BSD-2-Clause`, `BSD-3-Clause`, `ISC`, `MPL-2.0`, `LGPL-2.1-or-later`, `LGPL-3.0-or-later`, `GPL-3.0-or-later`, `GPL-3.0-only`, `AGPL-3.0-or-later`, `AGPL-3.0-only`, `Unlicense`, `0BSD`, `CC0-1.0`. |
@@ -99,8 +99,9 @@ before anyone adds the plugin, and asks again when an update asks for more.
 | Field | What |
 |---|---|
 | `permissions.network` | The hosts its fetches reach: names only, no address, nothing on a home network (`.local`, `192.168.x.x`). A fetch to any other host is refused. |
-| `permissions.read_entities` | Home Assistant entities the screen itself reads (an ESPHome `homeassistant` sensor). |
-| `permissions.home_assistant_actions` | Home Assistant actions the screen calls. |
+| `permissions.read_entities` | Home Assistant entities the screen itself reads (an ESPHome `homeassistant` sensor). `"{calendar}"` stands for the entity a person chose in the input `calendar`. |
+| `permissions.home_assistant_actions` | Home Assistant actions the screen calls (`tessera::action`). |
+| `permissions.ha_commands` | Home Assistant commands the app may ask on the plugin's behalf (`tessera::send`, API 0.2): `call_service:<domain>.<service>` for an action that answers (`call_service:calendar.get_events`), or a websocket command (`history/history_during_period`). Commands that read or change Home Assistant itself (`config/...`, `auth`, `supervisor`, `fire_event`, `render_template`, plain `call_service`, ...) are refused. Every one asked is logged. |
 | `attributes` | Any of `cloud` (uses a service outside the home), `commercial`, `ai-developed`, `experimental`. A plugin with `permissions.network` has `cloud`. |
 | `privacy` | An https link to what the service sees. Required with `cloud`. A section of the README is fine. |
 
@@ -116,12 +117,14 @@ inputs:
 
 | Field | What |
 |---|---|
-| `kind` | `secret` (kept by the app, never shown again, never on the screen or in YAML; used in a fetch), `text`, or `gpio` (a free pin of the board). |
+| `kind` | `secret` (kept by the app, never shown again, never on the screen or in YAML; used in a fetch), `text`, `gpio` (a free pin of the board), or `entity` (API 0.2: an entity of `domains`, for the plugin's own `homeassistant` sensors). |
+| `domains` | For `entity`, and only there: the Home Assistant domains it takes, `[calendar]`. The editor offers the entities of those domains. |
 | `scope` | `all`: asked once for every screen. `screen`: per screen. Default: `all` for a secret, `screen` for the rest. |
 | `label`, `hint` | Text keys. |
 
-A `text` or `gpio` input reaches the screen's build as a substitution in capitals: input `pin` is `${PIN}` in
-`plugin.yaml`. A `secret` never does. At most 8 inputs.
+A `text`, `gpio` or `entity` input reaches the screen's build as a substitution in capitals: input `pin` is `${PIN}` in
+`plugin.yaml`. A `secret` never does. At most 8 inputs. Give each a default in `plugin.yaml` (`defaults: { PIN: GPIO22 }`)
+so a build without the value still works.
 
 ### Optional parts: `parts`
 
@@ -141,10 +144,11 @@ parts:
 | `icon` | no | From Tessera's icon set; the plugin's icon when left out. The editor shows it, and a screen without the plugin draws it on its placeholder. |
 | `sizes` | yes | `{ min: 1x1, max: 2x2 }`, columns x rows. The editor offers the sizes in between that fit the screen's grid. |
 | `memory` | yes | What one tile costs of the screen's layout memory, in bytes (64 to 16384). The screen and the app add it to the layout's budget. About 400 for a few labels, 1200 for a list. |
-| `entity` | no | A Home Assistant domain (or a list) when the tile belongs to an entity. Not used by the app yet in API 0.1. |
+| `entity` | no | A Home Assistant domain (or a list) when the tile belongs to an entity (API 0.2). The inspector offers the entities of those domains, also of a domain Tessera draws no tile for; the tile gets the entity's state, name and `attributes`, again at every change. |
+| `attributes` | no | With `entity`: the attributes the tile gets, at most 16. One named `..._at`, `..._time` or `...date` that holds a moment comes as seconds since 1970. |
 | `data` | no | The id of the fetch whose answer the tile gets in `on_state`. |
 | `example` | no | Text key: a line the editor shows on the tile's placeholder. |
-| `preview` | no | How the editor draws the tile from its data, so the page in the editor looks like the glass (it cannot run your C++). Only with `data`. `badge`, `title` and `value` are templates of the first item's fields (`"{line}"`, `"{to}"`); `countdown` names a field with `as: epoch`, and the editor counts down to it in minutes the way the screen does. `value` or `countdown`, not both. Without a preview the editor shows the icon, the name and `example`. |
+| `preview` | no | How the editor draws the tile from its data, so the page in the editor looks like the glass (it cannot run your C++). With `data` or `entity`. `badge`, `title` and `value` are templates of the first item's fields (`"{line}"`, `"{to}"`; for a tile of an entity `{state}`, `{name}` and its attributes); `countdown` names a field with `as: epoch`, and the editor counts down to it in minutes the way the screen does. `value` or `countdown`, not both. Without a preview the editor shows the icon, the name and `example`. |
 | `options` | no | At most 12 options the inspector shows, below. |
 
 An option:
@@ -173,6 +177,51 @@ At most 8. [FETCH.md](FETCH.md) explains them in full.
 | `every` | How old an answer may get: `30s`, `5m`, `1h`, `1d`. At least 30 seconds. |
 | `map` | What of the answer reaches the screen. |
 
+### Cards: `cards` (API 0.2)
+
+A screen of the plugin's own over the page ([FIRMWARE_API.md](FIRMWARE_API.md), "A card").
+
+```yaml
+cards:
+  - { id: upcoming, name: card_name }          # wide: true for the whole width of the glass
+```
+
+| Field | What |
+|---|---|
+| `id` | `add_card("<id>", ...)` in the C++ uses the same. |
+| `name` | Text key: what the editor calls it. On the screen the card's title is the tile's name, or what `open_card` passes. |
+| `wide` | `true`: as wide as the glass (a picture, a timeline); else a hand's width, as Tessera's own cards. |
+
+### Tap actions: `tap_actions` (API 0.2)
+
+Something a person can set one of Tessera's own tiles to do on a tap, in the tile's inspector.
+
+```yaml
+tap_actions:
+  - { id: upcoming, label: tap_upcoming, domains: [sensor], card: upcoming }
+```
+
+| Field | What |
+|---|---|
+| `id` | `add_tap_action("<id>", ...)` in the C++ uses the same. |
+| `label` | Text key: the choice in the inspector's tap list. |
+| `domains` | The kinds of tile it is offered for. |
+| `card` | Optional: the card it opens, for the editor's description. |
+
+### Top bar items: `bar_items` (API 0.2)
+
+```yaml
+bar_items:
+  - { id: soon, label: bar_soon, icon: recycle, example: bar_example }
+```
+
+| Field | What |
+|---|---|
+| `id` | `add_bar_item("<id>", ...)` in the C++ uses the same. |
+| `label` | Text key: the item's name under "From plugins" when adding to a top bar. |
+| `icon` | From Tessera's set; the plugin's icon when left out. |
+| `example` | Text key: what the editor's mockup of the bar shows. |
+
 ## Limits at a glance
 
 | What | Most |
@@ -182,6 +231,10 @@ At most 8. [FETCH.md](FETCH.md) explains them in full.
 | Inputs | 8 |
 | Parts | 4 |
 | Fetches | 8 |
+| Cards, tap actions | 8 each |
+| Top bar items | 4 |
+| Attributes of a tile's entity | 16 |
+| Home Assistant commands | 8 |
 | Fields per mapped item | 8 |
 | Items in a mapped list | 48 |
 | Bytes of a tile's data on the wire | about 2.6 KB (the last items are dropped to fit) |

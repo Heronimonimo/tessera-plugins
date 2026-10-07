@@ -127,12 +127,41 @@ def check_folder(folder):
     return raw, translations, readme
 
 
+ENTRY_FIELDS = {'repo', 'path', 'ref', 'maintainer', 'topics'}
+
+
+def check_entry(path):
+    """An entry of community/<id>.yaml: a public GitHub repository of the maintainer, the plugin's folder in it, and
+    optionally the release tag to list (the newest release when left out). SystemExit with what is wrong."""
+    path = Path(path)
+    try:
+        entry = yaml.safe_load(path.read_text(encoding='utf-8'))
+    except (OSError, yaml.YAMLError) as error:
+        fail(path.name, str(error))
+    if not isinstance(entry, dict) or set(entry) - ENTRY_FIELDS or not {'repo', 'maintainer'} <= set(entry):
+        fail(path.name, f'an entry has repo and maintainer, and may have {", ".join(sorted(ENTRY_FIELDS - {"repo", "maintainer"}))}')
+    if not re.fullmatch(r'[a-z][a-z0-9_]{0,31}', path.stem):
+        fail(path.name, 'the file is named after the plugin\'s id: community/<id>.yaml')
+    match = re.fullmatch(r'https://github\.com/([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+)', str(entry['repo']))
+    if not match:
+        fail(path.name, 'repo is https://github.com/<owner>/<repository>')
+    if str(entry['maintainer']).lower() != match.group(1).lower():
+        fail(path.name, 'the maintainer is the owner of the repository')
+    if '..' in str(entry.get('path', '.')) or str(entry.get('path', '.')).startswith('/'):
+        fail(path.name, 'path is a folder inside the repository')
+    return entry
+
+
 def main():
     folders = [Path(arg) for arg in sys.argv[1:]] or [
         *(f for f in sorted((ROOT / 'plugins').iterdir()) if (f / 'tessera-plugin.yaml').is_file()), ROOT / 'template']
     for folder in folders:
         check_folder(folder)
         print(f'{folder.name}: ok')
+    if not sys.argv[1:]:
+        for entry in sorted((ROOT / 'community').glob('*.yaml')):
+            check_entry(entry)
+            print(f'community/{entry.name}: ok')
     print(f'plugin API {plugin_api()}: {len(folders)} checked')
 
 

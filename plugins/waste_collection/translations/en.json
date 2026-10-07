@@ -1,0 +1,29 @@
+{
+  "_meta": { "name": "English" },
+  "screen": {
+    "name": "Waste collection",
+    "today": "Today",
+    "none": "Nothing planned",
+    "waiting": "Asking the calendar",
+    "upcoming": "Coming collections",
+    "failed": "The calendar did not answer",
+    "in_bar": "In the top bar",
+    "days_ahead": "Days ahead",
+    "open_card": "Coming collections",
+    "bar_today": "Today: {what}",
+    "bar_tomorrow": "Tomorrow: {what}",
+    "bar_later": "{when}: {what}"
+  },
+  "app": {
+    "name": "Waste collection",
+    "summary": "When the next bin goes out, from a calendar in Home Assistant, on a tile and in the top bar.",
+    "input_calendar": "Waste calendar",
+    "input_calendar_hint": "The calendar with the collection days (Waste Collection Schedule, Afvalwijzer, or a calendar of your own).",
+    "tile_name": "Next collection",
+    "tile_example": "Paper, tomorrow",
+    "card_name": "Coming collections",
+    "tap_upcoming": "Show coming collections",
+    "bar_soon": "Next collection",
+    "bar_example": "Tomorrow: Paper"
+  }
+}

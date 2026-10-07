@@ -1,0 +1,48 @@
+# What a screen gets when it takes this plugin. Tessera includes this file from the screen's <name>.plugins.yaml with
+# CALENDAR filled in (the input chosen when the plugin was added), and adds the components folder beside it.
+defaults:
+  CALENDAR: calendar.waste
+
+# The calendar the top bar's item reads, straight from Home Assistant: what goes out next, and when.
+text_sensor:
+  - platform: homeassistant
+    id: waste_next_message
+    entity_id: ${CALENDAR}
+    attribute: message
+    internal: true
+  - platform: homeassistant
+    id: waste_next_start
+    entity_id: ${CALENDAR}
+    attribute: start_time
+    internal: true
+
+# Two settings, kept on the screen and shown in Home Assistant and on the screen's settings page: whether the top bar
+# says it, and how many days ahead.
+switch:
+  - platform: template
+    id: waste_in_bar
+    name: "Waste in top bar"
+    icon: mdi:recycle
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_ON
+    entity_category: config
+
+number:
+  - platform: template
+    id: waste_days_ahead
+    name: "Waste days ahead"
+    icon: mdi:calendar-clock
+    optimistic: true
+    min_value: 0
+    max_value: 3
+    step: 1
+    initial_value: 1
+    restore_value: true
+    entity_category: config
+
+waste_collection:
+  calendar: ${CALENDAR}
+  message: waste_next_message
+  start: waste_next_start
+  in_bar: waste_in_bar
+  days_ahead: waste_days_ahead

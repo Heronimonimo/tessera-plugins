@@ -4,7 +4,7 @@
 
 The Tessera app reads one file: `index.json` in this repository (on `main`). It lists every plugin with its manifest,
 its texts and its README at one commit, and the plugin versions that are blocked. `tools/build_index.py` writes it;
-nobody edits it by hand. The app reads it when its Plugins page opens, at most every six hours, and keeps the last one
+nobody edits it by hand. The app reads it when the editor opens, at most every ten minutes (a conditional request), and keeps the last one
 for when the internet is away.
 
 ## Tessera's own plugins: `plugins/`

@@ -46,6 +46,10 @@ python3 tools/check.py plugins/my_idea       # the same check the app does
 Then read [docs/MAKING_A_PLUGIN.md](docs/MAKING_A_PLUGIN.md). It goes through every file, how to try the plugin on
 your own screen before anyone else sees it, and how it gets into the list.
 
+A plugin can also live in a repository of your own. List it once with a pull request that adds a four-line file to
+`community/`; after that every release you publish reaches the app by itself within the hour, without a pull request
+here ([docs/PUBLISHING.md](docs/PUBLISHING.md)).
+
 Working with an AI assistant? Point it at [AGENTS.md](AGENTS.md) first: it has the rules and the order to read the
 docs in.
 

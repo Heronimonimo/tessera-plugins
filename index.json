@@ -1,6 +1,6 @@
 {
  "format": 1,
- "generated": "2026-10-07T15:52:59Z",
+ "generated": "2026-10-07T16:53:02Z",
  "plugin_api": "0.1",
  "blocked": [],
  "plugins": [
@@ -12,7 +12,7 @@
    "status": "ok",
    "release": {
     "version": "1.0.0",
-    "sha": "f2e7ec69df7e181f97ddfd45c452891e46f16098",
+    "sha": "8099a54bb4b9a8481ebcae3af92ea1d25797c969",
     "date": "2026-10-07"
    },
    "manifest": {
@@ -48,6 +48,11 @@
       "memory": 1200,
       "data": "departures",
       "example": "tile_example",
+      "preview": {
+       "badge": "{line}",
+       "title": "{to}",
+       "countdown": "at"
+      },
       "options": [
        {
         "id": "stop",

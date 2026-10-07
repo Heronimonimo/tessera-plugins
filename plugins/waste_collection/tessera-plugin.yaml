@@ -2,7 +2,7 @@
 # add (docs/MANIFEST.md): a tile that belongs to an entity, a card, a tap action for calendar tiles, an item for the top
 # bar, rows on the screen's settings page, and a Home Assistant command asked through the app.
 id: waste_collection
-version: 1.0.0
+version: 1.0.1
 api: "0.2"
 icon: recycle
 maintainer: MaxGramser
@@ -41,3 +41,8 @@ tap_actions:
 
 bar_items:
   - { id: soon, label: bar_soon, icon: recycle, example: bar_example }
+
+# The two settings of plugin.yaml, also under Screen settings in the editor (the ends of their entity ids).
+settings:
+  - { key: waste_in_top_bar, label: setting_in_bar, hint: setting_in_bar_hint }
+  - { key: waste_days_ahead, label: setting_days_ahead, hint: setting_days_ahead_hint }

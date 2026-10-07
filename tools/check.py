@@ -5,7 +5,8 @@
     python3 tools/check.py plugins/my_plugin    # one plugin (any folder with a tessera-plugin.yaml)
 
 It runs the app's own manifest check: plugin_manifest.py from the Tessera repository (homeassistant_espscreen,
-screen_manager/app/plugin_manifest.py), fetched once into tools/.cache/. The same file decides in the app whether a
+screen_manager/app/plugin_manifest.py), fetched into tools/.cache/ and fetched again when it is an hour old (offline,
+the copy there serves). The same file decides in the app whether a
 plugin is shown, so a plugin that passes here is read the same way there. Then the rules the manifest check cannot see:
 the folder layout, the translations (English complete), the README, the licence, and the drawing rules for the
 firmware code (docs/FIRMWARE_API.md, "Rules").
@@ -17,6 +18,7 @@ import json
 import os
 import re
 import sys
+import time
 import urllib.request
 from pathlib import Path
 
@@ -43,11 +45,15 @@ def manifest_module():
         path = Path(local)
     else:
         path = CACHE
-        if not path.is_file():
+        if not path.is_file() or time.time() - path.stat().st_mtime > 3600:
             path.parent.mkdir(parents=True, exist_ok=True)
             ref = os.environ.get('TESSERA_REF', 'dev')
-            with urllib.request.urlopen(SOURCE.format(ref=ref), timeout=20) as response:
-                path.write_bytes(response.read())
+            try:
+                with urllib.request.urlopen(SOURCE.format(ref=ref), timeout=20) as response:
+                    path.write_bytes(response.read())
+            except OSError:
+                if not path.is_file():
+                    raise
     spec = importlib.util.spec_from_file_location('plugin_manifest', path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)

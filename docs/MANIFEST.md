@@ -222,6 +222,24 @@ bar_items:
 | `icon` | From Tessera's set; the plugin's icon when left out. |
 | `example` | Text key: what the editor's mockup of the bar shows. |
 
+### Settings in the editor: `settings` (API 0.2)
+
+The ESPHome entities of the plugin's `plugin.yaml` that are settings (a template switch, number or select), so the
+editor shows them under Screen settings beside the screen's own. The same values are rows on the screen's settings page
+(`settings(SettingsPage&)` in the C++) and entities in Home Assistant.
+
+```yaml
+settings:
+  - { key: waste_in_top_bar, label: setting_in_bar, hint: setting_in_bar_hint }
+```
+
+| Field | What |
+|---|---|
+| `key` | The end of the entity's id on the screen: a switch named "Waste in top bar" is `switch.<screen>_waste_in_top_bar`, so its key is `waste_in_top_bar`. |
+| `label`, `hint` | Text keys. |
+
+The app changes only an entity a plugin on that screen names here, of that screen's own device.
+
 ## Limits at a glance
 
 | What | Most |

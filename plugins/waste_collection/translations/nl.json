@@ -1,5 +1,7 @@
 {
-  "_meta": { "name": "Nederlands" },
+  "_meta": {
+    "name": "Nederlands"
+  },
   "screen": {
     "name": "Afvalkalender",
     "today": "Vandaag",
@@ -24,6 +26,10 @@
     "card_name": "Komende ophaaldagen",
     "tap_upcoming": "Komende ophaaldagen tonen",
     "bar_soon": "Volgende ophaaldag",
-    "bar_example": "Morgen: Papier"
+    "bar_example": "Morgen: Papier",
+    "setting_in_bar": "In de bovenbalk",
+    "setting_in_bar_hint": "Of de bovenbalk zegt wanneer de volgende container buiten moet.",
+    "setting_days_ahead": "Dagen vooruit",
+    "setting_days_ahead_hint": "Vanaf hoeveel dagen voor een ophaaldag de bovenbalk het zegt."
   }
 }

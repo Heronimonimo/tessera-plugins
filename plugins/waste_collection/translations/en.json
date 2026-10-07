@@ -1,5 +1,7 @@
 {
-  "_meta": { "name": "English" },
+  "_meta": {
+    "name": "English"
+  },
   "screen": {
     "name": "Waste collection",
     "today": "Today",
@@ -24,6 +26,10 @@
     "card_name": "Coming collections",
     "tap_upcoming": "Show coming collections",
     "bar_soon": "Next collection",
-    "bar_example": "Tomorrow: Paper"
+    "bar_example": "Tomorrow: Paper",
+    "setting_in_bar": "In the top bar",
+    "setting_in_bar_hint": "Whether the top bar says when the next bin goes out.",
+    "setting_days_ahead": "Days ahead",
+    "setting_days_ahead_hint": "From how many days before a collection the top bar says it."
   }
 }

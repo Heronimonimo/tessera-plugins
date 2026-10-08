@@ -110,6 +110,14 @@ static void append_prices(JsonArrayConst rows, bool nordpool, bool tomorrow, For
   }
 }
 
+static void append_values(JsonArrayConst rows, bool tomorrow, Forecast &forecast) {
+  const size_t count = std::min(rows.size(), kMaxPricesPerDay);
+  for (size_t i = 0; i < count; ++i) {
+    double price = 0;
+    if (read_price(rows[i], price)) forecast.points.push_back({price, static_cast<int64_t>(i), tomorrow});
+  }
+}
+
 static void read_forecast(JsonObjectConst data, Forecast &forecast) {
   forecast = Forecast{};
   JsonObjectConst attributes = data["attributes"].as<JsonObjectConst>();
@@ -123,20 +131,28 @@ static void read_forecast(JsonObjectConst data, Forecast &forecast) {
   JsonArrayConst raw_tomorrow = attributes["raw_tomorrow"].as<JsonArrayConst>();
   JsonArrayConst prices_today = attributes["prices_today"].as<JsonArrayConst>();
   JsonArrayConst prices_tomorrow = attributes["prices_tomorrow"].as<JsonArrayConst>();
+  JsonArrayConst today = attributes["today"].as<JsonArrayConst>();
+  JsonArrayConst tomorrow = attributes["tomorrow"].as<JsonArrayConst>();
 
   const bool has_raw_today = !raw_today.isNull() && raw_today.size() > 0;
   const bool has_raw_tomorrow = !raw_tomorrow.isNull() && raw_tomorrow.size() > 0;
   const bool has_prices_today = !prices_today.isNull() && prices_today.size() > 0;
   const bool has_prices_tomorrow = !prices_tomorrow.isNull() && prices_tomorrow.size() > 0;
-  forecast.has_today = has_raw_today || has_prices_today;
-  forecast.has_tomorrow = has_raw_tomorrow || has_prices_tomorrow;
+  const bool has_today = !today.isNull() && today.size() > 0;
+  const bool has_tomorrow = !tomorrow.isNull() && tomorrow.size() > 0;
+  forecast.has_today = has_raw_today || has_prices_today || has_today;
+  forecast.has_tomorrow = has_raw_tomorrow || has_prices_tomorrow || has_tomorrow;
 
   if (has_raw_today) append_prices(raw_today, true, false, forecast);
   else if (has_prices_today) append_prices(prices_today, false, false, forecast);
+  else if (has_today) append_values(today, false, forecast);
   if (has_raw_tomorrow) append_prices(raw_tomorrow, true, true, forecast);
   else if (has_prices_tomorrow) append_prices(prices_tomorrow, false, true, forecast);
-  std::stable_sort(forecast.points.begin(), forecast.points.end(),
-                   [](const PricePoint &a, const PricePoint &b) { return a.at < b.at; });
+  else if (has_tomorrow) append_values(tomorrow, true, forecast);
+  std::stable_sort(forecast.points.begin(), forecast.points.end(), [](const PricePoint &a, const PricePoint &b) {
+    if (a.tomorrow != b.tomorrow) return !a.tomorrow;
+    return a.at < b.at;
+  });
 }
 
 static std::string format_price(double price, int decimals) {

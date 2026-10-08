@@ -20,7 +20,7 @@ tiles:
     example: tile_example
     domains: [sensor]
     preview: { value: "{state}" }
-    attributes: [raw_today, raw_tomorrow, prices_today, prices_tomorrow, unit_of_measurement, suggested_display_precision]
+    attributes: [raw_today, raw_tomorrow, prices_today, prices_tomorrow, today, tomorrow, unit_of_measurement, suggested_display_precision]
 
 cards:
   - { id: chart, name: card_name }

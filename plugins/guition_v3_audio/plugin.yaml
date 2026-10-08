@@ -85,7 +85,6 @@ guition_v3_audio:
   speaker: p4_speaker
   microphone: p4_microphone
   dac: p4_audio_dac
-  amplifier: p4_audio_amp
   mute: p4_microphone_mute
   tap_sound: p4_tap_sound
   volume: p4_speaker_volume

@@ -3,7 +3,6 @@ audio_adc:
   - platform: es7210
     id: guition_v3_audio_adc
     i2c_id: touch_bus
-    address: 0x41
 
 audio_dac:
   - platform: es8311

@@ -1,39 +1,63 @@
-# The Guition JC8012P4A1 V3's ES8311 handles speaker output and microphone input on the touch I2C bus.
+# The Guition JC8012P4A1 V3 audio codecs use the board's touch I2C bus.
+audio_adc:
+  - platform: es7210
+    id: guition_v3_audio_adc
+    i2c_id: touch_bus
+
 audio_dac:
   - platform: es8311
     id: guition_v3_audio_dac
     i2c_id: touch_bus
-    bits_per_sample: 16bit
-    sample_rate: 16000
-    use_mclk: true
-    use_microphone: true
+    address: 0x18
 
 i2s_audio:
   - id: guition_v3_audio_bus
+    i2s_mclk_pin: GPIO13
     i2s_lrclk_pin: GPIO10
     i2s_bclk_pin: GPIO12
-    i2s_mclk_pin: GPIO13
 
 microphone:
   - platform: i2s_audio
     id: guition_v3_microphone
     i2s_audio_id: guition_v3_audio_bus
-    i2s_din_pin: GPIO11
+    i2s_din_pin: GPIO48
     sample_rate: 16000
     bits_per_sample: 16bit
     adc_type: external
-    channel: left
+    channel: right
 
 speaker:
   - platform: i2s_audio
-    id: guition_v3_speaker
+    id: guition_v3_i2s_speaker
     i2s_audio_id: guition_v3_audio_bus
     i2s_dout_pin: GPIO9
     dac_type: external
-    sample_rate: 16000
+    sample_rate: 48000
     bits_per_sample: 16bit
-    channel: stereo
+    channel: mono
+    buffer_duration: 100ms
     audio_dac: guition_v3_audio_dac
+
+  - platform: mixer
+    id: guition_v3_mixing_speaker
+    output_speaker: guition_v3_i2s_speaker
+    source_speakers:
+      - id: guition_v3_announcement_mixing_input
+        timeout: never
+      - id: guition_v3_media_mixing_input
+        timeout: never
+
+  - platform: resampler
+    id: guition_v3_announcement_resampling_speaker
+    output_speaker: guition_v3_announcement_mixing_input
+    sample_rate: 48000
+    bits_per_sample: 16
+
+  - platform: resampler
+    id: guition_v3_media_resampling_speaker
+    output_speaker: guition_v3_media_mixing_input
+    sample_rate: 48000
+    bits_per_sample: 16
 
 switch:
   - platform: template
@@ -66,7 +90,7 @@ number:
     entity_category: config
 
 guition_v3_audio:
-  speaker: guition_v3_speaker
+  speaker: guition_v3_announcement_resampling_speaker
   microphone: guition_v3_microphone
   dac: guition_v3_audio_dac
   mute: guition_v3_microphone_mute

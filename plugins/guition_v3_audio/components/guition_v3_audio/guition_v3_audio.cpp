@@ -11,17 +11,18 @@ namespace esphome::guition_v3_audio {
 
 static const char *const TAG = "guition_v3_audio";
 
-static constexpr uint32_t RATE = 16000;
-static constexpr size_t CHANNELS = 2;
-static constexpr size_t RECORD_SAMPLES = RATE * 5;
+static constexpr uint32_t SPEAKER_RATE = 48000;
+static constexpr uint32_t MICROPHONE_RATE = 16000;
+static constexpr size_t CHANNELS = 1;
+static constexpr size_t RECORD_SAMPLES = MICROPHONE_RATE * 5;
 static constexpr float CODEC_VOLUME = 0.75f;
 
 static void sine(int16_t *out, size_t frames, float hz, float level) {
-  const float fade = RATE * 0.004f;
+  const float fade = SPEAKER_RATE * 0.004f;
   for (size_t i = 0; i < frames; ++i) {
     const float edge = std::min(1.0f, std::min<float>(i, frames - 1 - i) / fade);
     const int16_t sample =
-        static_cast<int16_t>(level * edge * std::sin(2.0f * static_cast<float>(M_PI) * hz * i / RATE));
+        static_cast<int16_t>(level * edge * std::sin(2.0f * static_cast<float>(M_PI) * hz * i / SPEAKER_RATE));
     for (size_t channel = 0; channel < CHANNELS; ++channel) out[i * CHANNELS + channel] = sample;
   }
 }
@@ -29,8 +30,8 @@ static void sine(int16_t *out, size_t frames, float hz, float level) {
 void GuitionV3Audio::setup() {
   dac_->set_volume(CODEC_VOLUME);
   dac_->set_mute_off();
-  click_.resize(RATE * 60 / 1000 * CHANNELS);
-  sine(click_.data(), RATE * 60 / 1000, 1000.0f, 12000.0f);
+  click_.resize(SPEAKER_RATE * 60 / 1000 * CHANNELS);
+  sine(click_.data(), SPEAKER_RATE * 60 / 1000, 1000.0f, 12000.0f);
 
   volume_->add_on_state_callback([this](float value) { speaker_->set_volume(std::clamp(value, 0.0f, 100.0f) / 100.0f); });
   if (volume_->has_state()) speaker_->set_volume(std::clamp(volume_->state, 0.0f, 100.0f) / 100.0f);
@@ -63,6 +64,8 @@ bool GuitionV3Audio::play(const int16_t *pcm, size_t count, Job job, int16_t *ow
   samples_ = count;
   sent_ = 0;
   owned_ = owned;
+  speaker_->set_audio_stream_info(
+      audio::AudioStreamInfo(16, CHANNELS, job == Job::PLAYBACK ? MICROPHONE_RATE : SPEAKER_RATE));
   step_ = Step::STARTING;
   since_ = millis();
   speaker_->start();
@@ -164,19 +167,15 @@ void GuitionV3Audio::loop() {
           ESP_LOGW(TAG, "Nothing came from the microphone");
           break;
         }
-        const size_t output_samples = frames * CHANNELS;
-        int16_t *stereo = RAMAllocator<int16_t>(RAMAllocator<int16_t>::ALLOC_EXTERNAL).allocate(output_samples);
-        if (stereo == nullptr) {
+        int16_t *mono_copy = RAMAllocator<int16_t>(RAMAllocator<int16_t>::ALLOC_EXTERNAL).allocate(frames);
+        if (mono_copy == nullptr) {
           RAMAllocator<int16_t>(RAMAllocator<int16_t>::ALLOC_EXTERNAL).deallocate(mono, RECORD_SAMPLES);
           ESP_LOGW(TAG, "No room for microphone playback");
           break;
         }
-        for (size_t i = 0; i < frames; ++i) {
-          stereo[i * CHANNELS] = mono[i];
-          stereo[i * CHANNELS + 1] = mono[i];
-        }
+        std::copy_n(mono, frames, mono_copy);
         RAMAllocator<int16_t>(RAMAllocator<int16_t>::ALLOC_EXTERNAL).deallocate(mono, RECORD_SAMPLES);
-        play(stereo, output_samples, Job::PLAYBACK, stereo);
+        play(mono_copy, frames, Job::PLAYBACK, mono_copy);
       }
       break;
   }
@@ -206,7 +205,7 @@ bool GuitionV3Audio::settings(tessera::SettingsPage &page) {
         if (job_ == Job::TONE) { stop(); return; }
         if (job_ == Job::CLICK) stop();
         if (job_ != Job::NONE) return;
-        const size_t frames = RATE * 600 / 1000;
+        const size_t frames = SPEAKER_RATE * 600 / 1000;
         const size_t samples = frames * CHANNELS;
         int16_t *tone = RAMAllocator<int16_t>(RAMAllocator<int16_t>::ALLOC_EXTERNAL).allocate(samples);
         if (tone == nullptr) return;

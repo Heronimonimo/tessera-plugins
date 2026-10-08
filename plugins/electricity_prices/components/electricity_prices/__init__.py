@@ -1,5 +1,4 @@
-"""My plugin: the ESPHome side. This file stays this short: smart_display.register_plugin() reads the id, version,
-tile memory and the screen's texts from the manifest and translations/ beside this folder (docs/FIRMWARE_API.md)."""
+"""Electricity prices: the ESPHome side; the plugin reads forecast data from sensor entity attributes."""
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import smart_display

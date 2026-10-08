@@ -1,19 +1,14 @@
 {
   "_meta": { "name": "Nederlands" },
   "screen": {
-    "days": "1 dag | {n} dagen",
-    "today": "Vandaag",
-    "passed": "Voorbij",
-    "no_date": "Kies een datum"
+    "tomorrow": "Gemiddelde morgen",
+    "no_prices": "Geen prijsverwachting",
+    "unavailable": "Sensor niet beschikbaar"
   },
   "app": {
-    "name": "Dagen tot",
-    "summary": "Telt de dagen tot een datum die je kiest.",
-    "tile_name": "Dagen tot",
-    "tile_example": "Nog 12 dagen tot de vakantie",
-    "date": "Datum",
-    "date_hint": "Als jaar-maand-dag, zoals 2026-12-25.",
-    "what": "Wat er dan is",
-    "what_hint": "Een paar woorden onder het getal, zoals Vakantie."
+    "name": "Elektriciteitsprijzen",
+    "summary": "Toont de day-ahead-elektriciteitsprijzen van morgen uit een Home Assistant-sensor.",
+    "tile_name": "Prijsverwachting",
+    "tile_example": "Gemiddeld morgen 0,18 EUR/kWh"
   }
 }

@@ -1,74 +1,74 @@
-# The GSL3680 touch controller uses 0x40 on this bus, so the ES7210 uses its alternate address.
+# What a screen gets when it takes this plugin: the panel's two audio codecs on the touch panel's I2C bus, one I2S bus
+# for both, the speaker's amplifier, and three settings. The pins are Waveshare's ESP32-P4-WIFI6-Touch-LCD-4B schematic,
+# page 1, the main board of the 86 panel as well. Capture and playback take turns on the one bus.
+
+# The microphone side: an ES7210 at 0x40. Its analogue gain is fixed here; 30 dB suits speech at arm's length.
 audio_adc:
   - platform: es7210
-    id: guition_v3_audio_adc
+    id: p4_audio_adc
     i2c_id: touch_bus
-
-audio_dac:
-  - platform: es8311
-    id: guition_v3_audio_dac
-    i2c_id: touch_bus
-    address: 0x18
-
-i2s_audio:
-  - id: guition_v3_audio_bus
-    i2s_mclk_pin: GPIO13
-    i2s_lrclk_pin: GPIO10
-    i2s_bclk_pin: GPIO12
-
-microphone:
-  - platform: i2s_audio
-    id: guition_v3_microphone
-    i2s_audio_id: guition_v3_audio_bus
-    i2s_din_pin: GPIO48
+    address: 0x40
     sample_rate: 16000
     bits_per_sample: 16bit
+    mic_gain: 30db
+
+# The speaker side: an ES8311 at 0x18, clocked from MCLK. Its own volume stays at 0 dB; Speaker volume scales the sound.
+audio_dac:
+  - platform: es8311
+    id: p4_audio_dac
+    i2c_id: touch_bus
+    address: 0x18
+    sample_rate: 16000
+    bits_per_sample: 16bit
+    use_mclk: true
+    use_microphone: false
+
+i2s_audio:
+  - id: p4_audio_bus
+    i2s_mclk_pin: GPIO13
+    i2s_bclk_pin: GPIO12
+    i2s_lrclk_pin: GPIO10
+
+# The ES7210 sends two channels; the panel's microphone is the first.
+microphone:
+  - platform: i2s_audio
+    id: p4_microphone
+    i2s_audio_id: p4_audio_bus
     adc_type: external
-    channel: right
+    i2s_din_pin: GPIO11
+    sample_rate: 16000
+    bits_per_sample: 16bit
+    channel: stereo
 
 speaker:
   - platform: i2s_audio
-    id: guition_v3_i2s_speaker
-    i2s_audio_id: guition_v3_audio_bus
-    i2s_dout_pin: GPIO9
+    id: p4_speaker
+    i2s_audio_id: p4_audio_bus
     dac_type: external
-    sample_rate: 48000
+    i2s_dout_pin: GPIO9
+    sample_rate: 16000
     bits_per_sample: 16bit
     channel: mono
-    buffer_duration: 100ms
-    audio_dac: guition_v3_audio_dac
+    buffer_duration: 500ms
+    timeout: 500ms
 
-  - platform: mixer
-    id: guition_v3_mixing_speaker
-    output_speaker: guition_v3_i2s_speaker
-    source_speakers:
-      - id: guition_v3_announcement_mixing_input
-        timeout: never
-      - id: guition_v3_media_mixing_input
-        timeout: never
-
-  - platform: resampler
-    id: guition_v3_announcement_resampling_speaker
-    output_speaker: guition_v3_announcement_mixing_input
-    sample_rate: 48000
-    bits_per_sample: 16
-
-  - platform: resampler
-    id: guition_v3_media_resampling_speaker
-    output_speaker: guition_v3_media_mixing_input
-    sample_rate: 48000
-    bits_per_sample: 16
-
+# The settings, kept on the screen and shown in Home Assistant, on the screen's settings page and in the editor.
 switch:
+  # The speaker's amplifier: on only while something plays, so the speaker never hisses.
+  - platform: gpio
+    id: p4_audio_amp
+    internal: true
+    pin: GPIO53
+    restore_mode: ALWAYS_OFF
   - platform: template
-    id: guition_v3_microphone_mute
+    id: p4_microphone_mute
     name: "Microphone mute"
     icon: mdi:microphone-off
     optimistic: true
     restore_mode: RESTORE_DEFAULT_OFF
     entity_category: config
   - platform: template
-    id: guition_v3_tap_sound
+    id: p4_tap_sound
     name: "Tap sound"
     icon: mdi:gesture-tap
     optimistic: true
@@ -77,7 +77,7 @@ switch:
 
 number:
   - platform: template
-    id: guition_v3_speaker_volume
+    id: p4_speaker_volume
     name: "Speaker volume"
     icon: mdi:volume-high
     optimistic: true
@@ -89,10 +89,11 @@ number:
     unit_of_measurement: "%"
     entity_category: config
 
-guition_v3_audio:
-  speaker: guition_v3_announcement_resampling_speaker
-  microphone: guition_v3_microphone
-  dac: guition_v3_audio_dac
-  mute: guition_v3_microphone_mute
-  tap_sound: guition_v3_tap_sound
-  volume: guition_v3_speaker_volume
+p4_audio:
+  speaker: p4_speaker
+  microphone: p4_microphone
+  dac: p4_audio_dac
+  amplifier: p4_audio_amp
+  mute: p4_microphone_mute
+  tap_sound: p4_tap_sound
+  volume: p4_speaker_volume

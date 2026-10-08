@@ -286,11 +286,18 @@ class PriceTile : public tessera::Tile {
     if (!forecast_.has_current) {
       ui::set_text(value_, plugin_->text(forecast_.unavailable ? "unavailable" : "no_price"));
       ui::set_font(value_, Font::BODY_LARGE);
+      const int value_height = ui::line_height(Font::BODY_LARGE);
+      const int unit_height = ui::line_height(Font::BODY);
+      const int unit_y = height_ - unit_height;
       lv_obj_set_width(value_, width_);
-      lv_obj_set_height(value_, ui::line_height(Font::BODY_LARGE));
+      lv_obj_set_height(value_, value_height);
       lv_obj_set_style_text_align(value_, LV_TEXT_ALIGN_CENTER, 0);
-      lv_obj_set_pos(value_, 0, (height_ - ui::line_height(Font::BODY_LARGE)) / 2);
-      ui::set_text(unit_, "");
+      lv_obj_set_pos(value_, 0, title_height + std::max(0, (unit_y - title_height - value_height) / 2));
+      ui::set_text(unit_, forecast_.unit);
+      lv_obj_set_width(unit_, width_);
+      lv_obj_set_height(unit_, unit_height);
+      lv_obj_set_style_text_align(unit_, LV_TEXT_ALIGN_CENTER, 0);
+      lv_obj_set_pos(unit_, 0, unit_y);
       return;
     }
 

@@ -94,7 +94,7 @@ guition_v3_audio:
   speaker: p4_speaker
   microphone: es8311_microphone
   dac: es8311_dac
-  amp: speaker_amplifier_enable
+  amplifier: speaker_amplifier_enable
   mute: p4_microphone_mute
   tap_sound: p4_tap_sound
   volume: p4_speaker_volume

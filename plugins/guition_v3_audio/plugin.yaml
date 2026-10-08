@@ -1,3 +1,73 @@
-# What a screen gets when it takes this plugin: the component, configured. Tessera includes this file from the screen's
-# <name>.plugins.yaml and adds this plugin's components/ folder as an ESPHome external component.
+# The Guition JC8012P4A1 V3's ES8311 handles speaker output and microphone input on the touch I2C bus.
+audio_dac:
+  - platform: es8311
+    id: guition_v3_audio_dac
+    i2c_id: touch_bus
+    bits_per_sample: 16bit
+    sample_rate: 16000
+    use_microphone: true
+
+i2s_audio:
+  - id: guition_v3_audio_bus
+    i2s_lrclk_pin: GPIO10
+    i2s_bclk_pin: GPIO12
+    i2s_mclk_pin: GPIO13
+
+microphone:
+  - platform: i2s_audio
+    id: guition_v3_microphone
+    i2s_audio_id: guition_v3_audio_bus
+    i2s_din_pin: GPIO11
+    sample_rate: 16000
+    bits_per_sample: 16bit
+    adc_type: external
+    channel: left
+
+speaker:
+  - platform: i2s_audio
+    id: guition_v3_speaker
+    i2s_audio_id: guition_v3_audio_bus
+    i2s_dout_pin: GPIO9
+    dac_type: external
+    sample_rate: 16000
+    bits_per_sample: 16bit
+    channel: stereo
+    audio_dac: guition_v3_audio_dac
+
+switch:
+  - platform: template
+    id: guition_v3_microphone_mute
+    name: "Microphone mute"
+    icon: mdi:microphone-off
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    entity_category: config
+  - platform: template
+    id: guition_v3_tap_sound
+    name: "Tap sound"
+    icon: mdi:gesture-tap
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    entity_category: config
+
+number:
+  - platform: template
+    id: guition_v3_speaker_volume
+    name: "Speaker volume"
+    icon: mdi:volume-high
+    optimistic: true
+    min_value: 0
+    max_value: 100
+    step: 5
+    initial_value: 50
+    restore_value: true
+    unit_of_measurement: "%"
+    entity_category: config
+
 guition_v3_audio:
+  speaker: guition_v3_speaker
+  microphone: guition_v3_microphone
+  dac: guition_v3_audio_dac
+  mute: guition_v3_microphone_mute
+  tap_sound: guition_v3_tap_sound
+  volume: guition_v3_speaker_volume

@@ -81,7 +81,7 @@ number:
     unit_of_measurement: "%"
     entity_category: config
 
-p4_audio:
+guition_v3_audio:
   speaker: p4_speaker
   microphone: p4_microphone
   dac: p4_audio_dac

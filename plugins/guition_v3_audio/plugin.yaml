@@ -68,7 +68,12 @@ switch:
     optimistic: true
     restore_mode: RESTORE_DEFAULT_OFF
     entity_category: config
-
+  - platform: gpio
+    id: speaker_amplifier_enable
+    name: "Speaker Amplifier"
+    pin: GPIO20
+    restore_mode: ALWAYS_OFF
+    
 number:
   - platform: template
     id: p4_speaker_volume
@@ -87,6 +92,7 @@ guition_v3_audio:
   speaker: p4_speaker
   microphone: es8311_microphone
   dac: es8311_dac
+  amp: speaker_amplifier_enable
   mute: p4_microphone_mute
   tap_sound: p4_tap_sound
   volume: p4_speaker_volume

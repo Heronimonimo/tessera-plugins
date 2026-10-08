@@ -33,9 +33,11 @@
 
 ## Cannot, yet
 
-Planned for later versions of the plugin API: a settings page on the screen, a card of its own (a full screen), items
-in the top bar, a tap action for existing tiles, tiles that belong to a Home Assistant entity, and messages between the
-screen and the app.
+Not in the plugin API so far: a picture of the plugin's own on a tile or a card (pictures reach a screen through
+Tessera's own picture route), a message to the app other than a Home Assistant command its manifest names
+(`permissions.ha_commands`), and a Python part of a plugin in the app (the app runs only its own code, see above). A
+settings page on the screen, a card, top bar items, tap actions, tiles of an entity and questions to the app exist
+since API 0.2 ([FIRMWARE_API.md](FIRMWARE_API.md)).
 
 ## Physical limits
 

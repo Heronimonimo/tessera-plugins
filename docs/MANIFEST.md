@@ -73,7 +73,7 @@ starting with a letter.
 |---|---|---|
 | `id` | yes | The plugin's id. Unique in the index, the same as its folder and its component. |
 | `version` | yes | Three numbers, `1.0.0`. Raise it for every change that reaches screens. |
-| `api` | yes | The plugin API it was written for, in quotes: `"0.2"`. It builds on every core with the same major and at least that minor. Name the lowest minor whose parts you use ([FIRMWARE_API.md](FIRMWARE_API.md), "Versions"). |
+| `api` | yes | The plugin API it was written for, in quotes: `"0.2"`. It builds on every core with the same major and at least that minor; the core offers plugin API 0.4 now. Name the lowest minor whose parts you use ([FIRMWARE_API.md](FIRMWARE_API.md), "Versions"). |
 | `icon` | yes | <a id="icon"></a>A Material Design Icons name from Tessera's icon set (`screen_manager/app/tile_icons.py` in the Tessera repository, such as `bus`, `train`, `calendar`, `thermometer`, `lightbulb`). The screen's icon font holds only that set. |
 | `maintainer` | yes | The GitHub name of whoever looks after the plugin. |
 | `license` | yes | An SPDX name that goes with AGPL-3.0: `MIT`, `Apache-2.0`, `BSD-2-Clause`, `BSD-3-Clause`, `ISC`, `MPL-2.0`, `LGPL-2.1-or-later`, `LGPL-3.0-or-later`, `GPL-3.0-or-later`, `GPL-3.0-only`, `AGPL-3.0-or-later`, `AGPL-3.0-only`, `Unlicense`, `0BSD`, `CC0-1.0`. |

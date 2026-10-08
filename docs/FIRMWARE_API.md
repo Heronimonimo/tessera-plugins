@@ -1,4 +1,4 @@
-# The firmware API (plugin API 0.3)
+# The firmware API (plugin API 0.4)
 
 A plugin's code runs on the screen as an ESPHome component. It talks to Tessera's core through one header:
 
@@ -10,9 +10,14 @@ The header lives in the Tessera repository at `components/smart_display/plugin_a
 page explains it. Everything is in namespace `tessera`.
 
 **Versions.** A manifest names the API it was written for (`api: "0.2"`). A plugin builds on every core with the same
-major and at least its minor: something new raises the minor, only a break raises the major. 0.1 has tiles and the
-moments; 0.2 adds tiles of an entity, cards, tap actions, top bar items, settings rows, questions to the app and the
-date words; 0.3 adds `on_touch`, and a settings action that says how it is going and is lit while it runs. Name the lowest minor whose parts you use, so the plugin builds on as many screens as possible.
+major and at least its minor. From 1.0 on that is a promise: a minor only adds, only a break raises the major. While the
+API is 0.x it is not promised to anyone yet: a minor may still change a name or a signature as the API settles, and
+Tessera's own plugins move with it in the same release; the core refuses a plugin written for a newer API than its own
+with one sentence. 0.1 has tiles and the moments; 0.2 adds tiles of an entity, cards, tap actions, top bar items,
+settings rows, questions to the app and the date words; 0.3 adds `on_touch`, and a settings action that says how it is
+going and is lit while it runs; 0.4 renames the plugin's 250 ms moment from `on_tick` to `on_interval`, so that
+`on_tick` everywhere means once a second with the clock. Name the lowest minor whose parts you use, so the plugin
+builds on as many screens as possible.
 
 ## The component: `__init__.py`
 
@@ -72,7 +77,7 @@ The moments every plugin can hear (override what you need; each has an empty def
 | Moment | When |
 |---|---|
 | `on_ready()` | The screen's interface is up. |
-| `on_tick(now_ms)` | Every 250 ms, with `millis()`. Keep it short: the screen draws and takes taps in the same loop. |
+| `on_interval(now_ms)` | Every 250 ms, the screen's own interval, with `millis()` (0.4; `on_tick` before it). Keep it short: the screen draws and takes taps in the same loop. A tile's or a card's `on_tick` is another thing: once a second, with the clock. |
 | `on_standby(dark)` | The screen dimmed or went dark (`true`), or woke up (`false`). |
 | `before_update()` | A firmware update starts: let go of large buffers. |
 | `settings(page)` | Once, when the interface is up: add rows to the screen's settings page (0.2, below). Return true when you added some. |

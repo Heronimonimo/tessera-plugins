@@ -31,8 +31,9 @@ This repository holds:
 3. In **Layout**, place the plugin's tile from the library's **Plugins** group and set its options in the inspector.
 
 Plugins are new and only in the dev version of the app for now (the app added with `#dev` at the end of the repository
-URL, or a local copy). The plugin API is version 0.1: it can still change, and a plugin names the version it was
-written for.
+URL, or a local copy). The plugin API is 0.4: while it is 0.x it can still change in a minor, Tessera's own plugins
+move with it, and a plugin names the version it was written for ([docs/FIRMWARE_API.md](docs/FIRMWARE_API.md),
+"Versions").
 
 ## Making a plugin
 

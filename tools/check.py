@@ -74,6 +74,25 @@ def plugin_api():
     return '.'.join(map(str, pm().PLUGIN_API))
 
 
+# Where the docs name the API the core offers now. The phrase "plugin API <n>" (lowercase plugin) always means the
+# current one; a part's own version is written "API 0.2" or "(0.2)". So the docs cannot fall behind the core unnoticed.
+DOC_FILES = ('README.md', 'AGENTS.md', 'docs/FIRMWARE_API.md', 'docs/MANIFEST.md', 'docs/MAKING_A_PLUGIN.md')
+CURRENT_API = re.compile(r'plugin API (?:is )?(\d+\.\d+)')
+
+
+def check_docs():
+    """Every doc that names the plugin API the core offers names the one the manifest check knows."""
+    wanted = plugin_api()
+    for name in DOC_FILES:
+        text = (ROOT / name).read_text(encoding='utf-8')
+        found = CURRENT_API.findall(text)
+        if not found:
+            fail(name, f'names no plugin API; it should say "plugin API {wanted}" where it means the current one')
+        stale = sorted(set(found) - {wanted})
+        if stale:
+            fail(name, f'says plugin API {", ".join(stale)}; the core offers {wanted}')
+
+
 def fail(folder, message):
     raise SystemExit(f'{folder}: {message}')
 
@@ -168,6 +187,8 @@ def main():
         for entry in sorted((ROOT / 'community').glob('*.yaml')):
             check_entry(entry)
             print(f'community/{entry.name}: ok')
+        check_docs()
+        print('docs: ok')
     print(f'plugin API {plugin_api()}: {len(folders)} checked')
 
 

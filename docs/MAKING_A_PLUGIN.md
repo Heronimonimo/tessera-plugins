@@ -174,7 +174,7 @@ plugin's id (`p4_audio_amp`), so they never meet one of Tessera's.
 | What happens | Why | Fix |
 |---|---|---|
 | The build says "No tessera-plugin.yaml above ..." | The component is not in `components/<id>/` next to the manifest. | Keep the folder layout of the template. |
-| The build says the plugin wants another plugin API | `api:` in the manifest is not the screen's. | Use the API the core offers (`0.3` now). |
+| The build says the plugin wants another plugin API | `api:` in the manifest is newer than the screen's core. | Name the lowest API whose parts you use; the core offers plugin API 0.4 now. |
 | The tile shows "Plugin missing" | The screen was not built with the plugin, or the tile id differs from `add_tile("...")`. | Build again; make the ids match. |
 | The tile stays empty | `on_state` got `{"wait": ...}`: the fetch is not filled in or failed. | Show the reason (see the bus plugin); check the options. |
 | Text cut with dots | The label is wider than its room. | Take a smaller font from `tessera::Font`, or give the label more width. |

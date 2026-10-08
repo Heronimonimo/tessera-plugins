@@ -1,5 +1,6 @@
 #include "ov_departures.h"
 #include <algorithm>
+#include <cstdio>
 #include <string>
 #include <vector>
 
@@ -136,7 +137,18 @@ class NextTile : public tessera::Tile {
     return d.to + "  " + tessera::format(plugin_->text("late"), static_cast<long>((d.at - d.plan) / 60));
   }
 
-  std::string when_text(uint32_t at, uint32_t now) const {
+  // How long until a departure leaves. The next one you can make counts down to the second (12:05, 0:42), so you know
+  // exactly when to go; the ones after it in whole minutes, which is all a glance at them needs. An hour or more away is
+  // a time of day.
+  std::string when_text(uint32_t at, uint32_t now, bool exact = false) const {
+    if (exact) {
+      if (at <= now) return plugin_->text("now");
+      const uint32_t left = at - now;
+      if (left >= 3600) return tessera::clock_text(at);
+      char text[8];
+      snprintf(text, sizeof text, "%u:%02u", static_cast<unsigned>(left / 60), static_cast<unsigned>(left % 60));
+      return text;
+    }
     if (at <= now + 59) return plugin_->text("now");
     const uint32_t minutes = (at - now) / 60;
     if (minutes >= 60) return tessera::clock_text(at);
@@ -155,9 +167,11 @@ class NextTile : public tessera::Tile {
     place_row(r, d.line, with_delay(d), "");
     // The time takes the largest face that fits the card. The line with the next times stays only where it costs the
     // time nothing: on a small cell (the CYD's) it goes, and the time is as large as the cell allows.
-    const std::string when = when_text(d.at, now);
-    const Font alone = fitting(when, height_ - head_);
-    const bool with_later = fitting(when, height_ - head_ - ui::line_height(Font::BODY)) == alone;
+    const std::string when = when_text(d.at, now, true);
+    // The face is chosen for the shape of the time, not its digits, so it never jumps a size as a second ticks by.
+    const std::string shape = digits_as_zero(when);
+    const Font alone = fitting(shape, height_ - head_);
+    const bool with_later = fitting(shape, height_ - head_ - ui::line_height(Font::BODY)) == alone;
     const Font face = alone;
     big_text(when, face, theme::INK, with_later);
     std::string list;
@@ -168,6 +182,12 @@ class NextTile : public tessera::Tile {
     if (!with_later) ui::set_text(later_, "");
     else if (stale_) ui::set_text(later_, plugin_->text("old"));
     else ui::set_text(later_, list.empty() ? std::string() : tessera::fill(plugin_->text("then"), "list", list));
+  }
+
+  static std::string digits_as_zero(std::string text) {
+    for (char &c : text)
+      if (c >= '1' && c <= '9') c = '0';
+    return text;
   }
 
   // The largest of the big faces `text` fits in, `room` high and the card wide; BODY_LARGE when none does.
@@ -198,7 +218,7 @@ class NextTile : public tessera::Tile {
         place_row(rows_[i], "", "", "");
         continue;
       }
-      place_row(rows_[i], next[i]->line, with_delay(*next[i]), when_text(next[i]->at, now));
+      place_row(rows_[i], next[i]->line, with_delay(*next[i]), when_text(next[i]->at, now, i == 0));
     }
     // The bottom row says when the times are old, if there is room below the rows.
     const int used = static_cast<int>(rows_.size()) * (head_ + gap_);

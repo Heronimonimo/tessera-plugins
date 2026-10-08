@@ -26,7 +26,8 @@ tegel van twee kolommen of breder is het een lijst, een regel per vertrek, zovee
 - Een vertrek dat een minuut of meer later is, krijgt "+2" achter de bestemming. Zet **Vertraging tonen** uit in de
   inspector om dat weg te laten.
 - Tessera vraagt OVapi één keer per minuut per halte op, voor alle schermen en tegels samen. Daartussen telt het
-  scherm zelf af.
+  scherm zelf af: het eerstvolgende vertrek dat je haalt op de seconde (12:05, dan 0:42), de vertrekken erna in
+  minuten. De voorvertoning in de editor toont hele minuten.
 - Een vertrek over een uur of meer staat er als tijdstip.
 - Antwoordt OVapi niet, dan houdt de tegel de laatste tijden en zegt hij dat ze oud kunnen zijn.
 - Werkt op elk bordje, ook op de CYD.

@@ -10,7 +10,7 @@ license: MIT
 requires:
   esphome: 2026.9.0
   psram: true
-boards: [wavesharep4]
+boards: [wavesharep4,jc8012p4a1v3]
 flash_kb: 80
 
 # The three settings of plugin.yaml, also under Screen settings in the editor (the ends of their entity ids).

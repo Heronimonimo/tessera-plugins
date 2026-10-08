@@ -1,6 +1,6 @@
 {
  "format": 1,
- "generated": "2026-10-08T05:08:57Z",
+ "generated": "2026-10-08T13:20:40Z",
  "plugin_api": "0.4",
  "blocked": [],
  "plugins": [
@@ -11,17 +11,18 @@
    "label": "tessera",
    "status": "ok",
    "release": {
-    "version": "1.2.1",
-    "sha": "450c2d12f8bb6b733f65acc5429c899b49d99b6a",
+    "version": "1.2.2",
+    "sha": "984fb3581bf1f5acfad445df869767b4229a6567",
     "date": "2026-10-08"
    },
    "manifest": {
     "id": "ov_departures",
-    "version": "1.2.1",
+    "version": "1.2.2",
     "api": "0.1",
     "icon": "bus",
     "maintainer": "MaxGramser",
     "license": "MIT",
+    "stage": "example",
     "requires": {
      "esphome": "2026.6.2"
     },
@@ -212,17 +213,18 @@
    "label": "tessera",
    "status": "ok",
    "release": {
-    "version": "1.0.1",
-    "sha": "f2d866ee51375817401901a677c58e90d3ad2070",
-    "date": "2026-10-07"
+    "version": "1.0.2",
+    "sha": "984fb3581bf1f5acfad445df869767b4229a6567",
+    "date": "2026-10-08"
    },
    "manifest": {
     "id": "p4_audio",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "api": "0.3",
     "icon": "volume-high",
     "maintainer": "MaxGramser",
     "license": "MIT",
+    "stage": "beta",
     "requires": {
      "esphome": "2026.9.0",
      "psram": true
@@ -312,17 +314,18 @@
    "label": "tessera",
    "status": "ok",
    "release": {
-    "version": "1.0.3",
-    "sha": "450c2d12f8bb6b733f65acc5429c899b49d99b6a",
+    "version": "1.0.4",
+    "sha": "984fb3581bf1f5acfad445df869767b4229a6567",
     "date": "2026-10-08"
    },
    "manifest": {
     "id": "waste_collection",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "api": "0.4",
     "icon": "recycle",
     "maintainer": "MaxGramser",
     "license": "MIT",
+    "stage": "example",
     "requires": {
      "esphome": "2026.6.2"
     },

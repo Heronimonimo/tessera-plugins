@@ -5,6 +5,7 @@ audio_dac:
     i2c_id: touch_bus
     bits_per_sample: 16bit
     sample_rate: 16000
+    use_mclk: true
     use_microphone: true
 
 i2s_audio:

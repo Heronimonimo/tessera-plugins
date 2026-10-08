@@ -31,6 +31,6 @@ and stand under Screen settings in the editor.
   speaker channels.
 - The microphone's gain is set by the ES8311. Nothing listens or records unless you start the microphone test.
 - The microphone and speaker share one I2S bus, so the screen does not listen while it plays.
-- The linked hardware configuration uses a stereo speaker and a 16 kHz sample rate. The plugin does not configure a
+- The ES8311 is clocked from I2S MCLK; playback uses a stereo speaker at 16 kHz. The plugin does not configure a
   separate amplifier pin.
 - Not yet tested on a physical Guition JC8012P4A1 V3.

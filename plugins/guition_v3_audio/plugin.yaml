@@ -35,7 +35,9 @@ speaker:
     i2s_mode: secondary           # slave to the mic bus's clock
     bits_per_sample: 16bit
     sample_rate: 16000
-
+    buffer_duration: 100ms
+    use_apll: true    
+    
   - platform: mixer
     id: mixer_speaker_id
     output_speaker: p4_speaker

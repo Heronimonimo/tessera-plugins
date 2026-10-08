@@ -11,7 +11,7 @@ namespace esphome::guition_v3_audio {
 
 static const char *const TAG = "guition_v3_audio";
 
-static constexpr uint32_t SPEAKER_RATE = 48000;
+static constexpr uint32_t SPEAKER_RATE = 16000;
 static constexpr uint32_t MICROPHONE_RATE = 16000;
 static constexpr size_t CHANNELS = 1;
 static constexpr size_t RECORD_SAMPLES = MICROPHONE_RATE * 5;

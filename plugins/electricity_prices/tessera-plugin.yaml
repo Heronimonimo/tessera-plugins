@@ -1,0 +1,26 @@
+# Every name in this manifest is a key in translations/<language>.json, part "app".
+id: electricity_prices
+version: 0.2.0
+api: "0.4"
+icon: flash
+maintainer: Heronimonimo
+license: MIT
+stage: beta
+requires:
+  esphome: 2026.6.2
+boards: any
+flash_kb: 8
+
+tiles:
+  - id: forecast
+    name: tile_name
+    icon: flash
+    sizes: { min: 1x1, max: 3x2 }
+    memory: 5000
+    example: tile_example
+    domains: [sensor]
+    preview: { value: "{state}" }
+    attributes: [raw_today, raw_tomorrow, prices_today, prices_tomorrow, unit_of_measurement, suggested_display_precision]
+
+cards:
+  - { id: chart, name: card_name }

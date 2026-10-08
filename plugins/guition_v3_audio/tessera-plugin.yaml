@@ -1,4 +1,4 @@
-# Audio on the Guition JC8012P4A1 V3: its ES8311 speaker and microphone, a click on every tap, volume and tests.
+# Audio on the Guition JC8012P4A1 V3: its ES8311 speaker and ES7210 microphone, a tap click, volume and tests.
 id: guition_v3_audio
 version: 0.1.0
 api: "0.3"

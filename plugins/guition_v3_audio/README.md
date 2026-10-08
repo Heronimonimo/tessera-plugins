@@ -1,11 +1,11 @@
 # Guition V3 audio
 
-The speaker and microphone of the Guition JC8012P4A1 V3: a short click on every tap the screen takes, a speaker volume,
-a switch that turns the microphone off, and two tests on the screen's settings page. Only JC8012P4A1 V3 screens are
-offered it, and only screens that take it carry the audio code.
+The ES8311 speaker and ES7210 microphone of the Guition JC8012P4A1 V3: a short click on every tap the screen takes, a
+speaker volume, a switch that turns the microphone off, and two tests on the screen's settings page. Only JC8012P4A1 V3
+screens are offered it, and only screens that take it carry the audio code.
 
-The ES8311 codec and the I2S-connected speaker and microphone are ESPHome components, so another component in the
-screen's Override YAML can use `guition_v3_microphone` and `guition_v3_speaker`.
+The audio codecs and I2S-connected speaker and microphone are ESPHome components, so another component in the screen's
+Override YAML can use `guition_v3_microphone` and `guition_v3_announcement_resampling_speaker`.
 
 ## Set up
 
@@ -27,10 +27,10 @@ and stand under Screen settings in the editor.
 
 ## Good to know
 
-- Recording uses the ES8311's left microphone channel; playback and speaker tests send the same mono signal to both
-  speaker channels.
-- The microphone's gain is set by the ES8311. Nothing listens or records unless you start the microphone test.
+- Recording uses the microphone's right channel at 16 kHz; playback and speaker tests use a mono 48 kHz output.
+- Nothing listens or records unless you start the microphone test.
 - The microphone and speaker share one I2S bus, so the screen does not listen while it plays.
-- The ES8311 is clocked from I2S MCLK; playback uses a stereo speaker at 16 kHz. The plugin does not configure a
-  separate amplifier pin.
+- The ES8311 and ES7210 use the board support package's I2C bus. Plugin audio is routed through the announcement input
+  of the mixer; a media input is also available for a speaker media player configured by the screen.
+- The I2S bus uses MCLK on GPIO13, and the microphone input is GPIO48.
 - Not yet tested on a physical Guition JC8012P4A1 V3.

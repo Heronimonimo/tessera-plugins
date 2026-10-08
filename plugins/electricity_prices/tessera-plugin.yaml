@@ -1,0 +1,29 @@
+# The manifest: who made the plugin, what it may do, and what the Tessera app shows. It holds no code and no words:
+# every name, label and hint below is a key into translations/<language>.json, part "app".
+# Every field is explained in docs/MANIFEST.md. Start a plugin of your own with: python3 tools/new_plugin.py <id>
+id: electricity_prices
+version: 0.1.0
+api: "0.1"
+icon: calendar
+maintainer: your-github-name
+license: MIT
+# beta while it finds its feet, stable once people use it every day, example when it is there to learn from.
+stage: beta
+requires:
+  esphome: 2026.6.2
+boards: any
+flash_kb: 4
+
+tiles:
+  # A tile that counts the days until a date. It draws on the screen alone: no Home Assistant entity, no data from
+  # the internet. To show data from a web service, add a `fetch` and point the tile's `data` at it (docs/FETCH.md).
+  # With data, a `preview` lets the editor draw the tile from it as well (docs/MANIFEST.md, "A tile").
+  - id: days_until
+    name: tile_name
+    icon: calendar
+    sizes: { min: 1x1, max: 2x1 }
+    memory: 400
+    example: tile_example
+    options:
+      - { id: date, kind: text, label: date, hint: date_hint }
+      - { id: what, kind: text, label: what, hint: what_hint }

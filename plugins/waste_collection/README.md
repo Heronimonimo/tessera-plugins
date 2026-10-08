@@ -34,6 +34,7 @@ can change them.
   packaging amber, glass purple, anything else grey. Dutch and English words both work.
 - The card asks Home Assistant for the coming events through Tessera (`calendar.get_events`); the screen reads the
   calendar's next event itself for the top bar.
+- The top bar item shows only while the next collection is within the days you set under **Waste days ahead**.
 - Works on every board, the CYD included.
 
 ## How it works

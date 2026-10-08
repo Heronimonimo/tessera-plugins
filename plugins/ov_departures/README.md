@@ -24,7 +24,7 @@ tile of two columns or more it is a list, one row per departure, as many as fit.
 - Tessera asks OVapi once a minute per stop, for every screen and tile together. The screen counts down on its own
   clock in between: the next departure you can make to the second (12:05, then 0:42), the ones after it in minutes.
   The editor's preview shows whole minutes.
-- A time an hour or more away is shown as a time of day.
+- A time an hour or more away is shown as a time of day; a departure that is due says "now".
 - A departure that runs a minute or more late gets "+2" behind where it goes. Turn **Show delays** off in the
   inspector to leave that out.
 - When OVapi does not answer, the tile keeps the last times it had and says they may be old.

@@ -1,14 +1,19 @@
 {
   "_meta": { "name": "Nederlands" },
   "screen": {
-    "tomorrow": "Gemiddelde morgen",
+    "current_price": "Prijs nu",
+    "forecast_title": "Prijsverwachting",
+    "today": "Vandaag",
+    "tomorrow": "Morgen",
+    "no_price": "Geen actuele prijs",
     "no_prices": "Geen prijsverwachting",
     "unavailable": "Sensor niet beschikbaar"
   },
   "app": {
     "name": "Elektriciteitsprijzen",
-    "summary": "Toont de day-ahead-elektriciteitsprijzen van morgen uit een Home Assistant-sensor.",
+    "summary": "Toont de actuele prijs en beschikbare elektriciteitsprijzen voor vandaag en morgen.",
     "tile_name": "Prijsverwachting",
-    "tile_example": "Gemiddeld morgen 0,18 EUR/kWh"
+    "tile_example": "Actuele prijs 0,18 EUR/kWh",
+    "card_name": "Prijsverwachting"
   }
 }

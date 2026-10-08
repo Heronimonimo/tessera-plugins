@@ -1,14 +1,19 @@
 {
   "_meta": { "name": "English" },
   "screen": {
-    "tomorrow": "Tomorrow average",
+    "current_price": "Price now",
+    "forecast_title": "Price forecast",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "no_price": "No current price",
     "no_prices": "No price forecast",
     "unavailable": "Sensor unavailable"
   },
   "app": {
     "name": "Electricity prices",
-    "summary": "Shows tomorrow's day-ahead electricity prices from a Home Assistant sensor.",
+    "summary": "Shows the current price and today's and tomorrow's available electricity prices.",
     "tile_name": "Price forecast",
-    "tile_example": "Tomorrow average 0.18 EUR/kWh"
+    "tile_example": "Current price 0.18 EUR/kWh",
+    "card_name": "Price forecast"
   }
 }

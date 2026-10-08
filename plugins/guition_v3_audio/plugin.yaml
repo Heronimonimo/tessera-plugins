@@ -1,47 +1,55 @@
-# What a screen gets when it takes this plugin: the panel's two audio codecs on the touch panel's I2C bus, one I2S bus
-# for both, the speaker's amplifier, and three settings. Pins and codec addresses are aligned with the
-# Guition_P4_70 reference config from RealDeco/sendspin-guition.
+i2s_audio:
+  - id: i2s_input                 # microphone bus = master (generates the clock)
+    i2s_mclk_pin: GPIO13
+    i2s_bclk_pin: { number: GPIO12, allow_other_uses: true }
+    i2s_lrclk_pin: { number: GPIO10, allow_other_uses: true }
+  - id: i2s_output                # speaker bus = secondary/slave
+    i2s_bclk_pin: { number: GPIO12, allow_other_uses: true }
+    i2s_lrclk_pin: { number: GPIO10, allow_other_uses: true }
 
-# The microphone side: an ES7210 at 0x36.
-audio_adc:
-  - platform: es7210
-    id: p4_audio_adc
-    i2c_id: touch_bus
-    address: 0x36
-
-# The speaker side: an ES8311.
 audio_dac:
   - platform: es8311
-    id: p4_audio_dac
-    i2c_id: touch_bus
+    id: es8311_dac
+    bits_per_sample: 16bit
     sample_rate: 16000
-    use_microphone: true
+    use_microphone: true          # mic is on the ES8311's own ADC front end,
+    mic_gain: 24dB                # no separate ES7210 on this board
 
-i2s_audio:
-  - id: p4_audio_bus
-    i2s_mclk_pin: GPIO13
-    i2s_bclk_pin: GPIO12
-    i2s_lrclk_pin: GPIO10
-
-# The ES7210 sends channels; this plugin uses the left channel as in the reference config.
 microphone:
   - platform: i2s_audio
-    id: p4_microphone
-    adc_type: external
+    id: es8311_microphone
+    i2s_audio_id: i2s_input
     i2s_din_pin: GPIO11
-    sample_rate: 16000
+    adc_type: external
     bits_per_sample: 16bit
+    sample_rate: 16000
 
 speaker:
   - platform: i2s_audio
     id: p4_speaker
-    i2s_audio_id: p4_audio_bus
-    dac_type: external
+    i2s_audio_id: i2s_output
     i2s_dout_pin: GPIO9
-    audio_dac: p4_audio_dac
-    sample_rate: 16000
+    audio_dac: es8311_dac
+    dac_type: external
+    channel: mono                 # ES8311 is a mono codec
+    i2s_mode: secondary           # slave to the mic bus's clock
     bits_per_sample: 16bit
-    channel: mono
+    sample_rate: 16000
+
+  - platform: mixer
+    id: mixer_speaker_id
+    output_speaker: p4_speaker
+    source_speakers:
+      - id: announcement_spk_mixer_input
+      - id: media_spk_mixer_input
+
+  - platform: resampler
+    id: media_spk_resampling_input
+    output_speaker: media_spk_mixer_input
+
+  - platform: resampler
+    id: announcement_spk_resampling_input
+    output_speaker: announcement_spk_mixer_input
 
 # The settings, kept on the screen and shown in Home Assistant, on the screen's settings page and in the editor.
 switch:
@@ -77,8 +85,8 @@ number:
 
 guition_v3_audio:
   speaker: p4_speaker
-  microphone: p4_microphone
-  dac: p4_audio_dac
+  microphone: es8311_microphone
+  dac: es8311_dac
   mute: p4_microphone_mute
   tap_sound: p4_tap_sound
   volume: p4_speaker_volume

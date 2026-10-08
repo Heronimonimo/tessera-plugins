@@ -1,11 +1,12 @@
 # The plugin's manifest: who made it, what it may do, and what the app shows. No code and no words: every name, label
 # and hint is a key into translations/<language>.json, part "app". docs/MANIFEST.md has every field.
 id: ov_departures
-version: 1.2.1
+version: 1.2.2
 api: "0.1"
 icon: bus
 maintainer: MaxGramser
 license: MIT
+stage: example
 requires:
   esphome: 2026.6.2
 boards: any

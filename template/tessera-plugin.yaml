@@ -7,6 +7,8 @@ api: "0.1"
 icon: calendar
 maintainer: your-github-name
 license: MIT
+# beta while it finds its feet, stable once people use it every day, example when it is there to learn from.
+stage: beta
 requires:
   esphome: 2026.6.2
 boards: any

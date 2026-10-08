@@ -16,6 +16,7 @@ api: "0.1"
 icon: bus
 maintainer: MaxGramser
 license: MIT
+stage: example
 requires:
   esphome: 2026.6.2
 boards: any
@@ -77,6 +78,7 @@ starting with a letter.
 | `icon` | yes | <a id="icon"></a>A Material Design Icons name from Tessera's icon set (`screen_manager/app/tile_icons.py` in the Tessera repository, such as `bus`, `train`, `calendar`, `thermometer`, `lightbulb`). The screen's icon font holds only that set. |
 | `maintainer` | yes | The GitHub name of whoever looks after the plugin. |
 | `license` | yes | An SPDX name that goes with AGPL-3.0: `MIT`, `Apache-2.0`, `BSD-2-Clause`, `BSD-3-Clause`, `ISC`, `MPL-2.0`, `LGPL-2.1-or-later`, `LGPL-3.0-or-later`, `GPL-3.0-or-later`, `GPL-3.0-only`, `AGPL-3.0-or-later`, `AGPL-3.0-only`, `Unlicense`, `0BSD`, `CC0-1.0`. |
+| `stage` | no | How far along it is, in your word: `stable` (ready for every day), `beta` (works, still finding its feet) or `example` (there to show what a plugin can do and to learn from). The app shows a Beta or Example badge; without it the plugin is `beta`. |
 
 The plugin's name and one-line summary are not fields: they are `name` and `summary` in `translations/en.json`, part
 `app`, which every plugin must have.
@@ -102,7 +104,7 @@ before anyone adds the plugin, and asks again when an update asks for more.
 | `permissions.read_entities` | Home Assistant entities the screen itself reads (an ESPHome `homeassistant` sensor). `"{calendar}"` stands for the entity a person chose in the input `calendar`. |
 | `permissions.home_assistant_actions` | Home Assistant actions the screen calls (`tessera::action`). |
 | `permissions.ha_commands` | Home Assistant commands the app may ask on the plugin's behalf (`tessera::send`, API 0.2): `call_service:<domain>.<service>` for an action that answers (`call_service:calendar.get_events`), or a websocket command (`history/history_during_period`). Commands that read or change Home Assistant itself (`config/...`, `auth`, `supervisor`, `fire_event`, `render_template`, plain `call_service`, ...) are refused. Every one asked is logged. |
-| `attributes` | Any of `cloud` (uses a service outside the home), `commercial`, `ai-developed`, `experimental`. A plugin with `permissions.network` has `cloud`. |
+| `attributes` | Any of `cloud` (uses a service outside the home), `commercial`, `ai-developed`. A plugin with `permissions.network` has `cloud`. |
 | `privacy` | An https link to what the service sees. Required with `cloud`. A section of the README is fine. |
 
 ### What a person fills in: `inputs`

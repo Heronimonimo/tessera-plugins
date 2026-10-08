@@ -2,11 +2,12 @@
 # tap, and two tests on the screen's settings page. A board's own hardware as a plugin (docs/MANIFEST.md): only screens
 # of the boards below are offered it, and only the screens that take it carry the codecs.
 id: p4_audio
-version: 1.0.1
+version: 1.0.2
 api: "0.3"
 icon: volume-high
 maintainer: MaxGramser
 license: MIT
+stage: beta
 requires:
   esphome: 2026.9.0
   psram: true

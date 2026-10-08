@@ -50,7 +50,7 @@ This makes `plugins/my_idea/` with every name changed. For a plugin in a reposit
 
 ### 2. Describe it in the manifest
 
-Open `tessera-plugin.yaml`. Set the `version` (start at `0.1.0`), `maintainer` (your GitHub name), `icon` (a name from
+Open `tessera-plugin.yaml`. Set the `version` (start at `0.1.0`), `maintainer` (your GitHub name), `stage` (`beta` until people use it every day, then `stable`), `icon` (a name from
 Tessera's icon set, see [MANIFEST.md](MANIFEST.md#icon)) and describe your tile under `tiles`:
 
 ```yaml

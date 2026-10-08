@@ -1,13 +1,13 @@
-# The Guition JC8012P4A1 V3 audio codecs use the board support package I2C bus.
+# The Guition JC8012P4A1 V3 audio codecs use the board's touch I2C bus.
 audio_adc:
   - platform: es7210
     id: guition_v3_audio_adc
-    i2c_id: bsp_bus
+    i2c_id: touch_bus
 
 audio_dac:
   - platform: es8311
     id: guition_v3_audio_dac
-    i2c_id: bsp_bus
+    i2c_id: touch_bus
     address: 0x18
 
 i2s_audio:

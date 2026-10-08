@@ -30,7 +30,7 @@ and stand under Screen settings in the editor.
 - Recording uses the microphone's right channel at 16 kHz; playback and speaker tests use a mono 48 kHz output.
 - Nothing listens or records unless you start the microphone test.
 - The microphone and speaker share one I2S bus, so the screen does not listen while it plays.
-- The ES8311 and ES7210 use the board support package's I2C bus. Plugin audio is routed through the announcement input
+- The ES8311 and ES7210 use the board's `touch_bus` I2C bus. Plugin audio is routed through the announcement input
   of the mixer; a media input is also available for a speaker media player configured by the screen.
 - The I2S bus uses MCLK on GPIO13, and the microphone input is GPIO48.
 - Not yet tested on a physical Guition JC8012P4A1 V3.

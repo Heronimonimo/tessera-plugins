@@ -25,13 +25,14 @@ class GuitionV3Audio : public Component, public tessera::Plugin {
   void set_speaker(speaker::Speaker *s) { speaker_ = s; }
   void set_microphone(microphone::Microphone *m) { microphone_ = m; }
   void set_dac(audio_dac::AudioDac *d) { dac_ = d; }
+  void set_amplifier(switch_::Switch *s) { amplifier_ = s; }
   void set_mute(switch_::Switch *s) { mute_ = s; }
   void set_tap_sound(switch_::Switch *s) { tap_sound_ = s; }
   void set_volume(number::Number *n) { volume_ = n; }
 
  protected:
   enum class Job : uint8_t { NONE, CLICK, TONE, RECORD, PLAYBACK };
-  enum class Step : uint8_t { IDLE, STARTING, FEEDING, FINISHING, RECORDING, STOPPING_MIC };
+  enum class Step : uint8_t { IDLE, AMPLIFIER, STARTING, FEEDING, FINISHING, RECORDING, STOPPING_MIC };
 
   bool play(const int16_t *pcm, size_t count, Job job, int16_t *owned = nullptr);
   void record();
@@ -42,6 +43,7 @@ class GuitionV3Audio : public Component, public tessera::Plugin {
   speaker::Speaker *speaker_{};
   microphone::Microphone *microphone_{};
   audio_dac::AudioDac *dac_{};
+  switch_::Switch *amplifier_{};
   switch_::Switch *mute_{}, *tap_sound_{};
   number::Number *volume_{};
 

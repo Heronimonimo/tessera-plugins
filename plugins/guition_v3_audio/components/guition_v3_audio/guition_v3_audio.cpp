@@ -15,6 +15,7 @@ static constexpr uint32_t SPEAKER_RATE = 16000;
 static constexpr uint32_t MICROPHONE_RATE = 16000;
 static constexpr size_t CHANNELS = 1;
 static constexpr size_t RECORD_SAMPLES = MICROPHONE_RATE * 5;
+static constexpr uint32_t AMPLIFIER_MS = 50;
 static constexpr float CODEC_VOLUME = 0.75f;
 
 static void sine(int16_t *out, size_t frames, float hz, float level) {
@@ -66,9 +67,9 @@ bool GuitionV3Audio::play(const int16_t *pcm, size_t count, Job job, int16_t *ow
   owned_ = owned;
   speaker_->set_audio_stream_info(
       audio::AudioStreamInfo(16, CHANNELS, job == Job::PLAYBACK ? MICROPHONE_RATE : SPEAKER_RATE));
-  step_ = Step::STARTING;
+  amplifier_->turn_on();
+  step_ = Step::AMPLIFIER;
   since_ = millis();
-  speaker_->start();
   return true;
 }
 
@@ -103,6 +104,7 @@ void GuitionV3Audio::stop() {
 }
 
 void GuitionV3Audio::done() {
+  amplifier_->turn_off();
   RAMAllocator<int16_t> psram(RAMAllocator<int16_t>::ALLOC_EXTERNAL);
   if (owned_) psram.deallocate(owned_, samples_);
   if (take_) psram.deallocate(take_, RECORD_SAMPLES);
@@ -117,6 +119,13 @@ void GuitionV3Audio::loop() {
   const uint32_t now = millis();
   switch (step_) {
     case Step::IDLE:
+      break;
+    case Step::AMPLIFIER:
+      if (now - since_ >= AMPLIFIER_MS) {
+        speaker_->start();
+        step_ = Step::STARTING;
+        since_ = now;
+      }
       break;
     case Step::STARTING:
       if (speaker_->is_running()) {

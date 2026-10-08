@@ -55,7 +55,6 @@ speaker:
 
 # The settings, kept on the screen and shown in Home Assistant, on the screen's settings page and in the editor.
 switch:
-  # Speaker enable on this hardware.
   - platform: template
     id: p4_microphone_mute
     name: "Microphone mute"
@@ -72,7 +71,8 @@ switch:
     entity_category: config
   - platform: gpio
     id: speaker_amplifier_enable
-    name: "Speaker Amplifier"
+    # Powered only during playback, to prevent idle hiss.
+    internal: true
     pin: GPIO20
     restore_mode: ALWAYS_OFF
     

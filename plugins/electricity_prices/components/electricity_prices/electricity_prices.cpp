@@ -1,6 +1,7 @@
 #include "electricity_prices.h"
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <string>
@@ -13,6 +14,7 @@ namespace ui = tessera::ui;
 
 struct PricePoint {
   double value;
+  int64_t at;
   bool tomorrow;
 };
 
@@ -47,17 +49,69 @@ static bool read_price(JsonVariantConst value, double &price) {
   return std::isfinite(price);
 }
 
+static int64_t days_since_epoch(int year, unsigned month, unsigned day) {
+  year -= month <= 2;
+  const int era = (year >= 0 ? year : year - 399) / 400;
+  const unsigned year_of_era = static_cast<unsigned>(year - era * 400);
+  const unsigned adjusted_month = month > 2 ? month - 3 : month + 9;
+  const unsigned day_of_year = (153 * adjusted_month + 2) / 5 + day - 1;
+  const unsigned day_of_era = year_of_era * 365 + year_of_era / 4 - year_of_era / 100 + day_of_year;
+  return static_cast<int64_t>(era) * 146097 + day_of_era - 719468;
+}
+
+static bool read_time(JsonVariantConst value, int64_t &at) {
+  if (value.is<int64_t>() || value.is<uint64_t>() || value.is<double>()) {
+    const double epoch = value.as<double>();
+    if (!std::isfinite(epoch)) return false;
+    at = static_cast<int64_t>(epoch > 1e12 || epoch < -1e12 ? epoch / 1000 : epoch);
+    return true;
+  }
+  const char *text = value.as<const char *>();
+  if (!text || std::char_traits<char>::length(text) < 19) return false;
+
+  int year = 0, month = 0, day = 0, hour = 0, minute = 0, second = 0;
+  if (sscanf(text, "%4d-%2d-%2d%*c%2d:%2d:%2d", &year, &month, &day, &hour, &minute, &second) != 6 ||
+      (text[10] != 'T' && text[10] != ' ') || month < 1 || month > 12 || hour > 23 || minute > 59 || second > 60)
+    return false;
+  static constexpr int month_days[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+  const bool leap = year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
+  if (day < 1 || day > month_days[month - 1] + (month == 2 && leap ? 1 : 0)) return false;
+
+  const char *suffix = text + 19;
+  if (*suffix == '.') {
+    ++suffix;
+    while (*suffix >= '0' && *suffix <= '9') ++suffix;
+  }
+  int offset = 0;
+  if (*suffix == '+' || *suffix == '-') {
+    const int sign = *suffix == '+' ? 1 : -1;
+    int offset_hour = 0, offset_minute = 0;
+    if (sscanf(suffix + 1, "%2d:%2d", &offset_hour, &offset_minute) != 2 ||
+        offset_hour > 23 || offset_minute > 59)
+      return false;
+    offset = sign * (offset_hour * 3600 + offset_minute * 60);
+  } else if (*suffix != '\0' && *suffix != 'Z' && *suffix != 'z') {
+    return false;
+  }
+  at = days_since_epoch(year, static_cast<unsigned>(month), static_cast<unsigned>(day)) * 86400 +
+       hour * 3600 + minute * 60 + second - offset;
+  return true;
+}
+
 static void append_prices(JsonArrayConst rows, bool nordpool, bool tomorrow, Forecast &forecast) {
   const size_t count = std::min(rows.size(), kMaxPricesPerDay);
   for (size_t i = 0; i < count; ++i) {
     JsonObjectConst row = rows[i].as<JsonObjectConst>();
     double price = 0;
-    if (read_price(row[nordpool ? "value" : "price"], price))
-      forecast.points.push_back({price, tomorrow});
+    int64_t at = 0;
+    const JsonVariantConst time = row[nordpool ? "start" : "time"];
+    if (read_price(row[nordpool ? "value" : "price"], price) && read_time(time, at))
+      forecast.points.push_back({price, at, tomorrow});
   }
 }
 
 static void read_forecast(JsonObjectConst data, Forecast &forecast) {
+  forecast = Forecast{};
   JsonObjectConst attributes = data["attributes"].as<JsonObjectConst>();
   forecast.decimals = std::clamp(attributes["suggested_display_precision"] | 3, 0, 4);
   forecast.unit = attributes["unit_of_measurement"] | "";
@@ -81,6 +135,8 @@ static void read_forecast(JsonObjectConst data, Forecast &forecast) {
   else if (has_prices_today) append_prices(prices_today, false, false, forecast);
   if (has_raw_tomorrow) append_prices(raw_tomorrow, true, true, forecast);
   else if (has_prices_tomorrow) append_prices(prices_tomorrow, false, true, forecast);
+  std::stable_sort(forecast.points.begin(), forecast.points.end(),
+                   [](const PricePoint &a, const PricePoint &b) { return a.at < b.at; });
 }
 
 static std::string format_price(double price, int decimals) {

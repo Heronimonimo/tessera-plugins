@@ -283,6 +283,7 @@ class PriceTile : public tessera::Tile {
     lv_obj_set_pos(title_, 0, 0);
     lv_obj_set_style_text_align(title_, LV_TEXT_ALIGN_CENTER, 0);
 
+    const int title_height = ui::line_height(Font::BODY);
     if (!forecast_.has_current) {
       ui::set_text(value_, plugin_->text(forecast_.unavailable ? "unavailable" : "no_price"));
       ui::set_font(value_, Font::BODY_LARGE);
@@ -309,7 +310,6 @@ class PriceTile : public tessera::Tile {
       if (ui::text_width(value, candidate) <= width_) break;
     }
     ui::set_font(value_, face);
-    const int title_height = ui::line_height(Font::BODY);
     const int value_height = ui::line_height(face);
     const int unit_height = ui::line_height(Font::BODY);
     const int unit_y = height_ - unit_height;

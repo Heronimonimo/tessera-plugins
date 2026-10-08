@@ -1,6 +1,6 @@
 {
  "format": 1,
- "generated": "2026-10-08T04:12:49Z",
+ "generated": "2026-10-08T04:28:57Z",
  "plugin_api": "0.4",
  "blocked": [],
  "plugins": [
@@ -312,14 +312,14 @@
    "label": "tessera",
    "status": "ok",
    "release": {
-    "version": "1.0.1",
-    "sha": "8a2d86bbbefd7c97e1a962e076b3043819d70d32",
-    "date": "2026-10-07"
+    "version": "1.0.2",
+    "sha": "25ecefb067fc361314753e1c3b1c5956a65821b1",
+    "date": "2026-10-08"
    },
    "manifest": {
     "id": "waste_collection",
-    "version": "1.0.1",
-    "api": "0.2",
+    "version": "1.0.2",
+    "api": "0.4",
     "icon": "recycle",
     "maintainer": "MaxGramser",
     "license": "MIT",
@@ -358,7 +358,9 @@
        "max": "2x2"
       },
       "memory": 700,
-      "entity": "calendar",
+      "domains": [
+       "calendar"
+      ],
       "attributes": [
        "message",
        "start_time"

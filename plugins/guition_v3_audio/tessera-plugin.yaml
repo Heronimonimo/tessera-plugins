@@ -1,0 +1,17 @@
+# Audio on the Guition JC8012P4A1 V3: its ES8311 speaker and microphone, a click on every tap, volume and tests.
+id: guition_v3_audio
+version: 0.1.0
+api: "0.3"
+icon: volume-high
+maintainer: MaxGramser
+license: MIT
+requires:
+  esphome: 2026.8.0
+  psram: true
+boards: [jc8012p4a1v3]
+flash_kb: 80
+
+settings:
+  - { key: microphone_mute, label: setting_mute, hint: setting_mute_hint }
+  - { key: speaker_volume, label: setting_volume, hint: setting_volume_hint }
+  - { key: tap_sound, label: setting_tap_sound, hint: setting_tap_sound_hint }

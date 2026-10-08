@@ -1,0 +1,24 @@
+{
+  "_meta": {
+    "name": "Nederlands"
+  },
+  "screen": {
+    "mute": "Microfoon uit",
+    "volume": "Volume luidspreker",
+    "tap_sound": "Tikgeluid",
+    "tone": "Luidspreker testen",
+    "record": "Microfoon testen",
+    "playing": "Speelt af",
+    "recording": "Luistert, {n} s"
+  },
+  "app": {
+    "name": "Geluid Guition V3",
+    "summary": "De luidspreker en microfoon van de Guition JC8012P4A1 V3: een tikgeluid, volume en tests op het scherm.",
+    "setting_mute": "Microfoon uit",
+    "setting_mute_hint": "De microfoon hoort niets zolang dit aan staat.",
+    "setting_volume": "Volume luidspreker",
+    "setting_volume_hint": "Hoe hard de luidspreker speelt, het tikgeluid ook.",
+    "setting_tap_sound": "Tikgeluid",
+    "setting_tap_sound_hint": "Een korte klik bij elke tik die het scherm aanneemt."
+  }
+}

@@ -76,7 +76,7 @@ def plugin_api():
 
 # Where the docs name the API the core offers now. The phrase "plugin API <n>" (lowercase plugin) always means the
 # current one; a part's own version is written "API 0.2" or "(0.2)". So the docs cannot fall behind the core unnoticed.
-DOC_FILES = ('README.md', 'AGENTS.md', 'docs/FIRMWARE_API.md', 'docs/MANIFEST.md', 'docs/MAKING_A_PLUGIN.md')
+DOC_FILES = ('README.md', 'AGENTS.md', 'llms.txt', 'docs/FIRMWARE_API.md', 'docs/MANIFEST.md', 'docs/MAKING_A_PLUGIN.md')
 CURRENT_API = re.compile(r'plugin API (?:is )?(\d+\.\d+)')
 
 

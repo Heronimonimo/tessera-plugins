@@ -16,7 +16,8 @@ Tessera's own plugins move with it in the same release; the core refuses a plugi
 with one sentence. 0.1 has tiles and the moments; 0.2 adds tiles of an entity, cards, tap actions, top bar items,
 settings rows, questions to the app and the date words; 0.3 adds `on_touch`, and a settings action that says how it is
 going and is lit while it runs; 0.4 renames the plugin's 250 ms moment from `on_tick` to `on_interval`, so that
-`on_tick` everywhere means once a second with the clock. Name the lowest minor whose parts you use, so the plugin
+`on_tick` everywhere means once a second with the clock, and a tile of an entity names its domains as `domains:` in the
+manifest, as a tap action and an input do (`entity:` before it). Name the lowest minor whose parts you use, so the plugin
 builds on as many screens as possible.
 
 ## The component: `__init__.py`
@@ -126,7 +127,7 @@ A change of the tile's size or options makes a new object: `create()` never has 
 | `width`, `height` | Its size in pixels, the card's padding already off. |
 | `columns`, `rows` | The grid cells the tile covers (1x1, 2x1, ...). |
 | `name` | The name the tile got in the editor, `""` for none. Valid during `create()` only: copy it. |
-| `entity` | The Home Assistant entity the tile belongs to (0.2, a manifest tile with `entity`), `""` for none. Copy it. |
+| `entity` | The Home Assistant entity the tile belongs to (0.2, a manifest tile with `domains`), `""` for none. Copy it. |
 | `tile` | The tile's index in the layout (0.2): pass it to `tessera::open_card` so the card follows the tile. |
 | `options` | The tile's options, the manifest's defaults filled in. Read with ArduinoJson: `c.options["walk"] \| 0`. |
 
@@ -145,7 +146,7 @@ or, for a map without `items`, the fields of one object. Two more keys can be th
 | `"stale": true` | The service did not answer the last time; this is the last good answer. Say so if it matters. |
 | `"wait": "<why>"` | There is no answer to show: `not_filled` (an option the URL needs is empty), `asking` (the first answer is on its way), `failed` (the service did not answer and there is no older answer), `too_large`, `refused`. |
 
-A tile with `entity` (0.2) also gets its entity, and is sent again whenever that entity changes in Home Assistant:
+A tile with `domains` (0.2) also gets its entity, and is sent again whenever that entity changes in Home Assistant:
 
 ```json
 { "state": "off", "name": "Waste", "attributes": { "message": "Paper", "start_time": 1791410400 } }
@@ -156,11 +157,11 @@ attribute whose name ends in `_at`, `_time` or `date` and holds a moment comes a
 in the screen's words (`tessera::date_text`, `days_from_today`). `"wait": "wrong_entity"` means the entity chosen in the
 editor is of another domain than the manifest names.
 
-A tile without `data` and without `entity` gets `{}`.
+A tile without `data` and without `domains` gets `{}`.
 
 ## A tile of an entity (0.2)
 
-In the manifest, `entity: calendar` (or a list of domains) and `attributes: [message, start_time]`. The editor then
+In the manifest, `domains: [calendar]` and `attributes: [message, start_time]`. The editor then
 offers the entities of those domains in the tile's inspector, also of a domain Tessera itself draws no tile for. To act on
 the entity, as a tap on one of Tessera's tiles would:
 

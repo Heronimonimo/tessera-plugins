@@ -144,11 +144,11 @@ parts:
 | `icon` | no | From Tessera's icon set; the plugin's icon when left out. The editor shows it, and a screen without the plugin draws it on its placeholder. |
 | `sizes` | yes | `{ min: 1x1, max: 2x2 }`, columns x rows. The editor offers the sizes in between that fit the screen's grid. |
 | `memory` | yes | What one tile costs of the screen's layout memory, in bytes (64 to 16384). The screen and the app add it to the layout's budget. About 400 for a few labels, 1200 for a list. |
-| `entity` | no | A Home Assistant domain (or a list) when the tile belongs to an entity (API 0.2). The inspector offers the entities of those domains, also of a domain Tessera draws no tile for; the tile gets the entity's state, name and `attributes`, again at every change. |
-| `attributes` | no | With `entity`: the attributes the tile gets, at most 16. One named `..._at`, `..._time` or `...date` that holds a moment comes as seconds since 1970. |
+| `domains` | no | The Home Assistant domains of the entity the tile belongs to, `[calendar]`, as a tap action and an input of kind `entity` name theirs (API 0.4; `entity:` before it). The inspector offers the entities of those domains, also of a domain Tessera draws no tile for; the tile gets the entity's state, name and `attributes`, again at every change. |
+| `attributes` | no | With `domains`: the attributes the tile gets, at most 16. One named `..._at`, `..._time` or `...date` that holds a moment comes as seconds since 1970. |
 | `data` | no | The id of the fetch whose answer the tile gets in `on_state`. |
 | `example` | no | Text key: a line the editor shows on the tile's placeholder. |
-| `preview` | no | How the editor draws the tile from its data, so the page in the editor looks like the glass (it cannot run your C++). With `data` or `entity`. `badge`, `title` and `value` are templates of the first item's fields (`"{line}"`, `"{to}"`; for a tile of an entity `{state}`, `{name}` and its attributes); `countdown` names a field with `as: epoch`, and the editor counts down to it in minutes the way the screen does. `value` or `countdown`, not both. Without a preview the editor shows the icon, the name and `example`. |
+| `preview` | no | How the editor draws the tile from its data, so the page in the editor looks like the glass (it cannot run your C++). With `data` or `domains`. `badge`, `title` and `value` are templates of the first item's fields (`"{line}"`, `"{to}"`; for a tile of an entity `{state}`, `{name}` and its attributes); `countdown` names a field with `as: epoch`, and the editor counts down to it in whole minutes (the editor's clock moves every 30 seconds). `value` or `countdown`, not both. Without a preview the editor shows the icon, the name and `example`. |
 | `options` | no | At most 12 options the inspector shows, below. |
 
 An option:

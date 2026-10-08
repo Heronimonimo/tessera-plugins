@@ -128,8 +128,8 @@ the largest size of your tile: the bus plugin asks for six departures.
 
 ## When a service is not JSON, or needs a login
 
-- An XML or binary service (GTFS-realtime): use the Home Assistant integration for it, and a normal tile, or wait for
-  tiles that belong to an entity (a later plugin API).
+- An XML or binary service (GTFS-realtime): use the Home Assistant integration for it, and a normal tile or a plugin
+  tile that belongs to its entity (`domains` in the manifest).
 - OAuth: `fetch` knows fixed keys only. A Home Assistant integration that offers the data as an entity is the way.
 - Data that only exists inside Home Assistant: a normal tile shows any entity; no plugin needed.
 

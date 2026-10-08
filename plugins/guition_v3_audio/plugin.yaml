@@ -14,6 +14,8 @@ audio_dac:
   - platform: es8311
     id: p4_audio_dac
     i2c_id: touch_bus
+    sample_rate: 16000
+    use_microphone: true
 
 i2s_audio:
   - id: p4_audio_bus
@@ -25,12 +27,10 @@ i2s_audio:
 microphone:
   - platform: i2s_audio
     id: p4_microphone
-    i2s_audio_id: p4_audio_bus
     adc_type: external
-    i2s_din_pin: GPIO48
+    i2s_din_pin: GPIO11
     sample_rate: 16000
     bits_per_sample: 16bit
-    channel: left
 
 speaker:
   - platform: i2s_audio
@@ -42,7 +42,6 @@ speaker:
     sample_rate: 16000
     bits_per_sample: 16bit
     channel: mono
-    buffer_duration: 100ms
 
 # The settings, kept on the screen and shown in Home Assistant, on the screen's settings page and in the editor.
 switch:

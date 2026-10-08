@@ -1,19 +1,24 @@
 {
-  "_meta": { "name": "English" },
+  "_meta": {
+    "name": "English"
+  },
   "screen": {
-    "days": "1 day | {n} days",
-    "today": "Today",
-    "passed": "Passed",
-    "no_date": "Choose a date"
+    "mute": "Microphone off",
+    "volume": "Speaker volume",
+    "tap_sound": "Tap sound",
+    "tone": "Test the speaker",
+    "record": "Test the microphone",
+    "playing": "Playing",
+    "recording": "Listening, {n} s"
   },
   "app": {
-    "name": "Days until",
-    "summary": "Counts the days until a date you choose.",
-    "tile_name": "Days until",
-    "tile_example": "12 days until the holidays",
-    "date": "Date",
-    "date_hint": "As year-month-day, such as 2026-12-25.",
-    "what": "What happens then",
-    "what_hint": "A few words under the number, such as Holidays."
+    "name": "Guition V3 audio",
+    "summary": "The speaker and microphone of the Guition JC8012P4A1 V3: a tap sound, volume, and tests on the screen.",
+    "setting_mute": "Microphone off",
+    "setting_mute_hint": "The microphone hears nothing while this is on.",
+    "setting_volume": "Speaker volume",
+    "setting_volume_hint": "How loud the speaker plays, the tap sound included.",
+    "setting_tap_sound": "Tap sound",
+    "setting_tap_sound_hint": "A short click on every tap the screen takes."
   }
 }

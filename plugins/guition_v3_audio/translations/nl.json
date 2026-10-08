@@ -1,19 +1,24 @@
 {
-  "_meta": { "name": "Nederlands" },
+  "_meta": {
+    "name": "Nederlands"
+  },
   "screen": {
-    "days": "1 dag | {n} dagen",
-    "today": "Vandaag",
-    "passed": "Voorbij",
-    "no_date": "Kies een datum"
+    "mute": "Microfoon uit",
+    "volume": "Volume luidspreker",
+    "tap_sound": "Tikgeluid",
+    "tone": "Luidspreker testen",
+    "record": "Microfoon testen",
+    "playing": "Speelt af",
+    "recording": "Luistert, {n} s"
   },
   "app": {
-    "name": "Dagen tot",
-    "summary": "Telt de dagen tot een datum die je kiest.",
-    "tile_name": "Dagen tot",
-    "tile_example": "Nog 12 dagen tot de vakantie",
-    "date": "Datum",
-    "date_hint": "Als jaar-maand-dag, zoals 2026-12-25.",
-    "what": "Wat er dan is",
-    "what_hint": "Een paar woorden onder het getal, zoals Vakantie."
+    "name": "Geluid Guition V3",
+    "summary": "De luidspreker en microfoon van de Guition JC8012P4A1 V3: een tikgeluid, volume en tests op het scherm.",
+    "setting_mute": "Microfoon uit",
+    "setting_mute_hint": "De microfoon hoort niets zolang dit aan staat.",
+    "setting_volume": "Volume luidspreker",
+    "setting_volume_hint": "Hoe hard de luidspreker speelt, het tikgeluid ook.",
+    "setting_tap_sound": "Tikgeluid",
+    "setting_tap_sound_hint": "Een korte klik bij elke tik die het scherm aanneemt."
   }
 }

@@ -1,93 +1,236 @@
 #include "guition_v3_audio.h"
-#include <cstdio>
-#include <string>
+
+#include <algorithm>
+#include <cmath>
+
+#include "esphome/core/hal.h"
+#include "esphome/core/helpers.h"
+#include "esphome/core/log.h"
 
 namespace esphome::guition_v3_audio {
 
-using tessera::Font;
-namespace ui = tessera::ui;
+static const char *const TAG = "guition_v3_audio";
 
-// Days since 1970-01-01 for a date (Howard Hinnant's days_from_civil): the difference of two of these is whole days.
-static long days_from_civil(int y, unsigned m, unsigned d) {
-  y -= m <= 2;
-  const long era = (y >= 0 ? y : y - 399) / 400;
-  const unsigned yoe = static_cast<unsigned>(y - era * 400);
-  const unsigned doy = (153 * (m + (m > 2 ? -3 : 9)) + 2) / 5 + d - 1;
-  const unsigned doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
-  return era * 146097 + static_cast<long>(doe) - 719468;
+static constexpr uint32_t RATE = 16000;
+static constexpr size_t CHANNELS = 2;
+static constexpr size_t RECORD_SAMPLES = RATE * 5;
+static constexpr float CODEC_VOLUME = 0.75f;
+
+static void sine(int16_t *out, size_t frames, float hz, float level) {
+  const float fade = RATE * 0.004f;
+  for (size_t i = 0; i < frames; ++i) {
+    const float edge = std::min(1.0f, std::min<float>(i, frames - 1 - i) / fade);
+    const int16_t sample =
+        static_cast<int16_t>(level * edge * std::sin(2.0f * static_cast<float>(M_PI) * hz * i / RATE));
+    for (size_t channel = 0; channel < CHANNELS; ++channel) out[i * CHANNELS + channel] = sample;
+  }
 }
 
-// The tile: a big number of days, and what happens then under it.
-// create() makes the parts once; on_tick() sets their texts, and ui::set_text changes a label only when its text differs.
-class DaysTile : public tessera::Tile {
- public:
-  explicit DaysTile(const tessera::Plugin *plugin) : plugin_(plugin) {}
-
-  void create(const tessera::TileContext &c) override {
-    width_ = c.width;
-    height_ = c.height;
-    unsigned y = 0, m = 0, d = 0;
-    const char *date = c.options["date"] | "";
-    has_date_ = sscanf(date, "%u-%u-%u", &y, &m, &d) == 3 && m >= 1 && m <= 12 && d >= 1 && d <= 31;
-    if (has_date_) target_ = days_from_civil(static_cast<int>(y), m, d);
-    what_text_ = c.options["what"] | "";
-    if (what_text_.empty()) what_text_ = c.name;
-
-    number_ = ui::label(c.parent, Font::VALUE, theme::INK);
-    lv_obj_set_width(number_, width_);
-    lv_obj_set_style_text_align(number_, LV_TEXT_ALIGN_CENTER, 0);
-    what_ = ui::label(c.parent, Font::BODY, theme::MUTED);
-    lv_obj_set_width(what_, width_);
-    lv_obj_set_style_text_align(what_, LV_TEXT_ALIGN_CENTER, 0);
-  }
-
-  void on_tick(uint32_t epoch) override {
-    std::string big, small = what_text_;
-    if (!has_date_) {
-      big = plugin_->text("no_date");
-    } else if (!epoch) {
-      big = "";  // the screen's clock is not set yet
-    } else {
-      const tessera::LocalTime now = tessera::local_time(epoch);
-      const long left = target_ - days_from_civil(now.year, static_cast<unsigned>(now.month), static_cast<unsigned>(now.day));
-      big = left == 0 ? plugin_->text("today") : left < 0 ? plugin_->text("passed") : tessera::format(plugin_->text("days"), left);
-    }
-    // The largest of the screen's fonts the words fit in.
-    Font face = Font::VALUE;
-    for (Font f : {Font::VALUE, Font::HEADLINE, Font::TITLE}) {
-      face = f;
-      if (ui::text_width(big, f) <= width_) break;
-    }
-    ui::set_font(number_, face);
-    ui::set_text(number_, big);
-    ui::set_text(what_, small);
-    // The number and the words under it, together in the middle of the card.
-    const int nh = ui::line_height(face), wh = small.empty() ? 0 : ui::line_height(Font::BODY);
-    const int top = (height_ - nh - wh) / 2;
-    lv_obj_set_pos(number_, 0, top);
-    lv_obj_set_height(number_, nh);
-    lv_obj_set_pos(what_, 0, top + nh);
-    lv_obj_set_height(what_, wh ? wh : 1);
-  }
-
-  // Light and dark: the theme roles have other values now.
-  void on_theme() override {
-    ui::set_color(number_, theme::INK);
-    ui::set_color(what_, theme::MUTED);
-  }
-
- private:
-  const tessera::Plugin *plugin_;
-  int width_ = 0, height_ = 0;
-  bool has_date_ = false;
-  long target_ = 0;
-  std::string what_text_;
-  lv_obj_t *number_{}, *what_{};
-};
-
 void GuitionV3Audio::setup() {
-  // The id is the tile's id in the manifest; the core makes a DaysTile for every card that shows one.
-  add_tile("days_until", [this]() { return new DaysTile(this); });
+  dac_->set_volume(CODEC_VOLUME);
+  dac_->set_mute_off();
+  click_.resize(RATE * 60 / 1000 * CHANNELS);
+  sine(click_.data(), RATE * 60 / 1000, 1000.0f, 12000.0f);
+
+  volume_->add_on_state_callback([this](float value) { speaker_->set_volume(std::clamp(value, 0.0f, 100.0f) / 100.0f); });
+  if (volume_->has_state()) speaker_->set_volume(std::clamp(volume_->state, 0.0f, 100.0f) / 100.0f);
+  mute_->add_on_state_callback([this](bool on) { microphone_->set_mute_state(on); });
+  microphone_->set_mute_state(mute_->state);
+
+  microphone_->add_data_callback([this](const std::vector<uint8_t> &data) {
+    if (!recording_.load() || take_ == nullptr) return;
+    size_t at = taken_.load();
+    const size_t frames = data.size() / sizeof(int16_t);
+    for (size_t i = 0; i < frames && at < RECORD_SAMPLES; ++i) {
+      const uint16_t sample = static_cast<uint16_t>(data[2 * i]) | (static_cast<uint16_t>(data[2 * i + 1]) << 8);
+      take_[at++] = static_cast<int16_t>(sample);
+    }
+    taken_.store(at);
+  });
+}
+
+int GuitionV3Audio::volume() const {
+  return volume_->has_state() && !std::isnan(volume_->state) ? static_cast<int>(volume_->state) : 50;
+}
+
+bool GuitionV3Audio::play(const int16_t *pcm, size_t count, Job job, int16_t *owned) {
+  if (job_ != Job::NONE || pcm == nullptr || count == 0) {
+    if (owned) RAMAllocator<int16_t>(RAMAllocator<int16_t>::ALLOC_EXTERNAL).deallocate(owned, count);
+    return false;
+  }
+  job_ = job;
+  sound_ = pcm;
+  samples_ = count;
+  sent_ = 0;
+  owned_ = owned;
+  step_ = Step::STARTING;
+  since_ = millis();
+  speaker_->start();
+  return true;
+}
+
+void GuitionV3Audio::record() {
+  if (job_ != Job::NONE) return;
+  take_ = RAMAllocator<int16_t>(RAMAllocator<int16_t>::ALLOC_EXTERNAL).allocate(RECORD_SAMPLES);
+  if (take_ == nullptr) {
+    ESP_LOGW(TAG, "No room for a recording");
+    return;
+  }
+  taken_.store(0);
+  discard_ = false;
+  job_ = Job::RECORD;
+  recording_.store(true);
+  microphone_->start();
+  step_ = Step::RECORDING;
+  since_ = millis();
+}
+
+void GuitionV3Audio::stop() {
+  if (job_ == Job::RECORD && step_ == Step::RECORDING) {
+    recording_.store(false);
+    microphone_->stop();
+    discard_ = true;
+    step_ = Step::STOPPING_MIC;
+    since_ = millis();
+    return;
+  }
+  if (job_ == Job::RECORD) return;
+  if (job_ != Job::NONE) speaker_->stop();
+  done();
+}
+
+void GuitionV3Audio::done() {
+  RAMAllocator<int16_t> psram(RAMAllocator<int16_t>::ALLOC_EXTERNAL);
+  if (owned_) psram.deallocate(owned_, samples_);
+  if (take_) psram.deallocate(take_, RECORD_SAMPLES);
+  owned_ = take_ = nullptr;
+  sound_ = nullptr;
+  samples_ = sent_ = 0;
+  job_ = Job::NONE;
+  step_ = Step::IDLE;
+}
+
+void GuitionV3Audio::loop() {
+  const uint32_t now = millis();
+  switch (step_) {
+    case Step::IDLE:
+      break;
+    case Step::STARTING:
+      if (speaker_->is_running()) {
+        step_ = Step::FEEDING;
+      } else if (now - since_ > 1000) {
+        ESP_LOGW(TAG, "The speaker did not start");
+        speaker_->stop();
+        done();
+      }
+      break;
+    case Step::FEEDING: {
+      const size_t total = samples_ * sizeof(int16_t);
+      sent_ += speaker_->play(reinterpret_cast<const uint8_t *>(sound_) + sent_, total - sent_, 0);
+      if (sent_ >= total) {
+        speaker_->finish();
+        step_ = Step::FINISHING;
+        since_ = now;
+      }
+      break;
+    }
+    case Step::FINISHING:
+      if (speaker_->is_stopped() || now - since_ > 3000) {
+        speaker_->stop();
+        done();
+      }
+      break;
+    case Step::RECORDING:
+      if (taken_.load() >= RECORD_SAMPLES || now - since_ >= 5000) {
+        recording_.store(false);
+        microphone_->stop();
+        step_ = Step::STOPPING_MIC;
+        since_ = now;
+      }
+      break;
+    case Step::STOPPING_MIC:
+      if (microphone_->is_stopped() || now - since_ > 1000) {
+        if (discard_) {
+          done();
+          break;
+        }
+        int16_t *mono = take_;
+        const size_t frames = taken_.load();
+        take_ = nullptr;
+        job_ = Job::NONE;
+        step_ = Step::IDLE;
+        if (frames == 0) {
+          RAMAllocator<int16_t>(RAMAllocator<int16_t>::ALLOC_EXTERNAL).deallocate(mono, RECORD_SAMPLES);
+          ESP_LOGW(TAG, "Nothing came from the microphone");
+          break;
+        }
+        const size_t output_samples = frames * CHANNELS;
+        int16_t *stereo = RAMAllocator<int16_t>(RAMAllocator<int16_t>::ALLOC_EXTERNAL).allocate(output_samples);
+        if (stereo == nullptr) {
+          RAMAllocator<int16_t>(RAMAllocator<int16_t>::ALLOC_EXTERNAL).deallocate(mono, RECORD_SAMPLES);
+          ESP_LOGW(TAG, "No room for microphone playback");
+          break;
+        }
+        for (size_t i = 0; i < frames; ++i) {
+          stereo[i * CHANNELS] = mono[i];
+          stereo[i * CHANNELS + 1] = mono[i];
+        }
+        RAMAllocator<int16_t>(RAMAllocator<int16_t>::ALLOC_EXTERNAL).deallocate(mono, RECORD_SAMPLES);
+        play(stereo, output_samples, Job::PLAYBACK, stereo);
+      }
+      break;
+  }
+}
+
+void GuitionV3Audio::on_touch() {
+  if (!tap_sound_->state || volume() <= 0 || job_ != Job::NONE) return;
+  if (!speaker_->is_stopped() || !microphone_->is_stopped()) return;
+  play(click_.data(), click_.size(), Job::CLICK);
+}
+
+bool GuitionV3Audio::settings(tessera::SettingsPage &page) {
+  page.icon = "\U000F057E";
+  page.toggle(text("mute"), [this]() { return mute_->state; },
+              [this](bool on) { if (on) mute_->turn_on(); else mute_->turn_off(); });
+  page.number(text("volume"), 0, 100, 5, "%", [this]() { return volume(); },
+              [this](int value) {
+                auto call = volume_->make_call();
+                call.set_value(value);
+                call.perform();
+              });
+  page.toggle(text("tap_sound"), [this]() { return tap_sound_->state; },
+              [this](bool on) { if (on) tap_sound_->turn_on(); else tap_sound_->turn_off(); });
+  page.action(
+      text("tone"), "\U000F0387",
+      [this]() {
+        if (job_ == Job::TONE) { stop(); return; }
+        if (job_ == Job::CLICK) stop();
+        if (job_ != Job::NONE) return;
+        const size_t frames = RATE * 600 / 1000;
+        const size_t samples = frames * CHANNELS;
+        int16_t *tone = RAMAllocator<int16_t>(RAMAllocator<int16_t>::ALLOC_EXTERNAL).allocate(samples);
+        if (tone == nullptr) return;
+        sine(tone, frames, 1000.0f, 12000.0f);
+        play(tone, samples, Job::TONE, tone);
+      },
+      nullptr, [this]() -> std::string { return job_ == Job::TONE ? text("playing") : ""; })
+      .active([this]() { return job_ == Job::TONE; });
+  page.action(
+      text("record"), "\U000F036C",
+      [this]() {
+        if (job_ == Job::RECORD || job_ == Job::PLAYBACK) { stop(); return; }
+        if (job_ == Job::CLICK) stop();
+        record();
+      },
+      nullptr, [this]() -> std::string {
+        if (job_ == Job::RECORD && step_ == Step::RECORDING) {
+          const long left = std::max<long>(1, 5 - static_cast<long>((millis() - since_) / 1000));
+          return tessera::format(text("recording"), left);
+        }
+        return job_ == Job::PLAYBACK ? text("playing") : "";
+      })
+      .active([this]() { return job_ == Job::RECORD || job_ == Job::PLAYBACK; });
+  return true;
 }
 
 }  // namespace esphome::guition_v3_audio

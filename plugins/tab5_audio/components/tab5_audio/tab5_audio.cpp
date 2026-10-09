@@ -21,10 +21,7 @@ static void sine(int16_t *out, size_t count, float hz, float level) {
   const float fade = SPEAKER_RATE * 0.004f;
   for (size_t i = 0; i < count; ++i) {
     const float edge = std::min(1.0f, std::min<float>(i, count - 1 - i) / fade);
-    const int16_t sample =
-        static_cast<int16_t>(level * edge * std::sin(2.0f * static_cast<float>(M_PI) * hz * i / SPEAKER_RATE));
-    out[2 * i] = sample;
-    out[2 * i + 1] = sample;
+    out[i] = static_cast<int16_t>(level * edge * std::sin(2.0f * static_cast<float>(M_PI) * hz * i / SPEAKER_RATE));
   }
 }
 
@@ -32,7 +29,7 @@ void Tab5Audio::setup() {
   dac_->set_volume(CODEC_VOLUME);
   dac_->set_mute_off();
   const size_t click_frames = SPEAKER_RATE * 60 / 1000;
-  click_.resize(click_frames * 2);
+  click_.resize(click_frames);
   sine(click_.data(), click_frames, 1000.0f, 12000.0f);
 
   volume_->add_on_state_callback([this](float value) {
@@ -173,7 +170,7 @@ void Tab5Audio::loop() {
         }
         const size_t factor = SPEAKER_RATE / MIC_RATE;
         const size_t frames = taken * factor;
-        const size_t count = frames * 2;
+        const size_t count = frames;
         int16_t *playback = RAMAllocator<int16_t>(RAMAllocator<int16_t>::ALLOC_EXTERNAL).allocate(count);
         if (playback == nullptr) {
           done();
@@ -185,9 +182,7 @@ void Tab5Audio::loop() {
           const int32_t end = i + 1 < taken ? take_[i + 1] : 0;
           for (size_t j = 0; j < factor; ++j) {
             const int16_t sample = static_cast<int16_t>(start + (end - start) * j / factor);
-            const size_t at = 2 * (i * factor + j);
-            playback[at] = sample;
-            playback[at + 1] = sample;
+            playback[i * factor + j] = sample;
           }
         }
         RAMAllocator<int16_t>(RAMAllocator<int16_t>::ALLOC_EXTERNAL).deallocate(take_, RECORD_SAMPLES);
@@ -225,7 +220,7 @@ bool Tab5Audio::settings(tessera::SettingsPage &page) {
         if (job_ == Job::CLICK) stop();
         if (job_ != Job::NONE) return;
         const size_t frames = SPEAKER_RATE * 600 / 1000;
-        const size_t count = frames * 2;
+        const size_t count = frames;
         int16_t *tone = RAMAllocator<int16_t>(RAMAllocator<int16_t>::ALLOC_EXTERNAL).allocate(count);
         if (tone == nullptr) return;
         sine(tone, frames, 1000.0f, 12000.0f);

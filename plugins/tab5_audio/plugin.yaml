@@ -90,6 +90,14 @@ select:
   - platform: es8388
     es8388_id: tab5_audio_dac
     dac_output:
+      id: tab5_audio_dac_output
       name: "DAC Output"
-      initial_option: LINE1
       entity_category: config
+
+esphome:
+  on_boot:
+    priority: -100
+    then:
+      - select.set:
+          id: tab5_audio_dac_output
+          option: LINE1

@@ -4,8 +4,9 @@ A tile for live and day-ahead electricity prices from a Home Assistant sensor. A
 price. A larger tile or the chart opened by tapping the tile shows available prices for today and tomorrow.
 
 It supports Nord Pool's `raw_today` and `raw_tomorrow` attributes (`value` in each row) and ENTSO-E's `prices_today`
-and `prices_tomorrow` attributes (`price` in each row). The tile uses up to 16 rows per day, in the order supplied by
-the sensor.
+and `prices_tomorrow` attributes (`price` in each row). The app maps each day's full list to numbers before sending it
+to the screen, so quarter-hour prices are not lost to the message size limit. The chart groups those prices into up to
+24 hourly bars per day.
 
 ## Set up
 

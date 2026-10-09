@@ -1,9 +1,115 @@
 {
  "format": 1,
- "generated": "2026-10-08T13:20:40Z",
- "plugin_api": "0.4",
+ "generated": "2026-10-09T09:36:08Z",
+ "plugin_api": "0.5",
  "blocked": [],
  "plugins": [
+  {
+   "id": "electricity_prices",
+   "repo": "https://github.com/MaxGramser/tessera-plugins",
+   "path": "plugins/electricity_prices",
+   "label": "tessera",
+   "status": "ok",
+   "release": {
+    "version": "0.2.0",
+    "sha": "e1a334bd210d103dbacda2979b0269def1eb8494",
+    "date": "2026-10-08"
+   },
+   "manifest": {
+    "id": "electricity_prices",
+    "version": "0.2.0",
+    "api": "0.4",
+    "icon": "flash",
+    "maintainer": "Heronimonimo",
+    "license": "MIT",
+    "stage": "beta",
+    "requires": {
+     "esphome": "2026.6.2"
+    },
+    "boards": "any",
+    "flash_kb": 8,
+    "tiles": [
+     {
+      "id": "forecast",
+      "name": "tile_name",
+      "icon": "flash",
+      "sizes": {
+       "min": "1x1",
+       "max": "3x2"
+      },
+      "memory": 5000,
+      "example": "tile_example",
+      "domains": [
+       "sensor"
+      ],
+      "preview": {
+       "value": "{state}"
+      },
+      "attributes": [
+       "raw_today",
+       "raw_tomorrow",
+       "prices_today",
+       "prices_tomorrow",
+       "unit_of_measurement",
+       "suggested_display_precision"
+      ]
+     }
+    ],
+    "cards": [
+     {
+      "id": "chart",
+      "name": "card_name"
+     }
+    ]
+   },
+   "translations": {
+    "en": {
+     "_meta": {
+      "name": "English"
+     },
+     "screen": {
+      "current_price": "Price now",
+      "forecast_title": "Price forecast",
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "no_price": "No current price",
+      "no_prices": "No price forecast",
+      "unavailable": "Sensor unavailable"
+     },
+     "app": {
+      "name": "Electricity prices",
+      "summary": "Shows the current price and today's and tomorrow's available electricity prices.",
+      "tile_name": "Price forecast",
+      "tile_example": "Current price 0.18 EUR/kWh",
+      "card_name": "Price forecast"
+     }
+    },
+    "nl": {
+     "_meta": {
+      "name": "Nederlands"
+     },
+     "screen": {
+      "current_price": "Prijs nu",
+      "forecast_title": "Prijsverwachting",
+      "today": "Vandaag",
+      "tomorrow": "Morgen",
+      "no_price": "Geen actuele prijs",
+      "no_prices": "Geen prijsverwachting",
+      "unavailable": "Sensor niet beschikbaar"
+     },
+     "app": {
+      "name": "Elektriciteitsprijzen",
+      "summary": "Toont de actuele prijs en beschikbare elektriciteitsprijzen voor vandaag en morgen.",
+      "tile_name": "Prijsverwachting",
+      "tile_example": "Actuele prijs 0,18 EUR/kWh",
+      "card_name": "Prijsverwachting"
+     }
+    }
+   },
+   "readme": {
+    "en": "# Electricity prices\n\nA tile for live and day-ahead electricity prices from a Home Assistant sensor. A small tile shows the sensor's current\nprice. A larger tile or the chart opened by tapping the tile shows available prices for today and tomorrow.\n\nIt supports Nord Pool's `raw_today` and `raw_tomorrow` attributes (`value` in each row) and ENTSO-E's `prices_today`\nand `prices_tomorrow` attributes (`price` in each row). The tile uses up to 16 rows per day, in the order supplied by\nthe sensor.\n\n## Set up\n\n1. Add this plugin to a screen in Tessera and let the screen build.\n2. In Layout, add **Price forecast** from the Plugins group.\n3. In the tile inspector, choose a Home Assistant sensor whose state is the current price and whose attributes include\n   a supported price forecast.\n\n## Good to know\n\n- Tap any tile to open its price chart.\n- Forecast bars are scaled from the lowest to highest available price. Today and tomorrow use different colours.\n- The sensor's unit is shown with both the current price and chart.\n- Tessera sends only the selected sensor's state and the attributes named in this plugin's manifest to the screen.\n  The plugin makes no internet requests.\n"
+   }
+  },
   {
    "id": "ov_departures",
    "repo": "https://github.com/MaxGramser/tessera-plugins",
@@ -12,7 +118,7 @@
    "status": "ok",
    "release": {
     "version": "1.2.2",
-    "sha": "984fb3581bf1f5acfad445df869767b4229a6567",
+    "sha": "beee8d8ecda93e63d93b4a0aee370fa4ad0dd32c",
     "date": "2026-10-08"
    },
    "manifest": {
@@ -214,7 +320,7 @@
    "status": "ok",
    "release": {
     "version": "1.0.2",
-    "sha": "984fb3581bf1f5acfad445df869767b4229a6567",
+    "sha": "beee8d8ecda93e63d93b4a0aee370fa4ad0dd32c",
     "date": "2026-10-08"
    },
    "manifest": {
@@ -308,6 +414,107 @@
    }
   },
   {
+   "id": "tab5_audio",
+   "repo": "https://github.com/MaxGramser/tessera-plugins",
+   "path": "plugins/tab5_audio",
+   "label": "tessera",
+   "status": "ok",
+   "release": {
+    "version": "0.1.0",
+    "sha": "60d50f037e0ed9dd9dd79b677ddc0c8522a711f6",
+    "date": "2026-10-09"
+   },
+   "manifest": {
+    "id": "tab5_audio",
+    "version": "0.1.0",
+    "api": "0.3",
+    "icon": "volume-high",
+    "maintainer": "MaxGramser",
+    "license": "MIT",
+    "stage": "beta",
+    "requires": {
+     "esphome": "2026.9.0",
+     "psram": true
+    },
+    "boards": [
+     "tab5"
+    ],
+    "flash_kb": 80,
+    "settings": [
+     {
+      "key": "microphone_mute",
+      "label": "setting_mute",
+      "hint": "setting_mute_hint"
+     },
+     {
+      "key": "speaker_volume",
+      "label": "setting_volume",
+      "hint": "setting_volume_hint"
+     },
+     {
+      "key": "tap_sound",
+      "label": "setting_tap_sound",
+      "hint": "setting_tap_sound_hint"
+     }
+    ]
+   },
+   "translations": {
+    "en": {
+     "_meta": {
+      "name": "English"
+     },
+     "screen": {
+      "name": "Audio",
+      "mute": "Microphone off",
+      "volume": "Speaker volume",
+      "tap_sound": "Tap sound",
+      "tone": "Test the speaker",
+      "record": "Test the microphone",
+      "playing": "Playing",
+      "recording": "Listening, {n} s"
+     },
+     "app": {
+      "name": "Tab5 audio",
+      "summary": "The M5Stack Tab5's speaker and microphone: tap sounds, volume, mute and audio tests.",
+      "setting_mute": "Microphone off",
+      "setting_mute_hint": "The microphone hears nothing while this is on.",
+      "setting_volume": "Speaker volume",
+      "setting_volume_hint": "How loud the speaker plays, including tap sounds.",
+      "setting_tap_sound": "Tap sound",
+      "setting_tap_sound_hint": "A short click on every tap the screen takes."
+     }
+    },
+    "nl": {
+     "_meta": {
+      "name": "Nederlands"
+     },
+     "screen": {
+      "name": "Geluid",
+      "mute": "Microfoon uit",
+      "volume": "Volume luidspreker",
+      "tap_sound": "Tikgeluid",
+      "tone": "Luidspreker testen",
+      "record": "Microfoon testen",
+      "playing": "Speelt af",
+      "recording": "Luistert, {n} s"
+     },
+     "app": {
+      "name": "Tab5-audio",
+      "summary": "De luidspreker en microfoon van de M5Stack Tab5: tikgeluiden, volume, dempen en geluidstests.",
+      "setting_mute": "Microfoon uit",
+      "setting_mute_hint": "De microfoon hoort niets zolang dit aan staat.",
+      "setting_volume": "Volume luidspreker",
+      "setting_volume_hint": "Hoe hard de luidspreker speelt, inclusief tikgeluiden.",
+      "setting_tap_sound": "Tikgeluid",
+      "setting_tap_sound_hint": "Een korte klik bij elke tik die het scherm aanneemt."
+     }
+    }
+   },
+   "readme": {
+    "en": "# Tab5 audio\n\nThe M5Stack Tab5's built-in speaker and microphone, with a short click on every tap the screen takes, a speaker volume,\na microphone mute switch, and speaker and microphone tests on the screen's settings page. The audio uses ESPHome's\nES8388 DAC and ES7210 ADC.\n\nThe microphone and speaker are ESPHome components named `tab5_microphone` and `tab5_speaker`. Capture and playback take\nturns on the Tab5's shared I2S bus.\n\n## Set up\n\n1. Use a M5Stack Tab5 screen running Tessera's **Tab5** board profile.\n2. Open **Plugins**, choose **Tab5 audio**, and add it to the screen. The firmware builds with the plugin.\n3. Hold the top bar, then open **Settings → Plugins → Audio** and tap **Test the speaker**.\n\n## On the screen\n\n- **Microphone off** mutes the microphone.\n- **Speaker volume** controls playback and tap sounds.\n- **Tap sound** plays a short click when the screen accepts a tap. It does not interrupt other audio.\n- **Test the speaker** plays a 600 ms tone; tap it again to stop.\n- **Test the microphone** records for five seconds and plays the recording; tap it again to stop.\n\nThe plugin selects the ES8388's **LINE1** output for the onboard speaker and controls the speaker-enable output through\nthe Tab5's I/O expander.\n\n## Good to know\n\n- The microphone records only while its test is running; the recording stays in PSRAM until playback ends.\n- The speaker, microphone and codecs are ESPHome components, so another screen component can use them too.\n- This plugin targets the Tab5 board profile (`tab5`) and needs PSRAM.\n- The firmware configuration follows the [ESPHome Tab5 audio setup](https://devices.esphome.io/devices/m5stack-tab5/).\n- It has not yet been built on or tested with a physical Tab5.\n"
+   }
+  },
+  {
    "id": "waste_collection",
    "repo": "https://github.com/MaxGramser/tessera-plugins",
    "path": "plugins/waste_collection",
@@ -315,7 +522,7 @@
    "status": "ok",
    "release": {
     "version": "1.0.4",
-    "sha": "984fb3581bf1f5acfad445df869767b4229a6567",
+    "sha": "beee8d8ecda93e63d93b4a0aee370fa4ad0dd32c",
     "date": "2026-10-08"
    },
    "manifest": {

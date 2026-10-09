@@ -1,0 +1,95 @@
+# The Tab5 uses its built-in ES7210 microphone ADC and ES8388 speaker DAC. The I/O expander enables the onboard speaker.
+tab5_audio:
+  speaker: tab5_speaker
+  microphone: tab5_microphone
+  dac: tab5_audio_dac
+  amplifier: tab5_audio_speaker_enable
+  mute: tab5_audio_microphone_mute
+  tap_sound: tab5_audio_tap_sound
+  volume: tab5_audio_speaker_volume
+
+audio_adc:
+  - platform: es7210
+    id: tab5_audio_adc
+    i2c_id: tab5_bus
+    sample_rate: 16000
+    bits_per_sample: 16bit
+
+audio_dac:
+  - platform: es8388
+    id: tab5_audio_dac
+    i2c_id: tab5_bus
+
+i2s_audio:
+  - id: tab5_audio_bus
+    i2s_lrclk_pin: GPIO29
+    i2s_bclk_pin: GPIO27
+    i2s_mclk_pin: GPIO30
+
+microphone:
+  - platform: i2s_audio
+    id: tab5_microphone
+    i2s_audio_id: tab5_audio_bus
+    adc_type: external
+    i2s_din_pin: GPIO28
+    sample_rate: 16000
+    bits_per_sample: 16bit
+    channel: stereo
+
+speaker:
+  - platform: i2s_audio
+    id: tab5_speaker
+    i2s_audio_id: tab5_audio_bus
+    dac_type: external
+    audio_dac: tab5_audio_dac
+    i2s_dout_pin: GPIO26
+    sample_rate: 48000
+    bits_per_sample: 16bit
+    channel: mono
+    buffer_duration: 100ms
+    timeout: 500ms
+
+switch:
+  - platform: gpio
+    id: tab5_audio_speaker_enable
+    internal: true
+    pin:
+      pi4ioe5v6408: tab5_ioe
+      number: 1
+    restore_mode: ALWAYS_OFF
+  - platform: template
+    id: tab5_audio_microphone_mute
+    name: "Microphone mute"
+    icon: mdi:microphone-off
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    entity_category: config
+  - platform: template
+    id: tab5_audio_tap_sound
+    name: "Tap sound"
+    icon: mdi:gesture-tap
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    entity_category: config
+
+number:
+  - platform: template
+    id: tab5_audio_speaker_volume
+    name: "Speaker volume"
+    icon: mdi:volume-high
+    optimistic: true
+    min_value: 0
+    max_value: 100
+    step: 5
+    initial_value: 50
+    restore_value: true
+    unit_of_measurement: "%"
+    entity_category: config
+
+select:
+  - platform: es8388
+    es8388_id: tab5_audio_dac
+    dac_output:
+      name: "DAC Output"
+      initial_option: LINE1
+      entity_category: config

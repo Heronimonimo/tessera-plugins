@@ -1,0 +1,23 @@
+{
+  "_meta": { "name": "Nederlands" },
+  "screen": {
+    "name": "Geluid",
+    "mute": "Microfoon uit",
+    "volume": "Volume luidspreker",
+    "tap_sound": "Tikgeluid",
+    "tone": "Luidspreker testen",
+    "record": "Microfoon testen",
+    "playing": "Speelt af",
+    "recording": "Luistert, {n} s"
+  },
+  "app": {
+    "name": "Tab5-audio",
+    "summary": "De luidspreker en microfoon van de M5Stack Tab5: tikgeluiden, volume, dempen en geluidstests.",
+    "setting_mute": "Microfoon uit",
+    "setting_mute_hint": "De microfoon hoort niets zolang dit aan staat.",
+    "setting_volume": "Volume luidspreker",
+    "setting_volume_hint": "Hoe hard de luidspreker speelt, inclusief tikgeluiden.",
+    "setting_tap_sound": "Tikgeluid",
+    "setting_tap_sound_hint": "Een korte klik bij elke tik die het scherm aanneemt."
+  }
+}

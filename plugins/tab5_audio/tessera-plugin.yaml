@@ -1,0 +1,19 @@
+# Audio on the M5Stack Tab5: its speaker and microphone, a click on every tap, and two tests on the screen's settings
+# page. Only screens using the Tab5 board profile are offered this plugin.
+id: tab5_audio
+version: 0.1.0
+api: "0.3"
+icon: volume-high
+maintainer: MaxGramser
+license: MIT
+stage: beta
+requires:
+  esphome: 2026.9.0
+  psram: true
+boards: [tab5]
+flash_kb: 80
+
+settings:
+  - { key: microphone_mute, label: setting_mute, hint: setting_mute_hint }
+  - { key: speaker_volume, label: setting_volume, hint: setting_volume_hint }
+  - { key: tap_sound, label: setting_tap_sound, hint: setting_tap_sound_hint }

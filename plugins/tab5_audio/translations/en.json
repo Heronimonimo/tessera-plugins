@@ -1,0 +1,23 @@
+{
+  "_meta": { "name": "English" },
+  "screen": {
+    "name": "Audio",
+    "mute": "Microphone off",
+    "volume": "Speaker volume",
+    "tap_sound": "Tap sound",
+    "tone": "Test the speaker",
+    "record": "Test the microphone",
+    "playing": "Playing",
+    "recording": "Listening, {n} s"
+  },
+  "app": {
+    "name": "Tab5 audio",
+    "summary": "The M5Stack Tab5's speaker and microphone: tap sounds, volume, mute and audio tests.",
+    "setting_mute": "Microphone off",
+    "setting_mute_hint": "The microphone hears nothing while this is on.",
+    "setting_volume": "Speaker volume",
+    "setting_volume_hint": "How loud the speaker plays, including tap sounds.",
+    "setting_tap_sound": "Tap sound",
+    "setting_tap_sound_hint": "A short click on every tap the screen takes."
+  }
+}

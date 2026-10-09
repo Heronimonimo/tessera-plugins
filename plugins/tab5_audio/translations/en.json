@@ -1,0 +1,19 @@
+{
+  "_meta": { "name": "English" },
+  "screen": {
+    "days": "1 day | {n} days",
+    "today": "Today",
+    "passed": "Passed",
+    "no_date": "Choose a date"
+  },
+  "app": {
+    "name": "Days until",
+    "summary": "Counts the days until a date you choose.",
+    "tile_name": "Days until",
+    "tile_example": "12 days until the holidays",
+    "date": "Date",
+    "date_hint": "As year-month-day, such as 2026-12-25.",
+    "what": "What happens then",
+    "what_hint": "A few words under the number, such as Holidays."
+  }
+}

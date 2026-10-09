@@ -45,9 +45,9 @@ speaker:
     i2s_dout_pin: GPIO26
     sample_rate: 48000
     bits_per_sample: 16bit
-    channel: mono
-    buffer_duration: 100ms
-    timeout: 500ms
+    channel: stereo
+    buffer_duration: 500ms
+    timeout: 2000ms
 
 switch:
   - platform: gpio

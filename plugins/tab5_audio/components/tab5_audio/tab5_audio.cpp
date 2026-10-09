@@ -21,15 +21,19 @@ static void sine(int16_t *out, size_t count, float hz, float level) {
   const float fade = SPEAKER_RATE * 0.004f;
   for (size_t i = 0; i < count; ++i) {
     const float edge = std::min(1.0f, std::min<float>(i, count - 1 - i) / fade);
-    out[i] = static_cast<int16_t>(level * edge * std::sin(2.0f * static_cast<float>(M_PI) * hz * i / SPEAKER_RATE));
+    const int16_t sample =
+        static_cast<int16_t>(level * edge * std::sin(2.0f * static_cast<float>(M_PI) * hz * i / SPEAKER_RATE));
+    out[2 * i] = sample;
+    out[2 * i + 1] = sample;
   }
 }
 
 void Tab5Audio::setup() {
   dac_->set_volume(CODEC_VOLUME);
   dac_->set_mute_off();
-  click_.resize(SPEAKER_RATE * 60 / 1000);
-  sine(click_.data(), click_.size(), 1000.0f, 12000.0f);
+  const size_t click_frames = SPEAKER_RATE * 60 / 1000;
+  click_.resize(click_frames * 2);
+  sine(click_.data(), click_frames, 1000.0f, 12000.0f);
 
   volume_->add_on_state_callback([this](float value) {
     speaker_->set_volume(std::clamp(value, 0.0f, 100.0f) / 100.0f);
@@ -168,7 +172,8 @@ void Tab5Audio::loop() {
           break;
         }
         const size_t factor = SPEAKER_RATE / MIC_RATE;
-        const size_t count = taken * factor;
+        const size_t frames = taken * factor;
+        const size_t count = frames * 2;
         int16_t *playback = RAMAllocator<int16_t>(RAMAllocator<int16_t>::ALLOC_EXTERNAL).allocate(count);
         if (playback == nullptr) {
           done();
@@ -178,8 +183,12 @@ void Tab5Audio::loop() {
         for (size_t i = 0; i < taken; ++i) {
           const int32_t start = take_[i];
           const int32_t end = i + 1 < taken ? take_[i + 1] : 0;
-          for (size_t j = 0; j < factor; ++j)
-            playback[i * factor + j] = static_cast<int16_t>(start + (end - start) * j / factor);
+          for (size_t j = 0; j < factor; ++j) {
+            const int16_t sample = static_cast<int16_t>(start + (end - start) * j / factor);
+            const size_t at = 2 * (i * factor + j);
+            playback[at] = sample;
+            playback[at + 1] = sample;
+          }
         }
         RAMAllocator<int16_t>(RAMAllocator<int16_t>::ALLOC_EXTERNAL).deallocate(take_, RECORD_SAMPLES);
         take_ = nullptr;
@@ -215,10 +224,11 @@ bool Tab5Audio::settings(tessera::SettingsPage &page) {
         if (job_ == Job::TONE) { stop(); return; }
         if (job_ == Job::CLICK) stop();
         if (job_ != Job::NONE) return;
-        const size_t count = SPEAKER_RATE * 600 / 1000;
+        const size_t frames = SPEAKER_RATE * 600 / 1000;
+        const size_t count = frames * 2;
         int16_t *tone = RAMAllocator<int16_t>(RAMAllocator<int16_t>::ALLOC_EXTERNAL).allocate(count);
         if (tone == nullptr) return;
-        sine(tone, count, 1000.0f, 12000.0f);
+        sine(tone, frames, 1000.0f, 12000.0f);
         play(tone, count, Job::TONE, tone);
       },
       nullptr, [this]() -> std::string { return job_ == Job::TONE ? text("playing") : ""; })

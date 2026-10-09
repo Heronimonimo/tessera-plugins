@@ -1,7 +1,7 @@
 # Every name in this manifest is a key in translations/<language>.json, part "app".
 id: electricity_prices
 version: 0.2.0
-api: "0.4"
+api: "0.5"
 icon: flash
 maintainer: Heronimonimo
 license: MIT
@@ -20,7 +20,12 @@ tiles:
     example: tile_example
     domains: [sensor]
     preview: { value: "{state}" }
-    attributes: [raw_today, raw_tomorrow, prices_today, prices_tomorrow, unit_of_measurement, suggested_display_precision]
+    attributes: [unit_of_measurement, suggested_display_precision]
+    fields:
+      raw_today_prices: { path: "raw_today[*].value", as: numbers }
+      raw_tomorrow_prices: { path: "raw_tomorrow[*].value", as: numbers }
+      prices_today_values: { path: "prices_today[*].price", as: numbers }
+      prices_tomorrow_values: { path: "prices_tomorrow[*].price", as: numbers }
 
 cards:
   - { id: chart, name: card_name }

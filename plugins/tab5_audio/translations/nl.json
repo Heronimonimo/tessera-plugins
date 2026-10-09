@@ -1,19 +1,23 @@
 {
   "_meta": { "name": "Nederlands" },
   "screen": {
-    "days": "1 dag | {n} dagen",
-    "today": "Vandaag",
-    "passed": "Voorbij",
-    "no_date": "Kies een datum"
+    "name": "Geluid",
+    "mute": "Microfoon uit",
+    "volume": "Volume luidspreker",
+    "tap_sound": "Tikgeluid",
+    "tone": "Luidspreker testen",
+    "record": "Microfoon testen",
+    "playing": "Speelt af",
+    "recording": "Luistert, {n} s"
   },
   "app": {
-    "name": "Dagen tot",
-    "summary": "Telt de dagen tot een datum die je kiest.",
-    "tile_name": "Dagen tot",
-    "tile_example": "Nog 12 dagen tot de vakantie",
-    "date": "Datum",
-    "date_hint": "Als jaar-maand-dag, zoals 2026-12-25.",
-    "what": "Wat er dan is",
-    "what_hint": "Een paar woorden onder het getal, zoals Vakantie."
+    "name": "Tab5-audio",
+    "summary": "De luidspreker en microfoon van de M5Stack Tab5: tikgeluiden, volume, dempen en geluidstests.",
+    "setting_mute": "Microfoon uit",
+    "setting_mute_hint": "De microfoon hoort niets zolang dit aan staat.",
+    "setting_volume": "Volume luidspreker",
+    "setting_volume_hint": "Hoe hard de luidspreker speelt, inclusief tikgeluiden.",
+    "setting_tap_sound": "Tikgeluid",
+    "setting_tap_sound_hint": "Een korte klik bij elke tik die het scherm aanneemt."
   }
 }

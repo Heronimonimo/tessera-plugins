@@ -175,7 +175,12 @@ void Tab5Audio::loop() {
           ESP_LOGW(TAG, "No room for microphone playback");
           break;
         }
-        for (size_t i = 0; i < taken; ++i) std::fill_n(playback + i * factor, factor, take_[i]);
+        for (size_t i = 0; i < taken; ++i) {
+          const int32_t start = take_[i];
+          const int32_t end = i + 1 < taken ? take_[i + 1] : 0;
+          for (size_t j = 0; j < factor; ++j)
+            playback[i * factor + j] = static_cast<int16_t>(start + (end - start) * j / factor);
+        }
         RAMAllocator<int16_t>(RAMAllocator<int16_t>::ALLOC_EXTERNAL).deallocate(take_, RECORD_SAMPLES);
         take_ = nullptr;
         job_ = Job::NONE;

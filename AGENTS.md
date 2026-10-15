@@ -15,11 +15,13 @@ plugin is done.
    carries out the plugin's `fetch` (JSON from a web service) with its own code.
 4. A tile of a plugin is `plugin:<plugin id>.<tile id>` in a screen's layout. The core gives it a card's drawing area
    while its page is on the glass, hands it the data the app sent (`on_state`), and ticks it once a second (`on_tick`).
-5. The plugin API is 0.10, released with Tessera 0.4.88 (firmware 0.56.0). A manifest names the lowest minor whose
+5. The plugin API is 0.11 on Tessera's dev branch; the release, Tessera 0.4.88 (firmware 0.56.0), has 0.10 until the
+   next one. A manifest names the lowest minor whose
    parts it uses: `api: "0.8"`, `"0.9"` for `Font::DIGITS`, `ui::covers`, `Tone::GOOD`, `ui::set_fill` and
-   `ui::tone_color`, `"0.10"` for pictures on a tile, `ui::text` and `tap_point()`. A plugin builds on a core with the
+   `ui::tone_color`, `"0.10"` for pictures on a tile, `ui::text` and `tap_point()`, `"0.11"` for `on_press` and
+   `on_step`. A plugin builds on a core with the
    same major and at least its minor, unless a minor after its own changed a name: while the major is 0 that may
-   happen, and the core lists those minors (only 0.4 so far). So a plugin of 0.7 builds on a core of 0.10, one of 0.3
+   happen, and the core lists those minors (only 0.4 so far). So a plugin of 0.7 builds on a core of 0.11, one of 0.3
    does not (`docs/FIRMWARE_API.md`, "Versions"). A tile's entity of a domain Tessera draws no tile for (`plant`,
    `todo`) reaches `TileContext::entity` and `tessera::action` only with the firmware after 0.56.0, on Tessera's dev
    branch until its next release (`docs/FIRMWARE_API.md`, "A tile of an entity").
@@ -115,6 +117,23 @@ contain, with the name over it).
 - **A changelog line for every version.** Raise `version` and add its `## <version>` heading at the top of
   `CHANGELOG.md`, with a few bullet lines of what a person notices and what they must do. The app shows them when it
   offers the update (docs/MAKING_A_PLUGIN.md, "The changelog").
+
+## Branches
+
+Two branches, as Tessera has, and each has its own `index.json`:
+
+- **main** is what every Tessera app reads. A plugin here builds on the firmware Tessera has released.
+- **dev** is what Tessera's dev app reads (it falls back on main while dev has no index). A plugin that needs what only
+  Tessera's dev firmware has, such as a newer plugin API, goes to dev: there the dev app installs and updates it the
+  ordinary way, on screens that build Tessera's dev. On main it would fit no screen until Tessera's next release, and
+  the index has one version per plugin, so nobody could install it in the meantime.
+- **The release:** right after Tessera publishes a release, merge dev into main and build the index on main
+  (Tessera's docs/RELEASING.md, "The release", step 6). A change that needs no newer firmware goes to main and is then
+  merged into dev, so dev never lacks what main has. Never rebase dev: screens are pinned to its commits.
+- **The index** of each branch is checked against the Tessera its app builds (`TESSERA_REF`: main against Tessera's
+  main, dev against its dev), and built by `.github/workflows/index.yml` after a push to it (the hourly run, for
+  community releases, is main's), or by hand: `GITHUB_TOKEN=$(gh auth token) python3 tools/build_index.py`, then
+  commit `index.json` on that branch.
 
 ## When you are done
 

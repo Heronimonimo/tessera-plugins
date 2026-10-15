@@ -1,7 +1,7 @@
 # Tessera plugins
 
 > Plugins for Tessera, the ESP32 touch screens for Home Assistant. A plugin is an ESPHome component (C++) built into a
-> screen's firmware plus a manifest the Tessera app reads; the app fetches web data for it. The plugin API is 0.10 now (on Tessera's dev; the release has 0.8 until the next one);
+> screen's firmware plus a manifest the Tessera app reads; the app fetches web data for it. The plugin API is 0.11 now (on Tessera's dev; the release has 0.10 until the next one);
 > a plugin builds on the same major from its own minor up, unless a listed minor after it changed a name (only 0.4).
 > Home Assistant is the backend: no plugin code runs in the app.
 
@@ -26,7 +26,7 @@ Start with AGENTS.md (rules for AI assistants), then docs/MAKING_A_PLUGIN.md.
 - [plugins/waste_collection/](plugins/waste_collection): a tile of an entity, a card, a tap action, a top bar item, settings
 - [plugins/voice_assist/](plugins/voice_assist): ESPHome's voice components on the features microphone, speaker and media player, sounds, a tile and a top bar item in colour
 - [plugins/screen_camera/](plugins/screen_camera): a board's camera through the board-only feature camera_sensor, with a driver of its own
-- [plugins/tap_sound/](plugins/tap_sound): the smallest plugin with a sound
+- [plugins/tap_sound/](plugins/tap_sound): the smallest plugin with sounds: a tick as a finger lands (on_press), a softer one per slider step (on_step)
 
 ## Tools
 - tools/new_plugin.py <id>: copy the template under a new id

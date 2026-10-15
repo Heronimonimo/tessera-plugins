@@ -1,4 +1,4 @@
-# The firmware API (plugin API 0.10)
+# The firmware API (plugin API 0.11)
 
 A plugin's code runs on the screen as an ESPHome component. It talks to Tessera's core through one header:
 
@@ -9,7 +9,7 @@ A plugin's code runs on the screen as an ESPHome component. It talks to Tessera'
 The header lives in the Tessera repository at `components/smart_display/plugin_api.h`; it is the reference, and this
 page explains it. Everything is in namespace `tessera`.
 
-A manifest names the plugin API it was written for: `api: "0.8"`, or `"0.9"` or `"0.10"` for the parts those brought; the plugin API 0.10 is the one the core offers now. Which cores
+A manifest names the plugin API it was written for: `api: "0.8"`, or `"0.9"`, `"0.10"` or `"0.11"` for the parts those brought; the plugin API 0.11 is the one the core offers now (on Tessera's dev branch; the release has 0.10 until the next one). Which cores
 a plugin builds on is under "Versions" at the end of this page.
 
 ## The component: `__init__.py`
@@ -78,7 +78,7 @@ The moments every plugin can hear (override what you need; each has an empty def
 | `on_message(message)` | An answer of the app to `tessera::send()` (below). |
 | `on_cards_closed()` | The cards closed: Back, standby, Back to page 1, another card. |
 | `on_alert()` | An alert is about to show, a doorbell for example. |
-| `on_touch()` | A tap the screen took, after the touch filter: a tile, a key, a button, a row of the settings, Back or the pager. It comes as the finger lets go, with the tap's action. It runs inside the touch event, so start a sound there and never wait for it. A slider's release, a refused tap and the repeat of a held key do not count. |
+| `on_touch()` | A tap the screen took, after the touch filter: a tile, a key, a button, a row of the settings, Back or the pager. It comes as the finger lets go, with the tap's action; for a click that answers the finger, take `on_press`. It runs inside the touch event, so start a sound there and never wait for it. A slider's release, a refused tap and the repeat of a held key do not count. |
 | `on_press()` | A finger came down on something that takes a tap or a drag: a tile, a key, a slider, a row of the settings, the top bar (0.11). At once, before the screen knows whether it becomes a tap, a hold or a swipe: the moment for a click or a buzz that answers the finger. Not for the push that wakes a dimmed screen, nor between the tiles. Start a sound, never wait for one. |
 | `on_step()` | A dragged slider or dial passed a step: every 5 % of its range, or every position of one with 20 or fewer, at most one every 35 ms (0.11). For a detent you can hear or feel. |
 
@@ -514,7 +514,8 @@ number. Before 0.9 a block has no colour by meaning: `TRACK` and `ACCENT`, or th
 - [`plugins/screen_camera/`](../plugins/screen_camera): a board's hardware through a feature only a board brings
   (`camera_sensor`), a driver beside the plugin's own component, and a top bar item that follows the camera.
 - [`plugins/tap_sound/components/tap_sound/tap_sound.cpp`](../plugins/tap_sound/components/tap_sound/tap_sound.cpp): the
-  smallest plugin with a sound, played in `on_touch`.
+  smallest plugin with sounds: a tick in `on_press` as a finger lands, a softer one in `on_step` for every step of a
+  dragged slider.
 
 ## Not in the API yet
 
@@ -525,7 +526,7 @@ tiles, 0.10). A plugin can bring a camera (0.8): the feature `camera`, an ESPHom
 
 ## Versions
 
-A manifest names the plugin API it was written for: `api: "0.8"`, `"0.9"` or `"0.10"`; the plugin API 0.10 is the one the core offers now. When a
+A manifest names the plugin API it was written for: `api: "0.8"`, `"0.9"`, `"0.10"` or `"0.11"`; the plugin API 0.11 is the one the core offers now (on Tessera's dev branch; the release has 0.10 until the next one). When a
 screen is built, `smart_display.register_plugin()` compares it with the core's and stops the build with one sentence
 when it does not fit. A plugin fits a core when all three hold:
 
@@ -538,16 +539,17 @@ when it does not fit. A plugin fits a core when all three hold:
 **While the major is 0** a minor may still change a name or a signature as the API settles. The core lists those
 minors in `PLUGIN_API_BREAKS`, in `screen_manager/app/plugin_manifest.py` and in `components/smart_display/__init__.py`
 (a test keeps the two equal). Today the list holds one: 0.4, where `Plugin::on_tick` became `on_interval`. So with a
-core of 0.10:
+core of 0.11:
 
 | The manifest says | Builds? | Why |
 |---|---|---|
-| `api: "0.10"` | Yes | The core's own. |
+| `api: "0.11"` | Yes | The core's own. |
+| `api: "0.10"` | Yes | Same major, an older minor, and no break after 0.10. |
 | `api: "0.9"` | Yes | Same major, an older minor, and no break after 0.9. |
 | `api: "0.8"` | Yes | Same major, an older minor, and no break after 0.8. |
 | `api: "0.7"` | Yes | Same major, an older minor, and no break after 0.7. |
 | `api: "0.3"` | No | 0.4 changed a name it may use; the build says so in one sentence and asks to update the plugin. |
-| `api: "0.11"` | No | Newer than the core; the build asks to update the plugin or the screen's firmware. |
+| `api: "0.12"` | No | Newer than the core; the build asks to update the plugin or the screen's firmware. |
 | `api: "1.0"` | No | Another major. |
 
 `tools/check.py` applies the same rules against the core it checks with (`api_fits` of `plugin_manifest.py`), so a
@@ -569,6 +571,7 @@ brought:
 | 0.8 | The features `camera` (`ts_camera`) and `camera_sensor`, the first feature only a board brings; a top bar item's `tone` and `ui::set_tone`; sounds of a plugin's own (`plugin_sound.h`, `smart_display.sound()`). |
 | 0.9 | `Font::DIGITS`, the large digits of a climate card's setpoint, and `ui::covers()`; `Tone::GOOD`, `ui::set_fill()` and `ui::tone_color()`, the tones for a block; `ui::label` one line high. |
 | 0.10 | Pictures on a tile: `ui::picture`, `ui::set_picture`, `ui::pictures`, `Fit`, `Turn` and a reflection, places that overlap, `ui::slide_pictures`, and the manifest's `pictures` of a tile; `ui::text`, a label of several lines; `tessera::tap_point()`, where a tile was tapped; memory in PSRAM: `tessera::Text`, `tessera::List`, and tiles and cards made there. |
+| 0.11 | `on_press`, a finger landing on something that takes a tap or a drag, at once (for a click that answers the finger; `on_touch` comes as the finger lets go), and `on_step`, a dragged slider or dial passing a step. |
 
 A minor of the app's or the manifest's side only still counts: a plugin that uses what it brought needs an app that
 knows it ([MANIFEST.md](MANIFEST.md), "Which minor brought a field").

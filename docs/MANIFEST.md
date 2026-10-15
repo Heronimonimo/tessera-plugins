@@ -87,7 +87,7 @@ fetch:
       label: [LinePublicNumber, DestinationName50]
 ```
 
-It names `api: "0.7"` and builds on today's core, which offers plugin API 0.10: no minor after 0.7 changed a name
+It names `api: "0.7"` and builds on today's core, which offers plugin API 0.11: no minor after 0.7 changed a name
 ([FIRMWARE_API.md](FIRMWARE_API.md), "Versions"). The fetch is plain `http` because OVapi offers nothing else and the
 fetch carries no secret.
 
@@ -109,7 +109,7 @@ fetch carries no secret.
 |---|---|---|
 | `id` | yes | The plugin's id. Unique in the index, the same as its folder and its component, and never changed. |
 | `version` | yes | Three numbers, `1.0.0`. Raise it for every change that reaches screens, and give it a `## 1.0.0` heading with its lines at the top of `CHANGELOG.md` ([MAKING_A_PLUGIN.md](MAKING_A_PLUGIN.md#the-changelog)). |
-| `api` | yes | The plugin API it was written for, as major and minor in quotes: `"0.8"`; the plugin API 0.10 is the one the core offers now. Without quotes YAML reads a number, which the check refuses. It builds on a core with the same major and at least that minor, unless a minor after its own up to the core's changed a name (0.4 did); `tools/check.py` refuses an `api` newer than the core it checks against, and one from before such a minor ([FIRMWARE_API.md](FIRMWARE_API.md), "Versions"). |
+| `api` | yes | The plugin API it was written for, as major and minor in quotes: `"0.8"`; the plugin API 0.11 is the one the core offers now (0.10 in the release until the next one). Without quotes YAML reads a number, which the check refuses. It builds on a core with the same major and at least that minor, unless a minor after its own up to the core's changed a name (0.4 did); `tools/check.py` refuses an `api` newer than the core it checks against, and one from before such a minor ([FIRMWARE_API.md](FIRMWARE_API.md), "Versions"). |
 | `icon` | yes | <a id="icon"></a>A Material Design Icons name from Tessera's icon set (`screen_manager/app/tile_icons.py` in the Tessera repository, such as `bus`, `train`, `calendar`, `thermometer`, `lightbulb`). The screen's icon font holds only that set. Tiles and top bar items take it when they name no icon of their own. |
 | `maintainer` | yes | The GitHub name of whoever looks after the plugin, 1 to 39 characters. `tools/check.py` refuses the template's `your-github-name` in any folder but `template/`. |
 | `license` | yes | An SPDX name that goes with AGPL-3.0: `MIT`, `Apache-2.0`, `BSD-2-Clause`, `BSD-3-Clause`, `ISC`, `MPL-2.0`, `LGPL-2.1-or-later`, `LGPL-3.0-or-later`, `GPL-3.0-or-later`, `GPL-3.0-only`, `AGPL-3.0-or-later`, `AGPL-3.0-only`, `Unlicense`, `0BSD`, `CC0-1.0`. |

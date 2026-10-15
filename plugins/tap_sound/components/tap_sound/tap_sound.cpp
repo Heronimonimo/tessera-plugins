@@ -9,7 +9,8 @@ void TapSound::on_press() {
 
 void TapSound::on_step() {
   if (sound_on_ != nullptr && !sound_on_->state) return;
-  sounds_.play(step_);
+  // Each step after the one before, 30 ms apart at the least: a quick drag ticks evenly instead of in clumps.
+  sounds_.add(step_, STEP_SPAN_MS);
 }
 
 bool TapSound::settings(tessera::SettingsPage &page) {

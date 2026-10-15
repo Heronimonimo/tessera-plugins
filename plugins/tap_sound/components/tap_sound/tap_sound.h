@@ -26,6 +26,7 @@ class TapSound : public Component, public tessera::Plugin {
   void set_step(tessera::Sound s) { step_ = s; }
 
  protected:
+  static constexpr uint32_t STEP_SPAN_MS = 30;
   switch_::Switch *sound_on_{};
   tessera::Sound tick_, step_;
   tessera::SoundPlayer sounds_;

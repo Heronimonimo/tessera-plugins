@@ -80,7 +80,7 @@ The moments every plugin can hear (override what you need; each has an empty def
 | `on_alert()` | An alert is about to show, a doorbell for example. |
 | `on_touch()` | A tap the screen took, after the touch filter: a tile, a key, a button, a row of the settings, Back or the pager. It comes as the finger lets go, with the tap's action; for a click that answers the finger, take `on_press`. It runs inside the touch event, so start a sound there and never wait for it. A slider's release, a refused tap and the repeat of a held key do not count. |
 | `on_press()` | A finger came down on something that takes a tap or a drag: a tile, a key, a slider, a row of the settings, the top bar (0.11). At once, before the screen knows whether it becomes a tap, a hold or a swipe: the moment for a click or a buzz that answers the finger. Not for the push that wakes a dimmed screen, nor between the tiles. Start a sound, never wait for one. |
-| `on_step()` | A dragged slider or dial passed a step: every 5 % of its range, or every position of one with 20 or fewer, at most one every 35 ms (0.11). For a detent you can hear or feel. |
+| `on_step()` | A dragged slider, dial or seek bar passed a step: every 5 % of its range, or every position of one with 20 or fewer (0.11). Once for every step passed, two at most at once, as a detent clicks; not for the jump of a slider to where the finger lands. For a detent you can hear or feel: play it with `SoundPlayer::add()` (below), which spaces a run of clicks evenly. |
 
 ## A tile: `tessera::Tile`
 
@@ -326,7 +326,10 @@ void loop() override { sounds_.loop(); }       // hands the speaker what it take
 void on_press() override { sounds_.play(tick_); }  // plugin API 0.11; on_touch() before it
 ```
 
-`play()` starts a sound in place of the one that plays, `stop()` ends it, `playing(sound)` says which one plays. A
+`play()` starts a sound in place of the one that plays, `stop()` ends it, `playing(sound)` says which one plays.
+`add(sound, span_ms)` (0.11) plays a sound after the ones handed to it before, followed by silence until `span_ms` after
+its start, so a run of clicks comes out evenly spaced however late the screen's loop comes round while it draws; two at
+most wait, more are left out so a run never trails behind the finger. Tap sound plays its step with `add(step_, 30)`. A
 sound follows the screen's volume. On a board whose microphone and speaker share one bus (`AUDIO_HALF_DUPLEX`), a sound
 waits while something listens, and the player drops it when the speaker took nothing of it for a second.
 
@@ -571,7 +574,7 @@ brought:
 | 0.8 | The features `camera` (`ts_camera`) and `camera_sensor`, the first feature only a board brings; a top bar item's `tone` and `ui::set_tone`; sounds of a plugin's own (`plugin_sound.h`, `smart_display.sound()`). |
 | 0.9 | `Font::DIGITS`, the large digits of a climate card's setpoint, and `ui::covers()`; `Tone::GOOD`, `ui::set_fill()` and `ui::tone_color()`, the tones for a block; `ui::label` one line high. |
 | 0.10 | Pictures on a tile: `ui::picture`, `ui::set_picture`, `ui::pictures`, `Fit`, `Turn` and a reflection, places that overlap, `ui::slide_pictures`, and the manifest's `pictures` of a tile; `ui::text`, a label of several lines; `tessera::tap_point()`, where a tile was tapped; memory in PSRAM: `tessera::Text`, `tessera::List`, and tiles and cards made there. |
-| 0.11 | `on_press`, a finger landing on something that takes a tap or a drag, at once (for a click that answers the finger; `on_touch` comes as the finger lets go), and `on_step`, a dragged slider or dial passing a step. |
+| 0.11 | `on_press`, a finger landing on something that takes a tap or a drag, at once (for a click that answers the finger; `on_touch` comes as the finger lets go), `on_step`, a dragged slider, dial or seek bar passing a step, and `SoundPlayer::add()`, sounds evenly spaced one after another. |
 
 A minor of the app's or the manifest's side only still counts: a plugin that uses what it brought needs an app that
 knows it ([MANIFEST.md](MANIFEST.md), "Which minor brought a field").

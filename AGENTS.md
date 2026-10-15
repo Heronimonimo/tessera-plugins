@@ -17,7 +17,8 @@ plugin is done.
    while its page is on the glass, hands it the data the app sent (`on_state`), and ticks it once a second (`on_tick`).
 5. The plugin API is 0.10, released with Tessera 0.4.88 (firmware 0.56.0). A manifest names the lowest minor whose
    parts it uses: `api: "0.8"`, `"0.9"` for `Font::DIGITS`, `ui::covers`, `Tone::GOOD`, `ui::set_fill` and
-   `ui::tone_color`, `"0.10"` for pictures on a tile, `ui::text` and `tap_point()`. A plugin builds on a core with the
+   `ui::tone_color`, `"0.10"` for pictures on a tile, `ui::text` and `tap_point()`, `"0.11"` for `on_press` and
+   `on_step` (on Tessera's dev branch until its next release). A plugin builds on a core with the
    same major and at least its minor, unless a minor after its own changed a name: while the major is 0 that may
    happen, and the core lists those minors (only 0.4 so far). So a plugin of 0.7 builds on a core of 0.10, one of 0.3
    does not (`docs/FIRMWARE_API.md`, "Versions"). A tile's entity of a domain Tessera draws no tile for (`plant`,

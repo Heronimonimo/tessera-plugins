@@ -78,7 +78,9 @@ The moments every plugin can hear (override what you need; each has an empty def
 | `on_message(message)` | An answer of the app to `tessera::send()` (below). |
 | `on_cards_closed()` | The cards closed: Back, standby, Back to page 1, another card. |
 | `on_alert()` | An alert is about to show, a doorbell for example. |
-| `on_touch()` | A tap the screen took, after the touch filter: a tile, a key, a button, a row of the settings, Back or the pager. For a click or a buzz. It runs inside the touch event, so start a sound there and never wait for it. A slider's release, a refused tap and the repeat of a held key do not count. |
+| `on_touch()` | A tap the screen took, after the touch filter: a tile, a key, a button, a row of the settings, Back or the pager. It comes as the finger lets go, with the tap's action. It runs inside the touch event, so start a sound there and never wait for it. A slider's release, a refused tap and the repeat of a held key do not count. |
+| `on_press()` | A finger came down on something that takes a tap or a drag: a tile, a key, a slider, a row of the settings, the top bar (0.11). At once, before the screen knows whether it becomes a tap, a hold or a swipe: the moment for a click or a buzz that answers the finger. Not for the push that wakes a dimmed screen, nor between the tiles. Start a sound, never wait for one. |
+| `on_step()` | A dragged slider or dial passed a step: every 5 % of its range, or every position of one with 20 or fewer, at most one every 35 ms (0.11). For a detent you can hear or feel. |
 
 ## A tile: `tessera::Tile`
 
@@ -321,7 +323,7 @@ tessera::Sound tick_;           // set_tick() keeps it
 tessera::SoundPlayer sounds_;   // set_speaker() hands it the speaker
 
 void loop() override { sounds_.loop(); }       // hands the speaker what it takes now, never waits
-void on_touch() override { sounds_.play(tick_); }
+void on_press() override { sounds_.play(tick_); }  // plugin API 0.11; on_touch() before it
 ```
 
 `play()` starts a sound in place of the one that plays, `stop()` ends it, `playing(sound)` says which one plays. A

@@ -2,9 +2,14 @@
 
 namespace esphome::tap_sound {
 
-void TapSound::on_touch() {
+void TapSound::on_press() {
   if (sound_on_ != nullptr && !sound_on_->state) return;
   sounds_.play(tick_);
+}
+
+void TapSound::on_step() {
+  if (sound_on_ != nullptr && !sound_on_->state) return;
+  sounds_.play(step_);
 }
 
 bool TapSound::settings(tessera::SettingsPage &page) {

@@ -2,7 +2,7 @@
 
 A short, soft tick on the screen's speaker the moment your finger lands on something you can tap: a tile, a key, a
 slider, a row of the settings, the top bar. Drag a slider and it ticks more softly at every step: every 5 %, or every
-position of a slider with only a few. It plays at the screen's volume, so turn the screen down and the tick is quieter
+position of a slider with only a few, with the full tick where it reaches its end. Holding - or + ticks at every step. It plays at the screen's volume, so turn the screen down and the tick is quieter
 too.
 
 ## What you need

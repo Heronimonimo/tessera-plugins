@@ -118,6 +118,23 @@ contain, with the name over it).
   `CHANGELOG.md`, with a few bullet lines of what a person notices and what they must do. The app shows them when it
   offers the update (docs/MAKING_A_PLUGIN.md, "The changelog").
 
+## Branches
+
+Two branches, as Tessera has, and each has its own `index.json`:
+
+- **main** is what every Tessera app reads. A plugin here builds on the firmware Tessera has released.
+- **dev** is what Tessera's dev app reads (it falls back on main while dev has no index). A plugin that needs what only
+  Tessera's dev firmware has, such as a newer plugin API, goes to dev: there the dev app installs and updates it the
+  ordinary way, on screens that build Tessera's dev. On main it would fit no screen until Tessera's next release, and
+  the index has one version per plugin, so nobody could install it in the meantime.
+- **The release:** right after Tessera publishes a release, merge dev into main and build the index on main
+  (Tessera's docs/RELEASING.md, "The release", step 6). A change that needs no newer firmware goes to main and is then
+  merged into dev, so dev never lacks what main has. Never rebase dev: screens are pinned to its commits.
+- **The index** of each branch is checked against the Tessera its app builds (`TESSERA_REF`: main against Tessera's
+  main, dev against its dev), and built by `.github/workflows/index.yml` after a push to it (the hourly run, for
+  community releases, is main's), or by hand: `GITHUB_TOKEN=$(gh auth token) python3 tools/build_index.py`, then
+  commit `index.json` on that branch.
+
 ## When you are done
 
 ```sh

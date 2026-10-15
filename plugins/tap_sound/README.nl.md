@@ -2,7 +2,8 @@
 
 Een kort, zacht tikje op de luidspreker van het scherm zodra je vinger iets raakt waar je op kunt tikken: een tegel,
 een toets, een slider, een rij van de instellingen, de bovenbalk. Sleep je een slider, dan tikt hij zachter bij elke
-stap: elke 5 %, of elke stand van een slider met maar een paar. Het speelt op het volume van het scherm: zet je het
+stap: elke 5 %, of elke stand van een slider met maar een paar, met het volle tikje waar hij zijn einde bereikt. - of +
+vasthouden tikt bij elke stap. Het speelt op het volume van het scherm: zet je het
 scherm zachter, dan is het tikje ook zachter.
 
 ## Wat je nodig hebt

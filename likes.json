@@ -1,10 +1,10 @@
 {
  "format": 1,
  "likes": {
-  "custom_card": 1,
+  "custom_card": 2,
   "ov_departures": 2,
   "picture_frame": 1,
   "tap_sound": 1,
-  "waste_collection": 1
+  "waste_collection": 2
  }
 }

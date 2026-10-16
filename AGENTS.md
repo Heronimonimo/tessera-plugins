@@ -94,7 +94,7 @@ contain, with the name over it).
 - **Name what the plugin may do** in `permissions`: every host a fetch reaches in `network`, every Home Assistant entity
   the screen reads in `read_entities`, every action it calls in `home_assistant_actions`. A plugin with `network` has
   the attribute `cloud` and a `privacy` link.
-- **Memory inside the chip is scarce** (since 0.10 of the plugin API): keep texts and lists a tile holds as `tessera::Text` and
+- **Memory inside the chip is scarce** (since API 0.10): keep texts and lists a tile holds as `tessera::Text` and
   `tessera::List`, which take PSRAM; a `std::string` member stays in the memory Wi-Fi needs (docs/FIRMWARE_API.md,
   "Memory").
 - **Memory**: the manifest's `memory` for a tile is what one tile costs in the screen's layout memory. Keep it honest:

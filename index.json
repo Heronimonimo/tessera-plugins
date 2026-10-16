@@ -1,6 +1,6 @@
 {
  "format": 1,
- "generated": "2026-10-15T19:50:43Z",
+ "generated": "2026-10-16T05:14:45Z",
  "plugin_api": "0.11",
  "blocked": [],
  "featured": [
@@ -32,6 +32,11 @@
    "repo": "https://github.com/maxgramser/tessera-plugins",
    "repo_id": 1408945265,
    "path": "plugins/guition_relays"
+  },
+  "microplant": {
+   "repo": "https://github.com/alexscemo/tessera-microplant",
+   "repo_id": 1418031891,
+   "path": "."
   },
   "ov_departures": {
    "repo": "https://github.com/maxgramser/tessera-plugins",
@@ -2095,6 +2100,311 @@
    },
    "changelog": {
     "en": "# Changelog\n\n## 0.3.0 - 2026-10-12\n- A second mode, Programmes: for each channel, in the order of the remote, the prime-time programme and the late one,\n  each with its time. A tap on the tile changes between Films and Programmes; the tile option \"Start mode\" says which\n  one it starts in; the mode a person chose stays when the screen wakes. The Programmes mode has its own title\n  (\"Programmes tonight\") and a pale blue background. When the channels do not fit, the page turns by itself every 8\n  seconds.\n- When there is no data (the sensor has no value, or its guide is not today's) the tile says so and shows an Update\n  button: a tap asks Home Assistant to update the sensor, which runs the script that fetches the guide. The screen must\n  be allowed to perform Home Assistant actions.\n- Needs the 0.3 version of the script `film-stasera-ha` (the sensor's new attributes `prog_*`); without them the Films\n  mode works as before and the Programmes mode says there are no programmes.\n- The tile asks for a little more room in the screen's layout memory (11000 bytes).\n- A long press counts as a tap. On some screens the finger's release reaches the app late, so a quick tap was read as a\n  long press, which a plugin never hears, and the tile sometimes ignored it. The tile also repaints only when\n  something changed (page, minute, data), not every second.\n\n\n## 0.2.1 - 2026-10-12\n- Adds `store.png`, the picture of the plugin on the Plugins page, made with `tools/store_image.py`. No change to the tile.\n\n## 0.2.0 - 2026-10-11\n- Under each title the channel's name is now in the regular colour, with a dot before it in the colour of its group\n  (Rai, Mediaset, Discovery, others), then the genre in grey. The sensor says the group in a new attribute, `groups`\n  (a number 1 to 4); without it the dot is simply not drawn.\n- The tile needs a little more room in the screen's layout memory (9000 instead of 6000 bytes).\n- A tile can now start from 1x1 (it shows the next film) and grow with the editor's handles up to 4x4.\n\n## 0.1.0 - 2026-10-11\n- First version: a tile with the films on TV tonight, read from a sensor of Home Assistant.\n"
+   },
+   "image": "store.png"
+  },
+  {
+   "id": "microplant",
+   "repo": "https://github.com/alexscemo/tessera-microplant",
+   "repo_id": 1418031891,
+   "path": ".",
+   "label": "community",
+   "status": "ok",
+   "release": {
+    "version": "0.6.2",
+    "sha": "50b6d13b8a89742fc3f612e11c8535d5b04524b2",
+    "date": "2026-10-14",
+    "tag": "v0.6.2"
+   },
+   "manifest": {
+    "id": "microplant",
+    "version": "0.6.2",
+    "api": "0.10",
+    "icon": "sprout",
+    "maintainer": "alexscemo",
+    "license": "MIT",
+    "stage": "beta",
+    "topics": [
+     "home"
+    ],
+    "requires": {
+     "esphome": "2026.6.2"
+    },
+    "boards": "any",
+    "flash_kb": 26,
+    "permissions": {
+     "ha_commands": [
+      "history/history_during_period",
+      "recorder/statistics_during_period",
+      "plant/get_info"
+     ],
+     "home_assistant_actions": [
+      "input_datetime.set_datetime",
+      "input_button.press",
+      "button.press"
+     ]
+    },
+    "answers": [
+     {
+      "command": "recorder/statistics_during_period",
+      "fields": {
+       "means": {
+        "path": "[*][*].mean",
+        "as": "numbers"
+       }
+      }
+     }
+    ],
+    "tiles": [
+     {
+      "id": "plant",
+      "name": "tile_name",
+      "icon": "sprout",
+      "sizes": {
+       "min": "1x1",
+       "max": "3x3",
+       "full": true
+      },
+      "memory": 6800,
+      "domains": [
+       "sensor",
+       "plant"
+      ],
+      "attributes": [
+       "moisture",
+       "temperature",
+       "humidity",
+       "brightness",
+       "illuminance",
+       "watered_at",
+       "unit_of_measurement",
+       "species"
+      ],
+      "example": "tile_example",
+      "preview": {
+       "title": "{name}",
+       "value": "{state}"
+      },
+      "options": [
+       {
+        "id": "watered_entity",
+        "kind": "text",
+        "label": "watered_entity",
+        "hint": "watered_entity_hint"
+       },
+       {
+        "id": "battery_entity",
+        "kind": "text",
+        "label": "battery_entity",
+        "hint": "battery_entity_hint"
+       }
+      ]
+     }
+    ],
+    "cards": [
+     {
+      "id": "metric",
+      "name": "card_name",
+      "wide": true
+     }
+    ],
+    "bar_items": [
+     {
+      "id": "thirsty",
+      "label": "bar_label",
+      "icon": "water",
+      "example": "bar_example"
+     }
+    ],
+    "settings": [
+     {
+      "key": "plant_demo_data",
+      "label": "setting_demo",
+      "hint": "setting_demo_hint"
+     },
+     {
+      "key": "plant_poll_seconds",
+      "label": "setting_poll",
+      "hint": "setting_poll_hint"
+     },
+     {
+      "key": "plant_watered_at",
+      "label": "setting_watered",
+      "hint": "setting_watered_hint"
+     }
+    ]
+   },
+   "translations": {
+    "en": {
+     "_meta": {
+      "name": "English"
+     },
+     "screen": {
+      "days_ago": "{n} day ago | {n} days ago",
+      "tile_default": "Plant",
+      "plant": "My plant",
+      "soil": "Soil",
+      "temperature": "Temp",
+      "humidity": "Air",
+      "light": "Light",
+      "soil_title": "Soil moisture",
+      "temperature_title": "Temperature",
+      "humidity_title": "Air humidity",
+      "light_title": "Light",
+      "mood_waiting": "Waiting for sensors",
+      "mood_thriving": "Thriving",
+      "mood_thanks": "Thank you!",
+      "mood_thirsty": "Thirsty",
+      "mood_parched": "Very thirsty",
+      "mood_soggy": "Too wet",
+      "mood_hot": "Too hot",
+      "mood_cold": "Too cold",
+      "mood_dark": "Needs light",
+      "mood_scorched": "Too much sun",
+      "mood_dry_air": "Air too dry",
+      "mood_humid": "Air too damp",
+      "watered_today": "Watered today",
+      "watered_yesterday": "Watered yesterday",
+      "watered_days": "Watered {n} day ago | Watered {n} days ago",
+      "watered_never": "Tap me when you water",
+      "water_key": "Watered",
+      "demo": "Demo",
+      "demo_choose": "Demo: choose a sensor",
+      "offline": "Offline",
+      "choose": "Choose a soil sensor",
+      "good": "Good",
+      "low": "A bit low",
+      "too_low": "Too low",
+      "high": "A bit high",
+      "too_high": "Too high",
+      "no_reading": "No reading",
+      "hint_good": "Nothing to do",
+      "hint_none": "Waiting for the sensor",
+      "hint_soil_low": "Water it soon",
+      "hint_soil_high": "Let the soil dry out",
+      "hint_temperature_low": "Move it somewhere warmer",
+      "hint_temperature_high": "Move it out of the heat",
+      "hint_humidity_low": "Mist it, or group plants",
+      "hint_humidity_high": "Give it more air",
+      "hint_light_low": "Move it nearer a window",
+      "hint_light_high": "Shade it from direct sun",
+      "range": "Good between {low} and {high}",
+      "history_title": "Last 24 hours",
+      "history_span": "{low} to {high}",
+      "history_wait": "Asking Home Assistant",
+      "history_none": "No history for this reading",
+      "history_ago": "24 h ago",
+      "history_now": "Now",
+      "bar_water": "Water {name}",
+      "bar_water_plain": "Water me",
+      "set_demo": "Demo data",
+      "set_poll": "Ask every",
+      "set_watered": "Watered now",
+      "set_never": "Never"
+     },
+     "app": {
+      "name": "MicroPlant",
+      "summary": "A living plant on your screen that shows soil, warmth, air and light, and says when to water.",
+      "tile_name": "Plant",
+      "tile_example": "Thriving, watered 2 days ago",
+      "card_name": "Plant reading",
+      "bar_label": "Plant needs water",
+      "bar_example": "Water Monstera",
+      "watered_entity": "Watering helper",
+      "watered_entity_hint": "An input_datetime, input_button or button that a tap on the plant sets. Empty: the screen keeps it.",
+      "battery_entity": "Sensor battery",
+      "battery_entity_hint": "The plant sensor's battery level (sensor, %). A small battery shows on the plant at 25 % or less.",
+      "setting_demo": "Demo data",
+      "setting_demo_hint": "Every plant tile on this screen shows a demo plant whose soil dries out in minutes.",
+      "setting_poll": "Ask every",
+      "setting_poll_hint": "How often a plant tile asks Home Assistant for the sensors of its options, in seconds.",
+      "setting_watered": "Watered at",
+      "setting_watered_hint": "The last watering of each plant without a helper, per tile: tile=seconds since 1970, and * for every plant. Empty for never."
+     }
+    },
+    "it": {
+     "_meta": {
+      "name": "Italiano"
+     },
+     "screen": {
+      "days_ago": "{n} giorno fa | {n} giorni fa",
+      "tile_default": "Pianta",
+      "plant": "La mia pianta",
+      "soil": "Terra",
+      "temperature": "Temp",
+      "humidity": "Aria",
+      "light": "Luce",
+      "soil_title": "Umidità del terreno",
+      "temperature_title": "Temperatura",
+      "humidity_title": "Umidità dell'aria",
+      "light_title": "Luce",
+      "mood_waiting": "In attesa dei sensori",
+      "mood_thriving": "In piena forma",
+      "mood_thanks": "Grazie!",
+      "mood_thirsty": "Ha sete",
+      "mood_parched": "Ha tanta sete",
+      "mood_soggy": "Troppo bagnata",
+      "mood_hot": "Troppo caldo",
+      "mood_cold": "Troppo freddo",
+      "mood_dark": "Vuole più luce",
+      "mood_scorched": "Troppo sole",
+      "mood_dry_air": "Aria troppo secca",
+      "mood_humid": "Aria troppo umida",
+      "watered_today": "Annaffiata oggi",
+      "watered_yesterday": "Annaffiata ieri",
+      "watered_days": "Annaffiata {n} giorno fa | Annaffiata {n} giorni fa",
+      "watered_never": "Toccami quando mi annaffi",
+      "water_key": "Annaffiata",
+      "demo": "Demo",
+      "demo_choose": "Demo: scegli un sensore",
+      "offline": "Offline",
+      "choose": "Scegli un sensore del terreno",
+      "good": "Bene",
+      "low": "Un po' basso",
+      "too_low": "Troppo basso",
+      "high": "Un po' alto",
+      "too_high": "Troppo alto",
+      "no_reading": "Nessun valore",
+      "hint_good": "Niente da fare",
+      "hint_none": "In attesa del sensore",
+      "hint_soil_low": "Annaffiala presto",
+      "hint_soil_high": "Lascia asciugare la terra",
+      "hint_temperature_low": "Spostala al caldo",
+      "hint_temperature_high": "Spostala dal caldo",
+      "hint_humidity_low": "Nebulizzala",
+      "hint_humidity_high": "Dalle più aria",
+      "hint_light_low": "Avvicinala a una finestra",
+      "hint_light_high": "Riparala dal sole diretto",
+      "range": "Bene tra {low} e {high}",
+      "history_title": "Ultime 24 ore",
+      "history_span": "da {low} a {high}",
+      "history_wait": "Chiedo a Home Assistant",
+      "history_none": "Nessuno storico per questo valore",
+      "history_ago": "24 h fa",
+      "history_now": "Ora",
+      "bar_water": "Annaffia {name}",
+      "bar_water_plain": "Annaffiami",
+      "set_demo": "Dati demo",
+      "set_poll": "Chiedi ogni",
+      "set_watered": "Annaffiata ora",
+      "set_never": "Mai"
+     },
+     "app": {
+      "name": "MicroPlant",
+      "summary": "Una pianta viva sullo schermo che mostra terra, caldo, aria e luce, e dice quando annaffiare.",
+      "tile_name": "Pianta",
+      "tile_example": "In piena forma, annaffiata 2 giorni fa",
+      "card_name": "Valore della pianta",
+      "bar_label": "La pianta ha sete",
+      "bar_example": "Annaffia Monstera"
+     }
+    }
+   },
+   "readme": {
+    "en": "# MicroPlant\n\nA houseplant that lives on your Tessera screen. It shows the soil moisture, temperature, air humidity and light of a\nreal plant, and its face and leaves show how the plant feels: thriving with a flower, drooping when it is thirsty,\nsweating in the heat, shivering in the cold, asleep in the dark. Tap it when you water it and it says thank you.\n\nMade for the 4-inch square screens (480 x 480), and drawn for every size from one cell to a page of its own.\n\n## What you see\n\n- **The plant**, in the middle of the tile. Its mood follows the reading that is furthest out of its range, the soil\n  first: *Thriving*, *Thirsty*, *Very thirsty*, *Too wet*, *Too hot*, *Too cold*, *Needs light*, *Too much sun*,\n  *Air too dry*, *Air too damp*. It blinks and sways now and then.\n- **Four cells** with the readings, each with a bar in green (in its range), amber (just outside it) or red (far\n  outside it).\n- **When it was last watered**: \"Watered 3 days ago\".\n- **The Watered key** on a large tile. On every size, a tap on the plant itself also counts as watering.\n- **A tap on a reading** opens its card: the value, a ruler from red through green, what to do (\"Water it soon\",\n  \"Move it nearer a window\"), and its last 24 hours from Home Assistant's history.\n- **The top bar** can show a watering can while a plant on the glass is thirsty (place *Plant needs water* on a\n  page's bar).\n\n| Size | What it shows |\n|---|---|\n| 1x1 | The plant, its mood, and the reading that matters most |\n| 2x1 | The plant, its mood and the four readings in a row |\n| 1x2, 1x3 | The plant on top, its mood and watering, the readings two by two |\n| 2x2, 2x3 | The plant, its name, mood and watering, the Watered key, and four cells under it |\n\n## Set up\n\n1. In Tessera, open **Plugins**, choose **Add with a link** and paste the link of this repository. Add **MicroPlant**\n   to your screen; the screen builds once.\n2. In **Layout**, place the **Plant** tile from the library's Plugins group. Until you choose an entity it shows a demo\n   plant whose soil dries out in minutes, so you can try the moods and the watering at once.\n3. In the inspector, choose the tile's **entity**: best a plant of\n   [Plant Monitor](https://github.com/Olen/homeassistant-plant) (the plant itself, not one of its sensors): the tile\n   finds its sensors and takes its good ranges from the plant. A sensor that has the readings as attributes, or a soil\n   moisture sensor alone, works too, with ranges that suit a leafy houseplant: soil 30 to 70 %, 16 to 28 °C, air 40\n   to 70 %, light 1,000 to 25,000 lx (see \"Where the readings come from\").\n4. Optional, but best: make a helper in Home Assistant (Settings, Devices & services, Helpers, **Date and/or time**,\n   with date and time) and fill its id into **Watering helper**, such as `input_datetime.monstera_watered`. A tap on\n   the plant then sets it, every screen sees the same watering, and it survives restarts. An **input_button** or a\n   **button** works too.\n5. To act on the plant, the screen must be allowed to perform actions in Home Assistant (the ESPHome integration's\n   option *Allow the device to perform Home Assistant actions*). Without it, watering is kept on the screen only.\n\n## Where the readings come from\n\nThe screen never makes a network connection of its own, by Tessera's rules. Home Assistant is the source:\n\n- **The tile's entity** is sent to the screen by Tessera at every change: its state (the soil moisture) and its\n  attributes `moisture`, `temperature`, `humidity`, `brightness` or `illuminance`, and `watered_at`.\n- **A plant of Plant Monitor** is asked for its sensors, their readings and its good ranges (`plant/get_info`), through\n  the Tessera app, every 60 seconds by default (the setting **Plant poll seconds**, 30 to 300), only while the tile is\n  on the glass and the screen is awake. The watering helper is asked at the same pace.\n- **A sensor node with a JSON API on your network** (an ESP32 in the pot, say): Tessera does not let a plugin reach a\n  local address, so let Home Assistant read it with a RESTful sensor, and choose that sensor as the tile's entity.\n  Home Assistant asks it every 30 seconds:\n\n```yaml\n# configuration.yaml\nrest:\n  - resource: http://192.168.1.50/api/plant     # your node's JSON, such as {\"moisture\": 41, \"temperature\": 21.8, ...}\n    scan_interval: 30\n    sensor:\n      - name: Monstera\n        unique_id: monstera_plant\n        value_template: \"{{ value_json.moisture }}\"\n        unit_of_measurement: \"%\"\n        json_attributes: [moisture, temperature, humidity, illuminance]\n```\n\n- **Separate sensors you already have**, as one entity:\n\n```yaml\ntemplate:\n  - sensor:\n      - name: Monstera\n        unique_id: monstera_combined\n        unit_of_measurement: \"%\"\n        state: \"{{ states('sensor.monstera_soil_moisture') }}\"\n        attributes:\n          temperature: \"{{ states('sensor.monstera_temperature') }}\"\n          humidity: \"{{ states('sensor.living_room_humidity') }}\"\n          illuminance: \"{{ states('sensor.monstera_illuminance') }}\"\n          watered_at: \"{{ states('input_datetime.monstera_watered') }}\"\n```\n\nA temperature in °F is turned into °C. The card's 24 hours come from Home Assistant's statistics, so they show for a sensor with a\n`state_class` (most do); a reading that is an attribute has no history of its own.\n\n## Settings\n\nIn the plugin's details on the screen's Plugins tab, in Home Assistant, and on the screen's own settings page (hold\nthe top bar, Settings, Plugins, MicroPlant):\n\n| Setting | What it does |\n|---|---|\n| Plant demo data | Every plant tile of this screen shows the demo plant. |\n| Plant poll seconds | How often a tile asks Plant Monitor and the watering helper. |\n| Plant watered at | The last watering of a plant without a helper, kept on the screen. The screen's settings page has a **Watered now** row for it. |\n\n## Privacy\n\nNothing leaves your home. The plugin reads only the entities you choose, through Home Assistant, and asks nothing of\nany service on the internet.\n\n## Good to know\n\n- MicroPlant uses plugin API 0.10, which is on Tessera's dev branch until its next release: put the screen on the dev\n  channel to build it today.\n- A tile shows **Offline** when Home Assistant has not answered for a few minutes; it keeps the last readings.\n- Amber means just outside the range (10 points for soil and air, 3 °C, or within half to twice the light range), red\n  means further out. The margins are at the top of `components/microplant/microplant_model.h`.\n- After **Watered**, the plant says thank you for ten seconds, then shows its mood again.\n"
+   },
+   "changelog": {
+    "en": "# Changelog\n\n## 0.6.2 - 2026-10-14\n- The battery mark and the watering helper work with an entity id longer than 32 characters (most battery sensors\n  have one): the app shortens the names in its answers, and the tile looked for the whole id.\n\n## 0.6.1 - 2026-10-14\n- Fewer redraws: a wide tile no longer draws its \"3 days ago\" again every second, nor an open card its marker. Lighter\n  on an ESP32-S3, whose panel and drawing share the same PSRAM.\n\n## 0.6.0 - 2026-10-14\n- A new option, **Sensor battery**: the plant sensor's battery level. At 25 % or less a small red battery shows at the\n  plant's top left corner, on every tile size, until the battery is changed.\n\n## 0.5.0 - 2026-10-14\n- A wide tile (2x1, 2x2) shows the days since the last watering at its top right, with a water drop: \"3 days ago\".\n  Nothing shows there before the first watering. The 2x2 tile's \"Watered ...\" line gave way to it.\n\n## 0.4.0 - 2026-10-14\n- The plant's name stands first on the top line of a wide tile (2x1, 2x2), its mood after it. It is the tile's name\n  from the editor, or the plant's own name in Home Assistant while the tile keeps its default name.\n\n## 0.3.1 - 2026-10-14\n- A plant without a light sensor shows three readings instead of an empty light cell.\n\n## 0.3.0 - 2026-10-14\n- The sensor and range options are gone: choose the plant of Plant Monitor as the tile's entity, and its sensors and\n  good ranges come from the plant. Other entities use ranges that suit a leafy houseplant.\n- Sensors typed into the old options are no longer read.\n\n## 0.2.0 - 2026-10-14\n- A plant of Plant Monitor brings its own sensors and good ranges: no sensors or ranges to fill in.\n- The Plant tile can take a whole page (2x3 on the 4-inch square).\n\n## 0.1.0 - 2026-10-13\n- First version: a plant tile that shows how your houseplant feels, from 1x1 to a page of its own.\n- Soil moisture, temperature, air humidity and light, each green, amber or red against a range you set.\n- Tap the plant or **Watered** when you water it; tap a reading for its range, what to do and its last 24 hours.\n- Demo data until you choose a sensor, or with the setting **Plant demo data**.\n- Plants without a watering helper each keep their own watering date on the screen.\n- A Plant Monitor that sends temperatures in °F shows them right.\n- Needs Tessera's dev firmware (plugin API 0.10) until its next release.\n"
    },
    "image": "store.png"
   },

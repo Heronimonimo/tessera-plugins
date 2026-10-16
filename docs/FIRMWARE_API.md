@@ -353,7 +353,7 @@ tessera::Sound tick_;           // set_tick() keeps it
 tessera::SoundPlayer sounds_;   // set_speaker() hands it the speaker
 
 void loop() override { sounds_.loop(); }       // hands the speaker what it takes now, never waits
-void on_press() override { sounds_.play(tick_); }  // since 0.11 of the plugin API; on_touch() before it
+void on_press() override { sounds_.play(tick_); }  // since API 0.11; on_touch() before it
 ```
 
 `play()` starts a sound in place of the one that plays, `stop()` ends it, `playing(sound)` says which one plays.
@@ -421,7 +421,7 @@ stack, and when they run out the screen loses Wi-Fi or restarts. A board with PS
 has megabytes beside it. A plain `std::string`, `std::vector` or `new` always takes the memory inside the chip: the
 boards are built so that only what asks for PSRAM gets it.
 
-So from 0.10 of the plugin API on:
+So from API 0.10 on:
 
 - **Your tile and card objects are in PSRAM by themselves.** `tessera::Tile` and `tessera::Card` take PSRAM in their
   `operator new`, so what they hold directly (numbers, `char` arrays, pointers, a `Film films[16]`) is there already.

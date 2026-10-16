@@ -391,7 +391,7 @@ stack, and when they run out the screen loses Wi-Fi or restarts. A board with PS
 has megabytes beside it. A plain `std::string`, `std::vector` or `new` always takes the memory inside the chip: the
 boards are built so that only what asks for PSRAM gets it.
 
-So from plugin API 0.10:
+So from API 0.10 on:
 
 - **Your tile and card objects are in PSRAM by themselves.** `tessera::Tile` and `tessera::Card` take PSRAM in their
   `operator new`, so what they hold directly (numbers, `char` arrays, pointers, a `Film films[16]`) is there already.

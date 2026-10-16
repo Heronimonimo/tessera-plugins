@@ -95,7 +95,7 @@ There are two ways for people to find it:
 3. The repository can be read without an account (it is public), and has a release, or the tag that `ref` names.
 4. `tools/check.py` passes on that release: the manifest (with a licence that goes with AGPL-3.0, and an `api` the core
    can build), the folder and its files, the translations, the README and the changelog, `plugin.yaml` and the code
-   rules. The manifest's id is the file's name.
+   rules, and the component's Python ("What a plugin's Python may do", below). The manifest's id is the file's name.
 5. The id is not one of Tessera's own, and no other repository or folder published it first ("Whose id it is", below).
 6. What it needs is in the index: every plugin of `requires.plugins`, and a plugin or a board for every feature of
    `requires.features`, for one of its boards; and no plugins that need each other in a circle.
@@ -130,7 +130,35 @@ work for the plugin: a fetch reaches only the hosts of `permissions.network`, an
   reason on its Plugins tab, and its next build leaves the plugin out ("Blocked versions", below). A plugin that breaks
   the rules also leaves the list.
 
+The ESPHome component of a plugin has a second half: its Python (`components/<id>/__init__.py`) runs where the screen is
+built, inside the Tessera app, when the app builds the screen. The app hands that build nothing of its own (not its
+token for Home Assistant), and the rules below hold the Python to what a component needs. The Tessera editor says both
+halves before anyone adds a plugin.
+
 Found a plugin that does harm? Open an issue in this repository.
+
+## What a plugin's Python may do
+
+ESPHome runs a component's `__init__.py`, and what it imports, on the computer that builds the screen: for most people
+the Tessera app in Home Assistant, beside Home Assistant's config folder and on its network. So `tools/check.py` reads
+every `.py` under `components/` as a syntax tree, at every release the index takes and for Tessera's own plugins alike,
+and refuses:
+
+- an import outside `esphome` and a short list of the standard library (`PYTHON_MODULES` in `tools/check.py`: pathlib,
+  json, re, math, struct, typing, dataclasses, enum, functools, itertools, collections, logging, voluptuous and a few
+  more; never os, sys, subprocess, socket, urllib, shutil, importlib);
+- the parts of ESPHome that run commands or fetch (`esphome.util`, `esphome.git`, `esphome.external_files`, ...);
+- `open()`, `eval()`, `exec()`, `__import__()` and the like, and a dunder attribute that is a way around all of this;
+- reading a file that is not beside the plugin: `.read_text()`, `.read_bytes()`, `.glob()` and so on go through a
+  `Path` made from `__file__` (`Path(__file__).parent / "sounds" / "tap.wav"`), and nothing is written at all;
+- a path of the computer in a string (`/config`, `/data`, `/homeassistant`, `/etc`, ...).
+
+And in `plugin.yaml` and the parts, which ESPHome reads on the same computer: no `!secret` (the screen's Wi-Fi and
+keys are the screen's; a value of a plugin is an input of its manifest), and no `!include` that leaves the plugin's
+folder. `packages` and `external_components` were already the core's alone.
+
+These rules catch the plain `import os` and the honest slip, and make anything else stand out in a diff. They are not
+a sandbox: listing stays what "What listing means" says.
 
 ## Whose id it is
 

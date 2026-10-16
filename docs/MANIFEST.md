@@ -87,7 +87,7 @@ fetch:
       label: [LinePublicNumber, DestinationName50]
 ```
 
-It names `api: "0.7"` and builds on today's core, which offers plugin API 0.11: no minor after 0.7 changed a name
+It names `api: "0.7"` and builds on today's core, which offers plugin API 0.12: no minor after 0.7 changed a name
 ([FIRMWARE_API.md](FIRMWARE_API.md), "Versions"). The fetch is plain `http` because OVapi offers nothing else and the
 fetch carries no secret.
 
@@ -109,7 +109,7 @@ fetch carries no secret.
 |---|---|---|
 | `id` | yes | The plugin's id. Unique in the index, the same as its folder and its component, and never changed. |
 | `version` | yes | Three numbers, `1.0.0`. Raise it for every change that reaches screens, and give it a `## 1.0.0` heading with its lines at the top of `CHANGELOG.md` ([MAKING_A_PLUGIN.md](MAKING_A_PLUGIN.md#the-changelog)). |
-| `api` | yes | The plugin API it was written for, as major and minor in quotes: `"0.8"`; the plugin API 0.11 is the one the core offers now (0.10 in the release until the next one). Without quotes YAML reads a number, which the check refuses. It builds on a core with the same major and at least that minor, unless a minor after its own up to the core's changed a name (0.4 did); `tools/check.py` refuses an `api` newer than the core it checks against, and one from before such a minor ([FIRMWARE_API.md](FIRMWARE_API.md), "Versions"). |
+| `api` | yes | The plugin API it was written for, as major and minor in quotes: `"0.8"`; the plugin API 0.12 is the one the core offers now (on Tessera's dev branch; the release has an older one until the next). Without quotes YAML reads a number, which the check refuses. It builds on a core with the same major and at least that minor, unless a minor after its own up to the core's changed a name (0.4 did); `tools/check.py` refuses an `api` newer than the core it checks against, and one from before such a minor ([FIRMWARE_API.md](FIRMWARE_API.md), "Versions"). |
 | `icon` | yes | <a id="icon"></a>A Material Design Icons name from Tessera's icon set (`screen_manager/app/tile_icons.py` in the Tessera repository, such as `bus`, `train`, `calendar`, `thermometer`, `lightbulb`). The screen's icon font holds only that set. Tiles and top bar items take it when they name no icon of their own. |
 | `maintainer` | yes | The GitHub name of whoever looks after the plugin, 1 to 39 characters. `tools/check.py` refuses the template's `your-github-name` in any folder but `template/`. |
 | `license` | yes | An SPDX name that goes with AGPL-3.0: `MIT`, `Apache-2.0`, `BSD-2-Clause`, `BSD-3-Clause`, `ISC`, `MPL-2.0`, `LGPL-2.1-or-later`, `LGPL-3.0-or-later`, `GPL-3.0-or-later`, `GPL-3.0-only`, `AGPL-3.0-or-later`, `AGPL-3.0-only`, `Unlicense`, `0BSD`, `CC0-1.0`. |
@@ -292,11 +292,31 @@ An option:
 | `default` | The value when nothing is chosen. It must fit the option: `true` or `false` for a toggle, a number from `min` to `max` for a number, a text of at most 64 characters for a text or a choice, and for a choice with `choices` one of their values (or `""`). |
 | `choices` | For `choice`: `[{ value: "a", label: key }]`, at most 48, each with both: `value` a text of 1 to 64 characters, `label` a text key. |
 | `options_from` | For `choice`: the id of a fetch of this plugin that fills the list (its `map` has `value` and `label`). A choice has either `choices` or `options_from`, never both or neither. |
+| `multiple` | For `text` and `choice` (0.12): the option keeps a list of up to this many values, 2 to 16, in the order the person put them (they drag them into another). A text list keeps texts; a choice keeps picks (below). Its default is `[]`; a text list may name a list of texts. A fetch uses a list through `each` or `{name\|,}` ([FETCH.md](FETCH.md)). |
+| `search` | For `choice` with `options_from` (0.12): `true` finds the choices by what the person types. The editor sends it, from two characters on, as `{search}` of that fetch: `url: https://api.deezer.com/search/artist?q={search}`. Without `multiple` the option keeps one pick. No option of the tile may be called `search`. |
 | `min`, `max`, `step`, `unit` | For `number`: the range (both required, `min` less than `max`), the step (more than 0, default 1), and a unit of up to 8 characters. |
 
 A field that belongs to another kind is an error (`min` on a text option, `choices` on a number). A text option's value
 is at most 64 characters. The tile gets every option in `context.options` of `create()`, with the defaults filled in.
 Options are also the placeholders of the tile's fetch: `{stop}` in a URL is the option `stop`.
+
+**What an option keeps** (0.12). A text, number or toggle keeps that value; a choice its value. A choice with `multiple`,
+or one found by `search`, keeps **picks**: `{"value": "9635624", "label": "Billie Eilish"}`, the label being the words the
+person saw in the list. A list from a fetch may be gone or other next week, so the words are kept with the value; for the
+plugin's own `choices` the label is the choice's text in the editor's language. Each value and label is at most 64
+characters, and a list holds each value once. All options of a tile together are at most 1280 bytes of JSON: they travel
+to the screen with the tile's data in one message, and the editor refuses a value that would not fit.
+
+```yaml
+options:
+  - { id: artists, kind: choice, multiple: 8, options_from: artist_search, search: true, label: artists }
+  - { id: tickers, kind: text, multiple: 6, label: tickers, default: [AAPL] }
+```
+
+```json
+{ "artists": [ { "value": "9635624", "label": "Billie Eilish" }, { "value": "27", "label": "Daft Punk" } ],
+  "tickers": [ "AAPL", "ASML" ] }
+```
 
 ### Fetches: `fetch`
 
@@ -305,9 +325,10 @@ At most 8. [FETCH.md](FETCH.md) explains them in full.
 | Field | Required | What |
 |---|---|---|
 | `id` | yes | The fetch's id; a tile names it in `data`, an option in `options_from`. Every fetch named there must be described here. |
-| `url` | yes | At most 512 characters. `https://`, or `http://` for a fetch that carries no secret. The host is fixed (no placeholder in it), one of `permissions.network`, with no user, no password and no port other than 80 or 443. Placeholders such as `{stop}` name an option of a tile that uses the fetch (through `data` or `options_from`) or an input. A secret may stand in the query, never in the path. |
+| `url` | yes | At most 512 characters. `https://`, or `http://` for a fetch that carries no secret. The host is fixed (no placeholder in it), one of `permissions.network`, with no user, no password and no port other than 80 or 443. Placeholders such as `{stop}` name an option of a tile that uses the fetch (through `data` or `options_from`) or an input; `{name\|,}` joins the values of a list option (0.12), and `{search}` is what the person types for a choice with `search`. A secret may stand in the query, never in the path. |
 | `headers` | no | Up to 8, each a text of at most 512 characters, with placeholders: `{ Authorization: "Bearer {api_key}" }`. |
 | `every` | yes | How old an answer may get: a whole number with `s`, `m`, `h` or `d` (`30s`, `5m`, `1h`, `1d`). At least 30 seconds. |
+| `each` | no | An option with `multiple` of every tile that uses the fetch (0.12): one ask per value, `{<option>}` in the URL being that value, and the answers come together as one list ([FETCH.md](FETCH.md), "Once per value"). Not for a fetch that fills a list of choices. |
 | `map` | yes | What of the answer reaches the screen. |
 
 The map's fields, in short ([FETCH.md](FETCH.md), "The map", has them in full):
@@ -315,7 +336,7 @@ The map's fields, in short ([FETCH.md](FETCH.md), "The map", has them in full):
 | Field | What |
 |---|---|
 | `items` | Where the list is, a path that starts with `$`. Required for a fetch that fills a list of choices. |
-| `fields` | 1 to 8 fields, each a path or `{ path, as, tz }`. `as` is `text` (default), `number`, `epoch` or `numbers` (0.5); `tz` only with `as: epoch`. Required for a fetch a tile shows. |
+| `fields` | 1 to 8 fields, each a path or `{ path, as, tz }`. `as` is `text` (default), `number`, `epoch` or `numbers` (0.5); `tz` only with `as: epoch`. In a fetch with `each`, `{ each: value }` or `{ each: label }` (0.12) is the value whose ask brought the item. Required for a fetch a tile shows. |
 | `where`, `skip` | Keep, or drop, the items whose field (named by its key) is one of the values: a value or a list of values, texts or numbers, which may hold placeholders. Only with `items`. |
 | `sort` | A field, with `-` in front for the other way round. Only with `items`. |
 | `limit` | How many items at most, a whole number from 1 to 48. Default 48. Only with `items`. |
@@ -493,6 +514,7 @@ These are the fields whose minor the core records:
 | 0.7 | `topics`, `provides`, `requires.features`, a part's `features`, plugins of `requires.plugins` that come along |
 | 0.8 | The features `camera` and `camera_sensor` |
 | 0.10 | A tile's `pictures` |
+| 0.12 | An option's `multiple` and `search`, a fetch's `each`, `{name\|,}` and `{search}` in a URL, a field `{ each: value }` |
 
 What each minor brought to the C++ is in [FIRMWARE_API.md](FIRMWARE_API.md), "Versions".
 
@@ -522,6 +544,9 @@ What each minor brought to the C++ is in [FIRMWARE_API.md](FIRMWARE_API.md), "Ve
 | Options per tile | 12 |
 | Choices of an option | 48, each value 64 characters |
 | A text option's value | 64 characters |
+| Values of a list option (`multiple`) | 16, each value and label 64 characters |
+| A tile's options together | 1280 bytes of JSON |
+| What a person types in a search | 64 characters, asked from 2 |
 | A number option's unit | 8 characters |
 | Fetches | 8 |
 | A fetch's URL | 512 characters |

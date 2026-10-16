@@ -13,6 +13,9 @@
 | Waking the screen when someone stands in front of it | A plugin with a radar sensor and `on_interval`. |
 | Settings a person changes in the editor, a test with its result ("Heard: Okay Nabu") | ESPHome entities in `plugin.yaml` named in `settings`; a button with a `status`. |
 | Talking to an AI model or a voice assistant | Home Assistant's Assist and its conversation agents (OpenAI, Anthropic); the plugin picks the assistant, the key stays in Home Assistant. |
+| Several stops, artists, calendars or tickers on one tile, picked in the editor or found by typing | An option with `multiple` (and `search`), and a fetch with `each` that asks once per value and shows one list, or `{name\|,}` for a service that takes them all in one ask (plugin API 0.12, [FETCH.md](FETCH.md)). |
+| A card with a list whose rows switch their entity (the lights that are on, the open locks) | A card's `on_tap` and `tessera::tap_point()` to find the row, then `tessera::action` (0.12, [FIRMWARE_API.md](FIRMWARE_API.md), "A card"). |
+| Playing an album, a playlist or a radio station on a tap | `tessera::action` with several fields of any type: `media_id`, `media_type`, `artist`, a list of speakers (0.12, [FIRMWARE_API.md](FIRMWARE_API.md), "Actions"). |
 | Tonight's films with their posters, a person's photo, a logo on a tile | Places for pictures on the tile (`ui::picture`, the manifest's `pictures`, plugin API 0.10): the app fetches each picture from a host the manifest names, or Home Assistant's own, and the screen shows them ([FIRMWARE_API.md](FIRMWARE_API.md), "Pictures on a tile"). |
 
 ## Works with a way around
@@ -40,8 +43,10 @@
 
 Not in the plugin API so far: a picture on a plugin's card over the page (a tile has places for pictures since 0.10,
 a card not yet), video on a plugin's tile (live cameras reach a screen through Tessera's own camera tiles), a message to
-the app other than a Home Assistant command its manifest names (`permissions.ha_commands`), and a Python part of a
-plugin in the app (the app runs only its own code, see above). A settings page on the screen, a card, top bar items,
+the app other than a Home Assistant command its manifest names (`permissions.ha_commands`), an option that holds
+entities of Home Assistant (a tile has one entity through `domains`), an option of several numbers or of objects of
+your own, a pause between the asks of a fetch with `each` (a service that allows one ask a second), and a Python part of
+a plugin in the app (the app runs only its own code, see above). A settings page on the screen, a card, top bar items,
 tap actions, tiles of an entity, pictures on a tile, questions to the app, sounds on the screen's speaker and a camera
 of the screen's own for Home Assistant (the features `camera` and `camera_sensor`) are all there
 ([FIRMWARE_API.md](FIRMWARE_API.md)).

@@ -1,4 +1,4 @@
-# The firmware API (plugin API 0.11)
+# The firmware API (plugin API 0.12)
 
 A plugin's code runs on the screen as an ESPHome component. It talks to Tessera's core through one header:
 
@@ -9,7 +9,7 @@ A plugin's code runs on the screen as an ESPHome component. It talks to Tessera'
 The header lives in the Tessera repository at `components/smart_display/plugin_api.h`; it is the reference, and this
 page explains it. Everything is in namespace `tessera`.
 
-A manifest names the plugin API it was written for: `api: "0.8"`, or `"0.9"`, `"0.10"` or `"0.11"` for the parts those brought; the plugin API 0.11 is the one the core offers now (on Tessera's dev branch; the release has 0.10 until the next one). Which cores
+A manifest names the plugin API it was written for: `api: "0.8"`, or `"0.9"` up to `"0.12"` for the parts those brought; the plugin API 0.12 is the one the core offers now (on Tessera's dev branch; the release has an older one until the next). Which cores
 a plugin builds on is under "Versions" at the end of this page.
 
 ## The component: `__init__.py`
@@ -126,7 +126,7 @@ A change of the tile's size or options makes a new object: `create()` never has 
 | `name` | The name the tile got in the editor, `""` for none. Valid during `create()` only: copy it. |
 | `entity` | The Home Assistant entity the tile belongs to (a manifest tile with `domains`), `""` for none. Copy it. An entity of a domain Tessera draws no tile for needs the firmware after 0.56.0 ("A tile of an entity"). |
 | `tile` | The tile's index in the layout: pass it to `tessera::open_card` so the card follows the tile. |
-| `options` | The tile's options, the manifest's defaults filled in. Read with ArduinoJson: `c.options["walk"] \| 0`. |
+| `options` | The tile's options, the manifest's defaults filled in. Read with ArduinoJson: `c.options["walk"] \| 0`. A list option (0.12, `multiple`) is an array: of texts, or for a choice of picks, `{"value", "label"}` with the words the person saw (`for (JsonVariantConst p : c.options["artists"].as<JsonArrayConst>()) p["label"]`); a choice found by `search` without `multiple` is one pick, or `""` while none is chosen. Copy what you keep. |
 
 ### What `on_state` gets
 
@@ -175,6 +175,26 @@ tessera::action("climate.set_temperature", entity_, "temperature", "21");
 The screen must be allowed to perform actions, and the manifest names each action under
 `permissions.home_assistant_actions`.
 
+### Actions
+
+An action with several fields, of any JSON type (0.12), takes a JSON object:
+
+```cpp
+JsonDocument d;
+d["media_id"] = album.title;          // a text arrives as the text: "1989" stays a text
+d["media_type"] = "album";
+d["artist"] = album.artist;
+tessera::action("music_assistant.play_media", player_, d);   // false when it was not sent
+```
+
+A text arrives in Home Assistant as the text, a number as a number, `true` and `false` as themselves, a list or an
+object whole: `hs_color` as `[20, 100]`, several speakers as an `entity_id` list. Nothing in it ever runs as a template,
+also a text from the internet with `{{` in it. `entity` is the action's `entity_id`, whose tiles on the screen wait for
+the answer as for a tap on them; pass `""` when the fields name their own target (an `entity_id` list, an `area_id`) or
+the action has none. Up to 16 fields, each named with `a-z`, `0-9` and `_`, together at most 1 KB; `entity_id` in the
+fields beside a non-empty `entity` is refused. When it is not sent, the screen's log says why. A text-only field is
+cheapest as the older form, `tessera::action(service, entity, key, value)`.
+
 An entity of a domain Tessera draws no tile for (`plant`, `todo`, `calendar`, ...) works the same, with the firmware
 after 0.56.0: up to 0.56.0 the tile gets that entity's state, name and attributes but an empty `entity`, and
 `tessera::action` on it returns false. The fix is on Tessera's dev branch until its next release. To try it now, build
@@ -195,12 +215,22 @@ class Upcoming : public tessera::Card {
   void on_state(JsonObjectConst data) override;         // the tile it was opened from changed
   void on_tick(uint32_t epoch) override;                // once a second while open
   void on_theme() override;
+  void on_tap() override;                               // a tap on the card's room (0.12); tessera::tap_point() says where
   bool on_back() override { return false; }             // true: stay open (you went back a step of your own)
 };
 
 add_card("upcoming", [this]() { return new Upcoming(this); });
 tessera::open_card(plugin_id(), "upcoming", entity_, tile_);   // from a tile's on_tap
 ```
+
+**A tap on the card** (0.12): `on_tap()` hears a short tap on the card's room (`c.parent`), after the same touch filter
+as a tile's: a finger that moved, or was too short, never reaches it, and a bounce on the same spot within 600 ms is one
+tap (a tap on another spot is not). `tessera::tap_point()` says where the finger was, in the card's own pixels (`0,0` the
+top left of `c.parent`), so a list knows its row: switch the entity of that row with `tessera::action`. The back key in
+the top bar is `on_back`, never `on_tap`. The objects `tessera::ui` makes take no taps, so a tap on a label or a block
+reaches the card; an LVGL object of your own takes the tap itself when it is clickable (`lv_obj_create` makes it so:
+`lv_obj_remove_flag(obj, LV_OBJ_FLAG_CLICKABLE)`), and an LVGL slider on the card keeps its drags. The card may close
+itself or open another from `on_tap`, as from any of its calls.
 
 `CardContext` has `parent`, `width`, `height`, `entity` (what it was opened for, `""` for none) and `tile` (-1 for
 none). `on_state` gets a plugin tile's data, or `{"state", "name"}` of one of Tessera's tiles. The title is the tile's
@@ -323,7 +353,7 @@ tessera::Sound tick_;           // set_tick() keeps it
 tessera::SoundPlayer sounds_;   // set_speaker() hands it the speaker
 
 void loop() override { sounds_.loop(); }       // hands the speaker what it takes now, never waits
-void on_press() override { sounds_.play(tick_); }  // plugin API 0.11; on_touch() before it
+void on_press() override { sounds_.play(tick_); }  // since 0.11 of the plugin API; on_touch() before it
 ```
 
 `play()` starts a sound in place of the one that plays, `stop()` ends it, `playing(sound)` says which one plays.
@@ -391,7 +421,7 @@ stack, and when they run out the screen loses Wi-Fi or restarts. A board with PS
 has megabytes beside it. A plain `std::string`, `std::vector` or `new` always takes the memory inside the chip: the
 boards are built so that only what asks for PSRAM gets it.
 
-So from plugin API 0.10:
+So from 0.10 of the plugin API on:
 
 - **Your tile and card objects are in PSRAM by themselves.** `tessera::Tile` and `tessera::Card` take PSRAM in their
   `operator new`, so what they hold directly (numbers, `char` arrays, pointers, a `Film films[16]`) is there already.
@@ -477,8 +507,9 @@ number. Before 0.9 a block has no colour by meaning: `TRACK` and `ACCENT`, or th
 | `tessera::date_text(epoch)` | A day as the top bar writes it: "Fri 9 Oct", "vr 9 okt". |
 | `tessera::days_text(days)` | "Tomorrow", "In 3 days" in the screen's language; `""` for today (bring your own word) and the past. |
 | `tessera::action(service, entity, key, value)` | A Home Assistant action on an entity (see "A tile of an entity"). |
+| `tessera::action(service, entity, fields)` | The same with a JSON object of fields of any type (0.12, "Actions"). |
 | `tessera::open_card(plugin_id, card, entity, tile, title)`, `close_card()` | Open or close a card. |
-| `tessera::tap_point()` | Where the finger of the tile's `on_tap` was (0.10), in the tile's own pixels; `-1,-1` when unknown. Valid during `on_tap`. |
+| `tessera::tap_point()` | Where the finger of the tile's `on_tap` was (0.10), or of a card's (0.12), in its own pixels; `-1,-1` when unknown. Valid during `on_tap`. |
 | `tessera::send(plugin, request)` | Ask the app (see "Questions to the app"). |
 
 ## Rules
@@ -529,7 +560,7 @@ tiles, 0.10). A plugin can bring a camera (0.8): the feature `camera`, an ESPHom
 
 ## Versions
 
-A manifest names the plugin API it was written for: `api: "0.8"`, `"0.9"`, `"0.10"` or `"0.11"`; the plugin API 0.11 is the one the core offers now (on Tessera's dev branch; the release has 0.10 until the next one). When a
+A manifest names the plugin API it was written for: `api: "0.8"` up to `"0.12"`; the plugin API 0.12 is the one the core offers now (on Tessera's dev branch; the release has an older one until the next). When a
 screen is built, `smart_display.register_plugin()` compares it with the core's and stops the build with one sentence
 when it does not fit. A plugin fits a core when all three hold:
 
@@ -542,17 +573,18 @@ when it does not fit. A plugin fits a core when all three hold:
 **While the major is 0** a minor may still change a name or a signature as the API settles. The core lists those
 minors in `PLUGIN_API_BREAKS`, in `screen_manager/app/plugin_manifest.py` and in `components/smart_display/__init__.py`
 (a test keeps the two equal). Today the list holds one: 0.4, where `Plugin::on_tick` became `on_interval`. So with a
-core of 0.11:
+core of 0.12:
 
 | The manifest says | Builds? | Why |
 |---|---|---|
-| `api: "0.11"` | Yes | The core's own. |
+| `api: "0.12"` | Yes | The core's own. |
+| `api: "0.11"` | Yes | Same major, an older minor, and no break after 0.11. |
 | `api: "0.10"` | Yes | Same major, an older minor, and no break after 0.10. |
 | `api: "0.9"` | Yes | Same major, an older minor, and no break after 0.9. |
 | `api: "0.8"` | Yes | Same major, an older minor, and no break after 0.8. |
 | `api: "0.7"` | Yes | Same major, an older minor, and no break after 0.7. |
 | `api: "0.3"` | No | 0.4 changed a name it may use; the build says so in one sentence and asks to update the plugin. |
-| `api: "0.12"` | No | Newer than the core; the build asks to update the plugin or the screen's firmware. |
+| `api: "0.13"` | No | Newer than the core; the build asks to update the plugin or the screen's firmware. |
 | `api: "1.0"` | No | Another major. |
 
 `tools/check.py` applies the same rules against the core it checks with (`api_fits` of `plugin_manifest.py`), so a
@@ -575,6 +607,7 @@ brought:
 | 0.9 | `Font::DIGITS`, the large digits of a climate card's setpoint, and `ui::covers()`; `Tone::GOOD`, `ui::set_fill()` and `ui::tone_color()`, the tones for a block; `ui::label` one line high. |
 | 0.10 | Pictures on a tile: `ui::picture`, `ui::set_picture`, `ui::pictures`, `Fit`, `Turn` and a reflection, places that overlap, `ui::slide_pictures`, and the manifest's `pictures` of a tile; `ui::text`, a label of several lines; `tessera::tap_point()`, where a tile was tapped; memory in PSRAM: `tessera::Text`, `tessera::List`, and tiles and cards made there. |
 | 0.11 | `on_press`, a finger landing on something that takes a tap or a drag, at once (for a click that answers the finger; `on_touch` comes as the finger lets go), `on_step(Step)`, a value under the finger stepping (a dragged slider, dial or seek bar, a held key), and `SoundPlayer::add()`, sounds evenly spaced one after another. |
+| 0.12 | A card's `on_tap()`, with `tessera::tap_point()` in the card's own pixels. Values of JSON: an option that keeps several values (`multiple`: texts, or picks `{value, label}`), a choice found by searching (`search`), a fetch once per value of a list (`each`, `{ each: label }`) or with the list joined (`{name\|,}`), and `tessera::action(service, entity, fields)` with fields of any JSON type. |
 
 A minor of the app's or the manifest's side only still counts: a plugin that uses what it brought needs an app that
 knows it ([MANIFEST.md](MANIFEST.md), "Which minor brought a field").

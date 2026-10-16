@@ -1,0 +1,40 @@
+# What tools/preview.py shows (docs/PREVIEW.md): a few weeks of releases of made-up artists, as the screen gets them
+# (Deezer's answers mapped, one ask per artist, merged newest first), with drawn covers (no real record's). Moments come
+# from the time of the run, so "New" stays new.
+tiles:
+  - tile: releases
+    name: New music
+    entity: media_player.living_room
+    options:
+      artists: [{ value: "1", label: Mira Vale }, { value: "2", label: The Low Tides }, { value: "3", label: Juno Park },
+                { value: "4", label: Northern Static }]
+    data:
+      items:
+        - { title: Golden Hour Again, artist: Mira Vale, kind: album, cover: sunset, date: "{epoch-1d}" }
+        - { title: Undertow, artist: The Low Tides, kind: single, cover: tide, date: "{epoch-4d}" }
+        - { title: Afterglow, artist: Juno Park, kind: ep, cover: neon, date: "{epoch+3d}" }
+        - { title: Open Fields, artist: Northern Static, kind: album, cover: meadow, date: "{epoch-9d}" }
+        - { title: Primary, artist: Juno Park, kind: single, cover: blocks, date: "{epoch-16d}" }
+        - { title: Night Lines, artist: Mira Vale, kind: single, cover: city, date: "{epoch-23d}" }
+        - { title: Concentric, artist: Northern Static, kind: ep, cover: rings, date: "{epoch-31d}" }
+        - { title: Dune Songs, artist: The Low Tides, kind: album, cover: dunes, date: "{epoch-40d}" }
+    sizes: [2x2, 3x2, 4x2, 2x1, 3x1, 1x1, 1x2]
+
+states:
+  media_player.living_room:
+    state: playing
+    attributes: { friendly_name: Living room, mass_player_type: player, media_album_name: Undertow,
+                  media_artist: The Low Tides }
+
+cards:
+  - { card: release, entity: media_player.living_room }
+
+pictures:
+  "https://cdn-images.dzcdn.net/images/cover/sunset/500x500-000000-80-0-0.jpg": preview/sunset.jpg
+  "https://cdn-images.dzcdn.net/images/cover/tide/500x500-000000-80-0-0.jpg": preview/tide.jpg
+  "https://cdn-images.dzcdn.net/images/cover/neon/500x500-000000-80-0-0.jpg": preview/neon.jpg
+  "https://cdn-images.dzcdn.net/images/cover/meadow/500x500-000000-80-0-0.jpg": preview/meadow.jpg
+  "https://cdn-images.dzcdn.net/images/cover/blocks/500x500-000000-80-0-0.jpg": preview/blocks.jpg
+  "https://cdn-images.dzcdn.net/images/cover/city/500x500-000000-80-0-0.jpg": preview/city.jpg
+  "https://cdn-images.dzcdn.net/images/cover/rings/500x500-000000-80-0-0.jpg": preview/rings.jpg
+  "https://cdn-images.dzcdn.net/images/cover/dunes/500x500-000000-80-0-0.jpg": preview/dunes.jpg

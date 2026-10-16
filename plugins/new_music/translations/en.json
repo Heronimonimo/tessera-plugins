@@ -1,0 +1,39 @@
+{
+  "_meta": {
+    "name": "English"
+  },
+  "screen": {
+    "waiting": "Asking for new music",
+    "no_artists": "Pick your artists",
+    "failed": "No new music right now",
+    "none": "Nothing out yet",
+    "old": "List may be old",
+    "today": "Today",
+    "new": "New",
+    "out": "Out {day}",
+    "album": "Album",
+    "ep": "EP",
+    "single": "Single",
+    "play": "Play",
+    "play_on": "Play on {player}",
+    "playing": "Playing",
+    "sent": "Starting",
+    "no_player": "Choose a Music Assistant player for this tile in the editor to play it here.",
+    "retry": "Try again"
+  },
+  "app": {
+    "name": "New music",
+    "summary": "The newest albums and singles of the artists you pick, as a cover flow you can play from.",
+    "tile_name": "New music",
+    "tile_example": "The newest releases of your artists",
+    "card_name": "Release",
+    "artists": "Artists",
+    "artists_hint": "Type a name and pick the artist, up to eight. The newest releases of all of them show together.",
+    "hide": "Show",
+    "hide_hint": "Leave the singles out to see only albums and EPs.",
+    "hide_none": "Albums, EPs and singles",
+    "hide_singles": "Albums and EPs",
+    "every": "Next release every",
+    "every_hint": "How often the cover flow moves on by itself; 0 keeps it still."
+  }
+}

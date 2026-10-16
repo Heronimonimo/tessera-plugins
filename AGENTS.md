@@ -128,9 +128,14 @@ Two branches, as Tessera has, and each has its own `index.json`:
   Tessera's dev firmware has, such as a newer plugin API, goes to dev: there the dev app installs and updates it the
   ordinary way, on screens that build Tessera's dev. On main it would fit no screen until Tessera's next release, and
   the index has one version per plugin, so nobody could install it in the meantime.
-- **The release:** right after Tessera publishes a release, merge dev into main and build the index on main
-  (Tessera's docs/RELEASING.md, "The release", step 6). A change that needs no newer firmware goes to main and is then
-  merged into dev, so dev never lacks what main has. Never rebase dev: screens are pinned to its commits.
+- **The release:** Tessera's release takes this repository along (`tools/release.py publish` there, with
+  `tools/release_plugins.py`; its docs/RELEASING.md, "The release", step 6). Before it publishes, it refuses when the
+  check is not green on dev, a plugin of dev's index does not fit the release's plugin API, or dev does not merge into
+  main by itself (outside `index.json` and `likes.json`). Right after, it merges dev into main, builds main's index
+  against the released core and checks it (every plugin fits, every plugin dev offered is there, the check is green on
+  main), and moves dev up to main. Nothing of that is done by hand, unless a step failed: then Tessera's
+  `tools/release.py plugins --yes` finishes it. A change that needs no newer firmware goes to main and is then merged
+  into dev, so dev never lacks what main has. Never rebase dev: screens are pinned to its commits.
 - **The index** of each branch is checked against the Tessera its app builds (`TESSERA_REF`: main against Tessera's
   main, dev against its dev), and built by `.github/workflows/index.yml` after a push to it (the hourly run, for
   community releases, is main's), or by hand: `GITHUB_TOKEN=$(gh auth token) python3 tools/build_index.py`, then

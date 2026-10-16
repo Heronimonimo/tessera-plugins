@@ -594,6 +594,11 @@ class ReleaseCard : public tessera::Card {
     int lines = 2;
     if (need(2, face) > room) lines = 1;
     if (need(lines, face) > room) face = Font::TITLE;
+    // A title that does not fit its lines in the large face takes the smaller one, never dots where a face fits.
+    if (face == Font::HEADLINE && ui::text_width(release_.title, face) > lines * w * 9 / 10) {
+      face = Font::TITLE;
+      if (lines == 1 && need(2, face) <= room) lines = 2;
+    }
     const int hh = ui::line_height(face);
     int y = top;
     kind_ = ui::label(c.parent, Font::BODY, theme::MUTED);
@@ -642,6 +647,14 @@ class ReleaseCard : public tessera::Card {
     ui::set_color(key_text_, theme::ON_ACCENT);
   }
 
+  // A player that does not start within a while: the key says Play again, so the person can try again.
+  void on_tick(uint32_t) override {
+    if (sent_ == Sent::YES && esphome::millis() - sent_at_ > 20000) {
+      sent_ = Sent::NO;
+      paint();
+    }
+  }
+
   void on_tap() override {
     const tessera::Point p = tessera::tap_point();
     if (player_.empty() || p.y < key_y_ - ui::px(8) || p.y > key_y_ + key_h_ + ui::px(8)) return;
@@ -651,6 +664,7 @@ class ReleaseCard : public tessera::Card {
     d["media_type"] = "album";
     if (release_.artist[0]) d["artist"] = release_.artist;
     sent_ = tessera::action(PLAY, plain(player_), d) ? Sent::YES : Sent::FAILED;
+    sent_at_ = esphome::millis();
     paint();
   }
 
@@ -722,6 +736,7 @@ class ReleaseCard : public tessera::Card {
   bool beside_ = false;
   Font title_face_ = Font::HEADLINE;
   Sent sent_ = Sent::NO;
+  uint32_t sent_at_ = 0;
   int x0_ = 0;
   Vinyl vinyl_;
   lv_obj_t *cover_{}, *kind_{}, *title_{}, *artist_{}, *key_{}, *key_icon_{}, *key_text_{}, *note_{};

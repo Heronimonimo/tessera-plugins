@@ -1,7 +1,7 @@
 {
  "format": 1,
- "generated": "2026-10-16T05:14:45Z",
- "plugin_api": "0.11",
+ "generated": "2026-10-16T06:39:14Z",
+ "plugin_api": "0.13",
  "blocked": [],
  "featured": [
   "ov_departures",
@@ -37,6 +37,11 @@
    "repo": "https://github.com/alexscemo/tessera-microplant",
    "repo_id": 1418031891,
    "path": "."
+  },
+  "new_music": {
+   "repo": "https://github.com/maxgramser/tessera-plugins",
+   "repo_id": 1408945265,
+   "path": "plugins/new_music"
   },
   "ov_departures": {
    "repo": "https://github.com/maxgramser/tessera-plugins",
@@ -960,6 +965,250 @@
    "changelog": {
     "en": "# Changelog\n\n## 0.1.0 - 2026-10-11\n- First version: the relays of the Guition 4-inch wallbox base (one, or three with **Three relays**) as switches in Home Assistant and on the screen's settings page.\n- Moving from the Override YAML of the Guition docs? Remove its `switch:` block first; the entities stay the same.\n",
     "nl": "# Wijzigingen\n\n## 0.1.0 - 2026-10-11\n- Eerste versie: de relais van de Guition 4-inch inbouwdoos (een, of drie met **Drie relais**) als schakelaars in Home Assistant en op de instellingenpagina van het scherm.\n- Kom je van de Override YAML uit de Guition-docs? Haal eerst het `switch:`-blok weg; de entiteiten blijven hetzelfde.\n"
+   },
+   "image": "store.png"
+  },
+  {
+   "id": "new_music",
+   "repo": "https://github.com/maxgramser/tessera-plugins",
+   "repo_id": 1408945265,
+   "path": "plugins/new_music",
+   "label": "tessera",
+   "status": "ok",
+   "release": {
+    "version": "0.1.0",
+    "sha": "345090ac01aacb4b8364f943367542d0e64ddbe9",
+    "date": "2026-10-16"
+   },
+   "manifest": {
+    "id": "new_music",
+    "version": "0.1.0",
+    "api": "0.13",
+    "icon": "album",
+    "maintainer": "MaxGramser",
+    "license": "MIT",
+    "stage": "beta",
+    "topics": [
+     "media",
+     "fun"
+    ],
+    "requires": {
+     "esphome": "2026.6.2"
+    },
+    "boards": "any",
+    "flash_kb": 12,
+    "permissions": {
+     "network": [
+      "api.deezer.com",
+      "cdn-images.dzcdn.net"
+     ],
+     "home_assistant_actions": [
+      "music_assistant.play_media"
+     ]
+    },
+    "attributes": [
+     "cloud"
+    ],
+    "privacy": "https://github.com/MaxGramser/tessera-plugins/tree/main/plugins/new_music#privacy",
+    "tiles": [
+     {
+      "id": "releases",
+      "name": "tile_name",
+      "icon": "album",
+      "sizes": {
+       "min": "1x1",
+       "max": "4x4"
+      },
+      "memory": 5600,
+      "pictures": 7,
+      "domains": [
+       "media_player"
+      ],
+      "has_attributes": [
+       "mass_player_type"
+      ],
+      "attributes": [
+       "media_album_name",
+       "media_artist"
+      ],
+      "data": "releases",
+      "example": "tile_example",
+      "preview": {
+       "title": "{title}",
+       "badge": "{artist}"
+      },
+      "options": [
+       {
+        "id": "artists",
+        "kind": "choice",
+        "multiple": 8,
+        "options_from": "artist_search",
+        "search": true,
+        "label": "artists",
+        "hint": "artists_hint"
+       },
+       {
+        "id": "hide",
+        "kind": "choice",
+        "label": "hide",
+        "hint": "hide_hint",
+        "default": "none",
+        "choices": [
+         {
+          "value": "none",
+          "label": "hide_none"
+         },
+         {
+          "value": "single",
+          "label": "hide_singles"
+         }
+        ]
+       },
+       {
+        "id": "every",
+        "kind": "number",
+        "min": 0,
+        "max": 60,
+        "step": 5,
+        "unit": "s",
+        "default": 15,
+        "label": "every",
+        "hint": "every_hint"
+       }
+      ]
+     }
+    ],
+    "cards": [
+     {
+      "id": "release",
+      "name": "card_name",
+      "pictures": 1
+     }
+    ],
+    "fetch": [
+     {
+      "id": "artist_search",
+      "url": "https://api.deezer.com/search/artist?q={search}&limit=25",
+      "every": "1d",
+      "map": {
+       "items": "$.data[*]",
+       "value": "id",
+       "label": "name"
+      }
+     },
+     {
+      "id": "releases",
+      "each": "artists",
+      "url": "https://api.deezer.com/artist/{artists}/albums?limit=50",
+      "every": "6h",
+      "map": {
+       "items": "$.data[*]",
+       "fields": {
+        "title": "title",
+        "date": {
+         "path": "release_date",
+         "as": "epoch"
+        },
+        "kind": "record_type",
+        "cover": "md5_image",
+        "artist": {
+         "each": "label"
+        }
+       },
+       "skip": {
+        "kind": "{hide}"
+       },
+       "sort": "-date",
+       "limit": 12
+      }
+     }
+    ]
+   },
+   "translations": {
+    "en": {
+     "_meta": {
+      "name": "English"
+     },
+     "screen": {
+      "waiting": "Asking for new music",
+      "no_artists": "Pick your artists",
+      "failed": "No new music right now",
+      "none": "Nothing out yet",
+      "old": "List may be old",
+      "today": "Today",
+      "new": "New",
+      "out": "Out {day}",
+      "album": "Album",
+      "ep": "EP",
+      "single": "Single",
+      "play": "Play",
+      "play_on": "Play on {player}",
+      "playing": "Playing",
+      "sent": "Starting",
+      "no_player": "Choose a Music Assistant player for this tile in the editor to play it here.",
+      "retry": "Try again"
+     },
+     "app": {
+      "name": "New music",
+      "summary": "The newest albums and singles of the artists you pick, as a cover flow you can play from.",
+      "tile_name": "New music",
+      "tile_example": "The newest releases of your artists",
+      "card_name": "Release",
+      "artists": "Artists",
+      "artists_hint": "Type a name and pick the artist, up to eight. The newest releases of all of them show together.",
+      "hide": "Show",
+      "hide_hint": "Leave the singles out to see only albums and EPs.",
+      "hide_none": "Albums, EPs and singles",
+      "hide_singles": "Albums and EPs",
+      "every": "Next release every",
+      "every_hint": "How often the cover flow moves on by itself; 0 keeps it still."
+     }
+    },
+    "nl": {
+     "_meta": {
+      "name": "Nederlands"
+     },
+     "screen": {
+      "waiting": "Nieuwe muziek ophalen",
+      "no_artists": "Kies je artiesten",
+      "failed": "Nu geen nieuwe muziek",
+      "none": "Nog niets uit",
+      "old": "Lijst kan oud zijn",
+      "today": "Vandaag",
+      "new": "Nieuw",
+      "out": "Uit {day}",
+      "album": "Album",
+      "ep": "EP",
+      "single": "Single",
+      "play": "Afspelen",
+      "play_on": "Afspelen op {player}",
+      "playing": "Speelt nu",
+      "sent": "Starten",
+      "no_player": "Kies in de editor een Music Assistant-speler voor deze tile om hier af te spelen.",
+      "retry": "Opnieuw"
+     },
+     "app": {
+      "name": "Nieuwe muziek",
+      "summary": "De nieuwste albums en singles van de artiesten die je kiest, als coverflow waaruit je afspeelt.",
+      "tile_name": "Nieuwe muziek",
+      "tile_example": "De nieuwste releases van je artiesten",
+      "card_name": "Release",
+      "artists": "Artiesten",
+      "artists_hint": "Typ een naam en kies de artiest, tot acht. De nieuwste releases van allemaal staan samen.",
+      "hide": "Toon",
+      "hide_hint": "Laat de singles weg om alleen albums en EP's te zien.",
+      "hide_none": "Albums, EP's en singles",
+      "hide_singles": "Albums en EP's",
+      "every": "Volgende release elke",
+      "every_hint": "Hoe vaak de coverflow vanzelf verder gaat; 0 houdt hem stil."
+     }
+    }
+   },
+   "readme": {
+    "en": "# New music\n\nThe newest albums, EPs and singles of the artists you pick, as a cover flow on a tile: the release in the middle large,\n\"New\" on its cover for two weeks after it came out, its title, artist and kind under it, the releases beside it turned\ntowards it with a reflection under every cover. It moves on by itself every fifteen seconds and runs round. Tap left of\nthe middle cover to go back one, right of it to go on one, and tap the middle cover to open the release with its cover\nlarge: a key there plays it on your Music Assistant player.\n\nThe artists, their releases and the covers come from [Deezer](https://www.deezer.com). You do not need a Deezer\naccount, and the music plays from whatever service your Music Assistant has (Spotify, Apple Music, Tidal, Deezer, your\nown files).\n\n## Set up\n\n1. Add the plugin to a screen in Tessera. The screen builds once.\n2. In Layout, place the **New music** tile from the library's Plugins group. Two rows high or more shows the cover\n   flow; one row high shows a cover beside its title; one cell shows the cover alone.\n3. In the inspector, under **Artists**, type a name and pick the artist, up to eight. The newest releases of all of\n   them show together, newest first.\n4. To play from the screen, choose the tile's player: the inspector offers the players of\n   [Music Assistant](https://www.music-assistant.io) in Home Assistant. Without one the tile shows the releases, and the\n   release's card says how to add a player.\n5. **Show** leaves the singles out; **Next release every** sets how often the flow moves on (0 keeps it still).\n\n## Good to know\n\n- The releases are asked for every six hours, once for each artist. The tile shows the newest twelve of all artists\n  together; a release two of your artists share shows once.\n- Deezer lists a release a little ahead of its day: it shows \"Out in 3 days\" on its cover until it is out.\n- Music Assistant finds the release by its title and artist on its own services, so it plays the best match it finds\n  there. A release that is only on Deezer, with a Music Assistant without Deezer, may play another version or not at\n  all.\n- The screen must be allowed to perform Home Assistant actions (the ESPHome integration's option, which Tessera turns\n  on when it adds the screen).\n- A board without the memory for pictures (the CYD, the Waveshare 3.5-inch, the Hosyond 4-inch) shows a record for\n  every release instead of its cover, its label in a colour of the artist's own, in the same cover flow.\n\n## Privacy\n\nTessera (the app in Home Assistant, not the screen) asks Deezer's API for the artists whose name you type and for the\nreleases of the artists you picked, and fetches the covers from `cdn-images.dzcdn.net`. Deezer sees the address of\nyour Home Assistant and those artists; nothing else of your home. Playing goes from the screen to Home Assistant and\nMusic Assistant only. The screen never reaches the internet.\n"
+   },
+   "changelog": {
+    "en": "# Changelog\n\n## 0.1.0\n- First version: the newest albums, EPs and singles of up to eight artists you pick, from Deezer, as a cover flow of\n  their covers that moves on by itself, with \"New\" on a release of the last two weeks. Tap left or right to go back or\n  on, tap the middle cover to open the release with its cover large and play it on a Music Assistant player. Needs a\n  screen with plugin API 0.13. A board without pictures shows a record for each release instead of its cover.\n"
    },
    "image": "store.png"
   },

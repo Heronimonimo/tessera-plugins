@@ -1,6 +1,6 @@
 {
  "format": 1,
- "generated": "2026-10-16T06:39:14Z",
+ "generated": "2026-10-16T07:07:57Z",
  "plugin_api": "0.13",
  "blocked": [],
  "featured": [
@@ -1647,13 +1647,13 @@
    "label": "tessera",
    "status": "ok",
    "release": {
-    "version": "0.2.0",
-    "sha": "eb0f7084a847b94bf7eed86bca88566dfa716796",
-    "date": "2026-10-15"
+    "version": "0.2.1",
+    "sha": "ec8a7b2c0a92cd1b58d3c38c1b5f27f3d34ad680",
+    "date": "2026-10-16"
    },
    "manifest": {
     "id": "tap_sound",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "api": "0.11",
     "icon": "gesture-tap-button",
     "maintainer": "MaxGramser",
@@ -1716,8 +1716,8 @@
     "nl": "# Tikgeluid\n\nEen kort, zacht tikje op de luidspreker van het scherm zodra je vinger iets raakt waar je op kunt tikken: een tegel,\neen toets, een slider, een rij van de instellingen, de bovenbalk. Sleep je een slider, dan tikt hij zachter bij elke\nstap: elke 5 %, of elke stand van een slider met maar een paar, met het volle tikje waar hij zijn einde bereikt. - of +\nvasthouden tikt bij elke stap. Het speelt op het volume van het scherm: zet je het\nscherm zachter, dan is het tikje ook zachter.\n\n## Wat je nodig hebt\n\n- De firmware van Tessera met plugin-API 0.11.\n- Een scherm met een luidspreker: een bord dat er een meebrengt (de reTerminal D1001, het Waveshare ESP32-P4-86-paneel)\n  of een plugin die dat doet.\n\n## Instellen\n\n1. Open in Tessera **Plugins**, kies **Tikgeluid** en vink je schermen aan. Elk scherm wordt een keer gebouwd.\n2. Meer is het niet: het scherm tikt vanaf dan bij elke aanraking.\n\n## Op het scherm\n\nHoud de bovenbalk vast, dan **Instellingen**, **Plugins**, **Tikgeluid**: **Tikgeluid** zet het tikje uit en aan. Dezelfde\nschakelaar is een entiteit van het scherm in Home Assistant (\"Tap sound\") en staat in de details van de plugin op het\ntabblad Plugins van het scherm. Het **Volume** van het scherm staat onder **Extras**.\n\n## Het geluid\n\nHet zijn twee bestanden: `components/tap_sound/sounds/tap.wav` voor een vinger die neerkomt en `step.wav` voor een stap\nvan een slider, WAV-bestanden met 16-bit samples, mono, op 48 kHz. Een\neigen plugin die je van deze maakt kan ze vervangen; de build zegt het als een bestand niet zo'n WAV is. Op een scherm\nwaarvan de microfoon en de luidspreker een bus delen (het Waveshare-paneel) wacht een tikje zolang er iets luistert, en\nvalt het weg als dat langer dan een seconde duurt.\n"
    },
    "changelog": {
-    "en": "# Changelog\n\n## 0.2.0 - 2026-10-15\n- The tick comes the moment your finger lands on a tile, a key, a slider or a row of the settings, no longer after you\n  let go. A push that wakes a dimmed screen and a touch between the tiles stay silent.\n- Dragging a slider ticks softly at every step, evenly however fast you drag: every 5 %, or every position of a slider\n  with only a few. The end of a slider ticks firmer, and holding - or + ticks at every step.\n- Needs Tessera's firmware with plugin API 0.11.\n\n## 0.1.0 - 2026-10-10\n- First version: a short, soft tick on the screen's speaker for every tap, with a setting to turn it off.\n",
-    "nl": "# Wijzigingen\n\n## 0.2.0 - 2026-10-15\n- Het tikje komt zodra je vinger een tegel, een toets, een slider of een rij van de instellingen raakt, niet meer pas\n  als je loslaat. Een druk die een gedimd scherm wekt en een aanraking tussen de tegels blijven stil.\n- Een slider slepen tikt zacht bij elke stap, gelijkmatig hoe snel je ook sleept: elke 5 %, of elke stand van een\n  slider met maar een paar. Het einde van een slider tikt steviger, en - of + vasthouden tikt bij elke stap.\n- Vraagt de firmware van Tessera met plugin-API 0.11.\n\n## 0.1.0 - 2026-10-10\n- Eerste versie: een kort, zacht tikje op de luidspreker van het scherm bij elke tik, met een instelling om het uit te zetten.\n"
+    "en": "# Changelog\n\n## 0.2.1 - 2026-10-16\n- Builds with the current firmware again: a screen that still had the first 0.2.0 failed its update with\n  \"on_step marked override, but does not override\". Update the plugin, then the screen.\n\n## 0.2.0 - 2026-10-15\n- The tick comes the moment your finger lands on a tile, a key, a slider or a row of the settings, no longer after you\n  let go. A push that wakes a dimmed screen and a touch between the tiles stay silent.\n- Dragging a slider ticks softly at every step, evenly however fast you drag: every 5 %, or every position of a slider\n  with only a few. The end of a slider ticks firmer, and holding - or + ticks at every step.\n- Needs Tessera's firmware with plugin API 0.11.\n\n## 0.1.0 - 2026-10-10\n- First version: a short, soft tick on the screen's speaker for every tap, with a setting to turn it off.\n",
+    "nl": "# Wijzigingen\n\n## 0.2.1 - 2026-10-16\n- Bouwt weer met de huidige firmware: een scherm dat nog de eerste 0.2.0 had, faalde bij zijn update met\n  \"on_step marked override, but does not override\". Werk de plugin bij, en dan het scherm.\n\n## 0.2.0 - 2026-10-15\n- Het tikje komt zodra je vinger een tegel, een toets, een slider of een rij van de instellingen raakt, niet meer pas\n  als je loslaat. Een druk die een gedimd scherm wekt en een aanraking tussen de tegels blijven stil.\n- Een slider slepen tikt zacht bij elke stap, gelijkmatig hoe snel je ook sleept: elke 5 %, of elke stand van een\n  slider met maar een paar. Het einde van een slider tikt steviger, en - of + vasthouden tikt bij elke stap.\n- Vraagt de firmware van Tessera met plugin-API 0.11.\n\n## 0.1.0 - 2026-10-10\n- Eerste versie: een kort, zacht tikje op de luidspreker van het scherm bij elke tik, met een instelling om het uit te zetten.\n"
    },
    "image": "store.png"
   },

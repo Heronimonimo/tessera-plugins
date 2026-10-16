@@ -1,7 +1,7 @@
 # Tessera plugins
 
 > Plugins for Tessera, the ESP32 touch screens for Home Assistant. A plugin is an ESPHome component (C++) built into a
-> screen's firmware plus a manifest the Tessera app reads; the app fetches web data for it. The plugin API is 0.12 now (on Tessera's dev; the release has an older one until the next);
+> screen's firmware plus a manifest the Tessera app reads; the app fetches web data for it. The plugin API is 0.13 now (on Tessera's dev; the release has an older one until the next);
 > a plugin builds on the same major from its own minor up, unless a listed minor after it changed a name (only 0.4).
 > Home Assistant is the backend: no plugin code runs in the app.
 

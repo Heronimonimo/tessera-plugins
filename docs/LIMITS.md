@@ -41,13 +41,12 @@
 
 ## Cannot, yet
 
-Not in the plugin API so far: a picture on a plugin's card over the page (a tile has places for pictures since 0.10,
-a card not yet), video on a plugin's tile (live cameras reach a screen through Tessera's own camera tiles), a message to
+Not in the plugin API so far: video on a plugin's tile (live cameras reach a screen through Tessera's own camera tiles), a message to
 the app other than a Home Assistant command its manifest names (`permissions.ha_commands`), an option that holds
 entities of Home Assistant (a tile has one entity through `domains`), an option of several numbers or of objects of
 your own, a pause between the asks of a fetch with `each` (a service that allows one ask a second), and a Python part of
 a plugin in the app (the app runs only its own code, see above). A settings page on the screen, a card, top bar items,
-tap actions, tiles of an entity, pictures on a tile, questions to the app, sounds on the screen's speaker and a camera
+tap actions, tiles of an entity, pictures on a tile and on a card, questions to the app, sounds on the screen's speaker and a camera
 of the screen's own for Home Assistant (the features `camera` and `camera_sensor`) are all there
 ([FIRMWARE_API.md](FIRMWARE_API.md)).
 

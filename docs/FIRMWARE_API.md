@@ -1,4 +1,4 @@
-# The firmware API (plugin API 0.12)
+# The firmware API (plugin API 0.13)
 
 A plugin's code runs on the screen as an ESPHome component. It talks to Tessera's core through one header:
 
@@ -9,7 +9,7 @@ A plugin's code runs on the screen as an ESPHome component. It talks to Tessera'
 The header lives in the Tessera repository at `components/smart_display/plugin_api.h`; it is the reference, and this
 page explains it. Everything is in namespace `tessera`.
 
-A manifest names the plugin API it was written for: `api: "0.8"`, or `"0.9"` up to `"0.12"` for the parts those brought; the plugin API 0.12 is the one the core offers now (on Tessera's dev branch; the release has an older one until the next). Which cores
+A manifest names the plugin API it was written for: `api: "0.8"`, or `"0.9"` up to `"0.13"` for the parts those brought; the plugin API 0.13 is the one the core offers now (on Tessera's dev branch; the release has an older one until the next). Which cores
 a plugin builds on is under "Versions" at the end of this page.
 
 ## The component: `__init__.py`
@@ -414,6 +414,36 @@ layout memory counts: the screen keeps them in its picture store, within the sam
 and a tile of eight posters is one picture there. A frame whose picture did not come stays the card's colour, and the
 screen asks again later, each time after a longer while.
 
+### Pictures on a card
+
+A card over the page shows pictures the same way (0.13): the same calls, made in `open()`, in the card's room.
+
+```cpp
+void open(const tessera::CardContext &c) override {
+  if (ui::pictures()) {
+    cover_ = ui::picture(c.parent);                       // a place, sized and placed as any object
+    lv_obj_set_size(cover_, side, side);
+    lv_obj_set_pos(cover_, 0, 0);
+    ui::set_picture(cover_, cover_url(album), tessera::Fit::COVER);
+  }
+  // ... the title, the artist, a key that plays it, beside or under the cover
+}
+void show(const Album &next) { ui::set_picture(cover_, cover_url(next), tessera::Fit::COVER); }   // a card that steps on
+```
+
+- Name how many places the card has in the manifest, `cards: [{ id: release, name: card_name, pictures: 1 }]`
+  ([MANIFEST.md](MANIFEST.md), "Cards"). The app paints only for a card that has them, from a host of
+  `permissions.network`, or Home Assistant's own pictures when the card was opened for an entity of the screen's layout
+  (`open_card` with that entity).
+- The card asks while it is open, with the priority of Tessera's own media card, and its picture leaves the store when
+  the card closes (Back, standby, another card). It shares the screen's picture budget: what the page under the card
+  shows stays, a page out of sight makes room first.
+- The same address as on the tile, such as the cover the tile shows at that moment, is a picture the app already has:
+  it only paints it at the card's size, so the card shows it about as soon as it opens. Use the very same URL.
+- `set_picture` with another address keeps the picture the place shows until the next one is there, as on a tile;
+  `ui::slide_pictures`, `Turn` and `mirror` work on a card as on a tile.
+- `ui::pictures()` is false on a board without the memory for pictures (the CYD): lay the card out without the place.
+
 ## Memory
 
 A screen has two kinds of memory. Inside the chip there are a few tens of kilobytes, shared with Wi-Fi and the network
@@ -459,7 +489,7 @@ The screen's look is the same on every tile, so a plugin draws with the core's s
 | `ui::tone_color(Tone, Role)` (0.9) | A tone's colour in this look, for a part the two above do not reach. |
 | `ui::text(parent, Font, Role)` | A label of several lines (0.10): wraps at its width, ends in dots at its height (two lines to start with; set your own). For a description, a title that may take two lines. |
 | `ui::block(parent, Role)` | A rounded block with the radius of a key (a badge, a bar). |
-| `ui::picture(parent)`, `ui::set_picture(place, url, fit)`, `ui::pictures()`, `ui::slide_pictures(dx, ms)` | Pictures on a tile (0.10), above. |
+| `ui::picture(parent)`, `ui::set_picture(place, url, fit)`, `ui::pictures()`, `ui::slide_pictures(dx, ms)` | Pictures on a tile (0.10) and on a card (0.13), above. |
 | `ui::color(Role)` | A colour by its role. |
 | `ui::icon(codepoint)` | An icon of Tessera's set as text, for a label in `Font::ICON` or `ICON_SMALL`. |
 
@@ -560,7 +590,7 @@ tiles, 0.10). A plugin can bring a camera (0.8): the feature `camera`, an ESPHom
 
 ## Versions
 
-A manifest names the plugin API it was written for: `api: "0.8"` up to `"0.12"`; the plugin API 0.12 is the one the core offers now (on Tessera's dev branch; the release has an older one until the next). When a
+A manifest names the plugin API it was written for: `api: "0.8"` up to `"0.13"`; the plugin API 0.13 is the one the core offers now (on Tessera's dev branch; the release has an older one until the next). When a
 screen is built, `smart_display.register_plugin()` compares it with the core's and stops the build with one sentence
 when it does not fit. A plugin fits a core when all three hold:
 
@@ -573,18 +603,19 @@ when it does not fit. A plugin fits a core when all three hold:
 **While the major is 0** a minor may still change a name or a signature as the API settles. The core lists those
 minors in `PLUGIN_API_BREAKS`, in `screen_manager/app/plugin_manifest.py` and in `components/smart_display/__init__.py`
 (a test keeps the two equal). Today the list holds one: 0.4, where `Plugin::on_tick` became `on_interval`. So with a
-core of 0.12:
+core of 0.13:
 
 | The manifest says | Builds? | Why |
 |---|---|---|
-| `api: "0.12"` | Yes | The core's own. |
+| `api: "0.13"` | Yes | The core's own. |
+| `api: "0.12"` | Yes | Same major, an older minor, and no break after 0.12. |
 | `api: "0.11"` | Yes | Same major, an older minor, and no break after 0.11. |
 | `api: "0.10"` | Yes | Same major, an older minor, and no break after 0.10. |
 | `api: "0.9"` | Yes | Same major, an older minor, and no break after 0.9. |
 | `api: "0.8"` | Yes | Same major, an older minor, and no break after 0.8. |
 | `api: "0.7"` | Yes | Same major, an older minor, and no break after 0.7. |
 | `api: "0.3"` | No | 0.4 changed a name it may use; the build says so in one sentence and asks to update the plugin. |
-| `api: "0.13"` | No | Newer than the core; the build asks to update the plugin or the screen's firmware. |
+| `api: "0.14"` | No | Newer than the core; the build asks to update the plugin or the screen's firmware. |
 | `api: "1.0"` | No | Another major. |
 
 `tools/check.py` applies the same rules against the core it checks with (`api_fits` of `plugin_manifest.py`), so a
@@ -608,6 +639,7 @@ brought:
 | 0.10 | Pictures on a tile: `ui::picture`, `ui::set_picture`, `ui::pictures`, `Fit`, `Turn` and a reflection, places that overlap, `ui::slide_pictures`, and the manifest's `pictures` of a tile; `ui::text`, a label of several lines; `tessera::tap_point()`, where a tile was tapped; memory in PSRAM: `tessera::Text`, `tessera::List`, and tiles and cards made there. |
 | 0.11 | `on_press`, a finger landing on something that takes a tap or a drag, at once (for a click that answers the finger; `on_touch` comes as the finger lets go), `on_step(Step)`, a value under the finger stepping (a dragged slider, dial or seek bar, a held key), and `SoundPlayer::add()`, sounds evenly spaced one after another. |
 | 0.12 | A card's `on_tap()`, with `tessera::tap_point()` in the card's own pixels. Values of JSON: an option that keeps several values (`multiple`: texts, or picks `{value, label}`), a choice found by searching (`search`), a fetch once per value of a list (`each`, `{ each: label }`) or with the list joined (`{name\|,}`), and `tessera::action(service, entity, fields)` with fields of any JSON type. |
+| 0.13 | Pictures on a card over the page: `ui::picture`, `ui::set_picture` and `ui::slide_pictures` in a card's calls, and the manifest's `pictures` of a card. |
 
 A minor of the app's or the manifest's side only still counts: a plugin that uses what it brought needs an app that
 knows it ([MANIFEST.md](MANIFEST.md), "Which minor brought a field").

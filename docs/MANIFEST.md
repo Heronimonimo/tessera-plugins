@@ -87,7 +87,7 @@ fetch:
       label: [LinePublicNumber, DestinationName50]
 ```
 
-It names `api: "0.7"` and builds on today's core, which offers plugin API 0.12: no minor after 0.7 changed a name
+It names `api: "0.7"` and builds on today's core, which offers plugin API 0.13: no minor after 0.7 changed a name
 ([FIRMWARE_API.md](FIRMWARE_API.md), "Versions"). The fetch is plain `http` because OVapi offers nothing else and the
 fetch carries no secret.
 
@@ -109,7 +109,7 @@ fetch carries no secret.
 |---|---|---|
 | `id` | yes | The plugin's id. Unique in the index, the same as its folder and its component, and never changed. |
 | `version` | yes | Three numbers, `1.0.0`. Raise it for every change that reaches screens, and give it a `## 1.0.0` heading with its lines at the top of `CHANGELOG.md` ([MAKING_A_PLUGIN.md](MAKING_A_PLUGIN.md#the-changelog)). |
-| `api` | yes | The plugin API it was written for, as major and minor in quotes: `"0.8"`; the plugin API 0.12 is the one the core offers now (on Tessera's dev branch; the release has an older one until the next). Without quotes YAML reads a number, which the check refuses. It builds on a core with the same major and at least that minor, unless a minor after its own up to the core's changed a name (0.4 did); `tools/check.py` refuses an `api` newer than the core it checks against, and one from before such a minor ([FIRMWARE_API.md](FIRMWARE_API.md), "Versions"). |
+| `api` | yes | The plugin API it was written for, as major and minor in quotes: `"0.8"`; the plugin API 0.13 is the one the core offers now (on Tessera's dev branch; the release has an older one until the next). Without quotes YAML reads a number, which the check refuses. It builds on a core with the same major and at least that minor, unless a minor after its own up to the core's changed a name (0.4 did); `tools/check.py` refuses an `api` newer than the core it checks against, and one from before such a minor ([FIRMWARE_API.md](FIRMWARE_API.md), "Versions"). |
 | `icon` | yes | <a id="icon"></a>A Material Design Icons name from Tessera's icon set (`screen_manager/app/tile_icons.py` in the Tessera repository, such as `bus`, `train`, `calendar`, `thermometer`, `lightbulb`). The screen's icon font holds only that set. Tiles and top bar items take it when they name no icon of their own. |
 | `maintainer` | yes | The GitHub name of whoever looks after the plugin, 1 to 39 characters. `tools/check.py` refuses the template's `your-github-name` in any folder but `template/`. |
 | `license` | yes | An SPDX name that goes with AGPL-3.0: `MIT`, `Apache-2.0`, `BSD-2-Clause`, `BSD-3-Clause`, `ISC`, `MPL-2.0`, `LGPL-2.1-or-later`, `LGPL-3.0-or-later`, `GPL-3.0-or-later`, `GPL-3.0-only`, `AGPL-3.0-or-later`, `AGPL-3.0-only`, `Unlicense`, `0BSD`, `CC0-1.0`. |
@@ -371,6 +371,7 @@ A screen of the plugin's own over the page ([FIRMWARE_API.md](FIRMWARE_API.md), 
 ```yaml
 cards:
   - { id: upcoming, name: card_name }          # wide: true for the whole width of the glass
+  - { id: release, name: release_name, pictures: 1 }   # a place for a picture (0.13)
 ```
 
 | Field | What |
@@ -378,6 +379,7 @@ cards:
 | `id` | Required. `add_card("<id>", ...)` in the C++ uses the same. |
 | `name` | Required. Text key: what the editor calls it. On the screen the card's title is the tile's name, or what `open_card` passes. |
 | `wide` | `true`: as wide as the glass (a picture, a timeline); `false` (default): the width of Tessera's own cards. |
+| `pictures` | Places for pictures on the card (0.13), 1 to 8: how many the card makes at most with `ui::picture` ([FIRMWARE_API.md](FIRMWARE_API.md), "Pictures on a card"). The app paints only for a card that has this, from a host of `permissions.network`, or Home Assistant's own pictures when the card was opened for an entity of the screen's layout. Default: 0, no pictures. |
 
 ### Tap actions: `tap_actions`
 
@@ -515,6 +517,7 @@ These are the fields whose minor the core records:
 | 0.8 | The features `camera` and `camera_sensor` |
 | 0.10 | A tile's `pictures` |
 | 0.12 | An option's `multiple` and `search`, a fetch's `each`, `{name\|,}` and `{search}` in a URL, a field `{ each: value }` |
+| 0.13 | A card's `pictures` |
 
 What each minor brought to the C++ is in [FIRMWARE_API.md](FIRMWARE_API.md), "Versions".
 
@@ -538,7 +541,7 @@ What each minor brought to the C++ is in [FIRMWARE_API.md](FIRMWARE_API.md), "Ve
 | A tile's size | 9 x 9 cells |
 | A tile's `memory` | 64 to 16384 bytes |
 | A tile's `domains` | 8 |
-| A tile's `pictures` | 8, each from an address of at most 512 characters, at most 2 MB |
+| A tile's `pictures`, a card's | 8, each from an address of at most 512 characters, at most 2 MB |
 | Attributes of a tile's entity | 16, and 8 `fields`, 8 `has_attributes` |
 | A text of a `preview` | 64 characters |
 | Options per tile | 12 |

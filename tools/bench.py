@@ -613,7 +613,8 @@ class Bench(run.Run):
             await asyncio.sleep(0.6)
 
     async def answer_pictures(self, data):
-        """The pictures of a plugin tile's places, as the app would answer (server.answer_plugin_pictures): the frames of
+        """The pictures of a plugin tile's or card's places (a card: plugin API 0.13), as the app would answer
+        (server.answer_plugin_pictures): the frames of
         the question painted with the files preview.yaml's `pictures` names for each address (relative to the plugin's
         folder), a drawn stand-in for an address it does not name, and the checks the app makes (the manifest's
         `pictures`, where a picture may come from)."""
@@ -621,16 +622,24 @@ class Bench(run.Run):
         import tile_art
         import media_art
         question = plugin_pictures.parse(data, (self.screen.width, self.screen.height))
-        reply = {'v': 1, 'op': 'camera', 't': 'live', 'e': data.get('tiles', ''), 'u': ''}
+        # A card over the page asks too (plugin API 0.13, `card`): the app answers it as "pcard".
+        card = bool(getattr(question, 'card', False))
+        reply = {'v': 1, 'op': 'camera', 't': 'pcard' if card else 'live', 'e': data.get('tiles', ''), 'u': ''}
         try:
             view = int(data.get('view', 0))
         except (TypeError, ValueError):
             view = 0
         if not question:
-            self.find('warning', 'pictures', f'a tile asked for pictures in a way the app does not take: {data}')
+            self.find('warning', 'pictures', f'a tile or card asked for pictures in a way the app does not take: {data}')
             return
-        kind = self.entry.tile(question.tile)
-        problem = plugin_pictures.refused(question, self.entry.manifest, kind)
+        if card:
+            # The manifest's card; Home Assistant's own pictures when the card was opened for an entity (`for`), as the
+            # app allows them for a card shown for an entity of the layout.
+            kind = next((c for c in self.entry.manifest.get('cards') or [] if c['id'] == question.tile), None)
+            problem = plugin_pictures.refused(question, self.entry.manifest, kind, bool(question.of))
+        else:
+            kind = self.entry.tile(question.tile)
+            problem = plugin_pictures.refused(question, self.entry.manifest, kind)
         if problem:
             self.find('warning', 'pictures', f'{question.entity} asked for pictures the app refuses: {problem}')
         else:

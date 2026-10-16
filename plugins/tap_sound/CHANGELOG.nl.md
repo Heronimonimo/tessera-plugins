@@ -1,5 +1,9 @@
 # Wijzigingen
 
+## 0.2.1 - 2026-10-16
+- Bouwt weer met de huidige firmware: een scherm dat nog de eerste 0.2.0 had, faalde bij zijn update met
+  "on_step marked override, but does not override". Werk de plugin bij, en dan het scherm.
+
 ## 0.2.0 - 2026-10-15
 - Het tikje komt zodra je vinger een tegel, een toets, een slider of een rij van de instellingen raakt, niet meer pas
   als je loslaat. Een druk die een gedimd scherm wekt en een aanraking tussen de tegels blijven stil.

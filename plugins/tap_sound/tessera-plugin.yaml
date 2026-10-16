@@ -2,7 +2,7 @@
 # softer one for every step of a dragged slider, with a setting to turn it off.
 # It needs a speaker, which a board brings (features/audio.yaml) or a plugin; the tick follows the screen's volume.
 id: tap_sound
-version: 0.2.0
+version: 0.2.1
 api: "0.11"
 icon: gesture-tap-button
 maintainer: MaxGramser

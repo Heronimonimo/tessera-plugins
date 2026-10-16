@@ -1,0 +1,39 @@
+{
+  "_meta": {
+    "name": "Nederlands"
+  },
+  "screen": {
+    "waiting": "Nieuwe muziek ophalen",
+    "no_artists": "Kies je artiesten",
+    "failed": "Nu geen nieuwe muziek",
+    "none": "Nog niets uit",
+    "old": "Lijst kan oud zijn",
+    "today": "Vandaag",
+    "new": "Nieuw",
+    "out": "Uit {day}",
+    "album": "Album",
+    "ep": "EP",
+    "single": "Single",
+    "play": "Afspelen",
+    "play_on": "Afspelen op {player}",
+    "playing": "Speelt nu",
+    "sent": "Starten",
+    "no_player": "Kies in de editor een Music Assistant-speler voor deze tile om hier af te spelen.",
+    "retry": "Opnieuw"
+  },
+  "app": {
+    "name": "Nieuwe muziek",
+    "summary": "De nieuwste albums en singles van de artiesten die je kiest, als coverflow waaruit je afspeelt.",
+    "tile_name": "Nieuwe muziek",
+    "tile_example": "De nieuwste releases van je artiesten",
+    "card_name": "Release",
+    "artists": "Artiesten",
+    "artists_hint": "Typ een naam en kies de artiest, tot acht. De nieuwste releases van allemaal staan samen.",
+    "hide": "Toon",
+    "hide_hint": "Laat de singles weg om alleen albums en EP's te zien.",
+    "hide_none": "Albums, EP's en singles",
+    "hide_singles": "Albums en EP's",
+    "every": "Volgende release elke",
+    "every_hint": "Hoe vaak de coverflow vanzelf verder gaat; 0 houdt hem stil."
+  }
+}

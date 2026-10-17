@@ -8,21 +8,23 @@ plugin is done.
 
 1. A plugin is a folder: a manifest (`tessera-plugin.yaml`), an ESPHome package (`plugin.yaml`), an ESPHome component
    in C++ (`components/<id>/`), texts (`translations/<language>.json`), a `README.md` and a `CHANGELOG.md`.
-2. The screen builds the component into its firmware; the component registers tile types with the core through
+2. The screen builds the component into its firmware; the component registers tile types (and cards, top bar items,
+   screensavers, ...) with the core through
    `tessera::Plugin` (`components/smart_display/plugin_api.h` in the Tessera repository; a plugin includes it as
    `esphome/components/smart_display/plugin_api.h`).
 3. The Tessera app (in Home Assistant) reads only the manifest: it shows the plugin, its options and its README, and
    carries out the plugin's `fetch` (JSON from a web service) with its own code.
 4. A tile of a plugin is `plugin:<plugin id>.<tile id>` in a screen's layout. The core gives it a card's drawing area
    while its page is on the glass, hands it the data the app sent (`on_state`), and ticks it once a second (`on_tick`).
-5. The plugin API is 0.13 on Tessera's dev branch; the release, Tessera 0.4.88 (firmware 0.56.0), has 0.10 until the
+5. The plugin API is 0.14 on Tessera's dev branch; the release, Tessera 0.4.88 (firmware 0.56.0), has 0.10 until the
    next one. A manifest names the lowest minor whose
    parts it uses: `api: "0.8"`, `"0.9"` for `Font::DIGITS`, `ui::covers`, `Tone::GOOD`, `ui::set_fill` and
    `ui::tone_color`, `"0.10"` for pictures on a tile, `ui::text` and `tap_point()`, `"0.11"` for `on_press` and
    `on_step`, `"0.12"` for options that keep lists (`multiple`, `search`), a fetch with `each` or `{name|,}`,
-   `tessera::action` with a JSON object, and a card's `on_tap`, `"0.13"` for pictures on a card. A plugin builds on a core with the
+   `tessera::action` with a JSON object, and a card's `on_tap`, `"0.13"` for pictures on a card, `"0.14"` for screensavers
+   (`savers`, `add_saver`, `ui::takes_taps`, `tessera::wish`). A plugin builds on a core with the
    same major and at least its minor, unless a minor after its own changed a name: while the major is 0 that may
-   happen, and the core lists those minors (only 0.4 so far). So a plugin of 0.7 builds on a core of 0.13, one of 0.3
+   happen, and the core lists those minors (only 0.4 so far). So a plugin of 0.7 builds on a core of 0.14, one of 0.3
    does not (`docs/FIRMWARE_API.md`, "Versions"). A tile's entity of a domain Tessera draws no tile for (`plant`,
    `todo`) reaches `TileContext::entity` and `tessera::action` only with the firmware after 0.56.0, on Tessera's dev
    branch until its next release (`docs/FIRMWARE_API.md`, "A tile of an entity").
@@ -42,6 +44,7 @@ plugin is done.
 | A speaker, microphone or media player for other plugins | `provides`, and the component with the feature's id (`ts_speaker`) in `plugin.yaml` | docs/MAKING_A_PLUGIN.md, "Features" |
 | A speaker, microphone or media player another plugin or the board brings | `requires.features`, or a part with `features` when the plugin also works without it | docs/MANIFEST.md, "Features" |
 | Another plugin on the same screen | `requires.plugins`: the app adds it with yours | docs/MANIFEST.md, "What it needs and brings" |
+| A screensaver: another clock, player or photo view in standby, or a step of its own (the rain radar while it rains) | `savers` in the manifest (a face: `step: clock`, `media` or `photos`; a step of its own: `step: own` with `data` or `domains` and `when`), `tessera::Saver` and `add_saver`; the step's cover or photo through `saver:picture`; keys through `ui::takes_taps` and `tessera::wish` | docs/FIRMWARE_API.md, "A screensaver"; docs/MANIFEST.md, "savers" |
 | A server, an account, a live session (OAuth, a websocket, a voice model) | A Home Assistant integration of its own, which the plugin reaches through its entities and actions | docs/MAKING_A_PLUGIN.md, "Where the backend lives" |
 
 ## Read in this order
@@ -61,7 +64,9 @@ a tap action, a top bar item, settings), [`plugins/voice_assist/`](plugins/voice
 its own, ESPHome components of its own, a top bar item in colour) and [`plugins/screen_camera/`](plugins/screen_camera)
 (a board's hardware through a feature only a board brings, and a driver beside the plugin's own component) and
 [`plugins/picture_frame/`](plugins/picture_frame) (pictures on a tile: an entity's own picture or an address, cover or
-contain, with the name over it).
+contain, with the name over it). Screensavers: [`plugins/flip_clock/`](plugins/flip_clock) (a face of the clock, no
+pictures, every board), [`plugins/vinyl_deck/`](plugins/vinyl_deck) (a face of the music: the cover, keys that take taps,
+`wish()`) and [`plugins/photo_clock/`](plugins/photo_clock) (a face of the photos, the photo over the whole glass).
 
 ## Rules that are never optional
 
@@ -94,6 +99,21 @@ contain, with the name over it).
 - **Name what the plugin may do** in `permissions`: every host a fetch reaches in `network`, every Home Assistant entity
   the screen reads in `read_entities`, every action it calls in `home_assistant_actions`. A plugin with `network` has
   the attribute `cloud` and a `privacy` link.
+- **A screensaver** (0.14) keeps its own rules, as much as a tile keeps the ones above:
+  - **Draw only in `show()`**: every part in `context.parent`, the stage the screen moves; nothing outside it.
+  - **Paint, do not rebuild, in `on_tick`** and `on_state`: set only what changed (the digits of a new minute, the dot
+    of a second). The glass draws only the boxes that changed, and a saver stands there all night.
+  - **`ui::takes_taps` only for parts that must work without waking the screen** (a player's keys), at least
+    `ui::mm(10)` across, with `taps: true` in the manifest. Every other part lets the finger wake the screen.
+  - **`tessera::wish()` for every value a finger changes** (play and pause, mute, on and off), with the key painted
+    from `on_state` only; never an action with a value written into the saver first. A step (volume up) is
+    `tessera::action`. Name every action, the wish's too, in `permissions.home_assistant_actions`.
+  - **No timers, tasks or animations of its own**: `on_tick`, once a second, is its clock.
+  - **The dark look** is the saver's whatever the screen's: draw with theme roles, never a light ground over the glass.
+  - **`moves: true` only when the saver really moves itself** every minute; otherwise the screen moves it. The bench
+    warns when a saver looks the same two minutes later.
+  - **A face draws only from its step's contract**, a step of its own from its fetch and entity, through the app; read
+    every option with its default (`c.options["seconds"] | true`).
 - **Memory inside the chip is scarce** (since API 0.10): keep texts and lists a tile holds as `tessera::Text` and
   `tessera::List`, which take PSRAM; a `std::string` member stays in the memory Wi-Fi needs (docs/FIRMWARE_API.md,
   "Memory").

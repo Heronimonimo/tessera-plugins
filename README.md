@@ -27,23 +27,33 @@ This repository holds:
 | [Voice assistant](plugins/voice_assist) | Home Assistant's Assist on the screen: a wake word on the screen itself, the answer on its speaker, sounds while it listens and thinks. | With a microphone and a speaker |
 | [Screen camera](plugins/screen_camera) | The screen's own camera as a camera in Home Assistant, with a camera in the top bar while it is watched. | With a camera |
 | [Tap sound](plugins/tap_sound) | A short, soft tick on the screen's speaker for every tap. | With a speaker |
+| [Cinema](plugins/cinema) | The films in your country's cinemas, or coming soon, as a cover flow of posters with their rating. | All |
+| [New music](plugins/new_music) | The newest albums and singles of the artists you pick, as a cover flow you can play from. | All |
+| [Picture frame](plugins/picture_frame) | A picture on a tile: a person's photo, an image entity, what plays, or any picture at an address. | All |
+| [Guition relays](plugins/guition_relays) | The relays of the Guition 4-inch wallbox base as switches in Home Assistant and on the screen. | Guition 4-inch |
+| [Bluetooth proxy](plugins/bt_proxy) | Home Assistant reaches Bluetooth devices near the screen; shares the radio with Wi-Fi. | With Bluetooth (the ESP32-P4 boards) |
+| [Flip clock](plugins/flip_clock) | A screensaver clock of two flip cards, with the date and the outside temperature under them. | All |
+| [Vinyl deck](plugins/vinyl_deck) | The music that plays as a record in its sleeve on the screensaver, with keys for play and the volume. | With pictures |
+| [Photo clock](plugins/photo_clock) | Your photos over the whole screensaver, with the time and the date small in a corner. | With pictures |
 
 ## Using a plugin
 
 1. Open Tessera in Home Assistant and go to **Plugins**, or to the **Plugins** tab of a screen. The tabs Tiles,
-   Functions and Hardware say what a plugin adds, and In use what your screens run. Topics narrow the list, and it is
+   Screensavers, Functions and Hardware say what a plugin adds, and In use what your screens run. Topics narrow the list, and it is
    sorted by most liked unless you choose newest or name.
 2. Open a plugin, read what it does and what it may do, tick the screens it goes on, and apply. What it needs comes
    along: a plugin it names, or the plugin that brings a speaker the screen lacks. Each screen builds its firmware once
    with all of it.
 3. In **Layout**, place the plugin's tile from the library's **Plugins** group and set its options in the inspector.
+   A screensaver of a plugin is chosen in the screen's **Settings**, on the **Screensaver** card: under **Face** in a
+   step's drawer, or as a step of its own with **Add from plugins**.
 
 A plugin that is not in the list can be added with a link to its GitHub repository (**Add with a link**). Every screen
 stays on the commit it was built with: a newer version shows as an update on the screen's Plugins tab, and one tap
 builds it.
 
 Plugins are new and only in the dev version of the app for now (the app added with `#dev` at the end of the repository
-URL, or a local copy). The plugin API is 0.13 (an older one in the release until the next), and a plugin names the version it was written for. While the API is 0.x
+URL, or a local copy). The plugin API is 0.14 (an older one in the release until the next), and a plugin names the version it was written for. While the API is 0.x
 a minor may still change a name: the core lists the minors that did (only 0.4 so far), a plugin written before one no
 longer builds and says so, and Tessera's own plugins move with it ([docs/FIRMWARE_API.md](docs/FIRMWARE_API.md),
 "Versions").
@@ -74,8 +84,8 @@ docs in.
 
 ## What a plugin can and cannot do
 
-- **On the screen** a plugin is an ESPHome component written in C++. It draws its own tiles with the screen's fonts,
-  colours and sizes, and hears about the screen's moments (start, a tick, standby, an update).
+- **On the screen** a plugin is an ESPHome component written in C++. It draws its own tiles, cards and screensavers
+  with the screen's fonts, colours and sizes, and hears about the screen's moments (start, a tick, standby, an update).
 - **In the app** a plugin is only a description. The app reads its manifest and carries out what it asks with its own
   code: fetch JSON from a web service it names, keep a secret key, show its options and its README. The app never runs
   a plugin's code.

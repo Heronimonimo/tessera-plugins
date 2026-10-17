@@ -1,0 +1,16 @@
+{
+  "_meta": { "name": "Nederlands" },
+  "screen": {},
+  "app": {
+    "name": "Fotoklok",
+    "summary": "Je foto's over de hele schermbeveiliging, met de tijd en de datum klein in een hoek.",
+    "saver_name": "Fotoklok",
+    "saver_example": "Een foto over het hele scherm, 14:05 en vr 9 okt in de hoek",
+    "corner": "Hoek",
+    "corner_hint": "Waar de tijd en de datum op de foto staan.",
+    "bottom_left": "Linksonder",
+    "bottom_right": "Rechtsonder",
+    "top_left": "Linksboven",
+    "top_right": "Rechtsboven"
+  }
+}

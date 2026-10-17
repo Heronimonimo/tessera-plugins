@@ -35,7 +35,10 @@ origin says which of them a screen runs.
 
 ## The index
 
-The app reads one file for the list: `index.json` in this repository (on `main`). It lists every plugin with its
+The app reads one file for the list: `index.json` in this repository. Each branch has its own (AGENTS.md, "Branches"):
+the app of a Tessera release reads the one on `main`, whose plugins build on the firmware Tessera has released, and
+Tessera's dev app reads the one on `dev` (and `main`'s while `dev` has none), where a plugin that needs a newer plugin
+API waits for Tessera's next release. Each index lists every plugin with its
 manifest, its texts, its README and its changelog at one commit, the plugin versions that are blocked, the plugins Tessera recommends,
 and whose each id is. `tools/build_index.py` writes it; nobody edits it by hand. The app reads it with a conditional
 request and keeps the last one for when the internet is away. Beside it, `likes.json` has how many people like each

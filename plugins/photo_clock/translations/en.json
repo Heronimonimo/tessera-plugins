@@ -1,0 +1,16 @@
+{
+  "_meta": { "name": "English" },
+  "screen": {},
+  "app": {
+    "name": "Photo clock",
+    "summary": "Your photos over the whole screensaver, with the time and the date small in a corner.",
+    "saver_name": "Photo clock",
+    "saver_example": "A photo over the whole glass, 14:05 and Fri 9 Oct in the corner",
+    "corner": "Corner",
+    "corner_hint": "Where the time and the date stand on the photo.",
+    "bottom_left": "Bottom left",
+    "bottom_right": "Bottom right",
+    "top_left": "Top left",
+    "top_right": "Top right"
+  }
+}

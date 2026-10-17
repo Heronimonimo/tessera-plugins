@@ -60,7 +60,11 @@ SCREEN_CODE = re.compile(r'plugin_api\.h|\btessera::|\blv_')
 # docs/FIRMWARE_API.md, "Memory"). A hint, not a failure: a short word costs little.
 KEPT_IN_CHIP = re.compile(r'^\s+(?:const\s+)?std::(?:string|vector<[^;]*>)\s+\w+_\s*(?:[;={]|,)', re.M)
 API_PARTS = [((0, 9), re.compile(r'Font::DIGITS|\bui::covers\s*\(|Tone::GOOD|\bui::set_fill\s*\(|\bui::tone_color\s*\('),
-               'Font::DIGITS, ui::covers, Tone::GOOD, ui::set_fill and ui::tone_color')]
+               'Font::DIGITS, ui::covers, Tone::GOOD, ui::set_fill and ui::tone_color'),
+             # A screensaver (docs/FIRMWARE_API.md, "A screensaver"): the manifest's `savers` needs 0.14 as well.
+             ((0, 14), re.compile(r'\badd_saver\s*\(|\bSaver(?:Context|Step)?\b|\bui::takes_taps\s*\(|\btessera::wish\s*\('
+                                  r'|\bWish::'),
+              'a screensaver (add_saver, Saver, SaverContext, SaverStep), ui::takes_taps and tessera::wish')]
 
 # What plugin.yaml (and a part's file) never sets at its top level (docs/LIMITS.md, "plugin.yaml"). It is merged into
 # the screen's own configuration, so these would change what the core and the screen's own YAML hold, or open the

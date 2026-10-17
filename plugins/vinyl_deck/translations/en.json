@@ -1,0 +1,12 @@
+{
+  "_meta": { "name": "English" },
+  "screen": {},
+  "app": {
+    "name": "Vinyl deck",
+    "summary": "The music that plays as a record in its sleeve on the screensaver, with keys for play and the volume.",
+    "saver_name": "Vinyl deck",
+    "saver_example": "The cover as a record sleeve, the title and the artist beside it",
+    "keys": "Keys",
+    "keys_hint": "Play, pause and the volume on the screensaver. A tap anywhere else wakes the screen."
+  }
+}

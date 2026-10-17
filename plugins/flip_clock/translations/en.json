@@ -1,0 +1,12 @@
+{
+  "_meta": { "name": "English" },
+  "screen": {},
+  "app": {
+    "name": "Flip clock",
+    "summary": "A screensaver clock of two flip cards, with the date and the outside temperature under them.",
+    "saver_name": "Flip clock",
+    "saver_example": "14:05 on two flip cards, Fri 9 Oct and 21° under them",
+    "seconds": "Seconds dot",
+    "seconds_hint": "A dot between the cards that blinks every second."
+  }
+}

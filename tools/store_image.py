@@ -352,8 +352,13 @@ def shadow(layer, blur, opacity):
 
 
 def font(weight, size):
-    """Roboto, the screens' own font, from the copy of Tessera the bench keeps."""
+    """Roboto, the screens' own font, from the checkout TESSERA_TREE names (as the bench takes it), else the copy of
+    Tessera the bench keeps."""
+    import os
     import preview
+    own = os.environ.get('TESSERA_TREE')
+    if own and (Path(own) / 'fonts' / f'Roboto-{weight}.ttf').is_file():
+        return ImageFont.truetype(str(Path(own) / 'fonts' / f'Roboto-{weight}.ttf'), size)
     for path in sorted(preview.CACHE.glob(f'tessera-*/fonts/Roboto-{weight}.ttf')):
         return ImageFont.truetype(str(path), size)
     raise SystemExit('store_image: no Roboto; run the bench once (python3 tools/preview.py --setup, then a render)')

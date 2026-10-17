@@ -247,7 +247,8 @@ bench checks where it can:
    Keep such parts few and large (`ui::mm(10)` or more). Everything else wakes the screen.
 5. A key that changes a value of an entity (play and pause, mute, on and off) calls `tessera::wish()`, never an action
    with a value written first; it paints the key from `on_state`. A step (volume up) is an action.
-6. Read every option with its default: the app sends the options as the person left them.
+6. Read every option with its default (`c.options["seconds"] | true`): the app fills in the manifest's defaults, and the
+   default in the C++ keeps the saver right on an app that does not.
 
 **Try it.** Give `preview.yaml` a `savers` part with the data of its step ([PREVIEW.md](PREVIEW.md), "Screensavers"),
 and run the bench: it shows each saver in standby on every screen that shows it, with the screen light and dark,

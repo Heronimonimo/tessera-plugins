@@ -1,7 +1,7 @@
 # Photo clock: a face of the screensaver's photos (plugin API 0.14, docs/FIRMWARE_API.md "A screensaver"). The photo
 # over the whole glass and the time small in a corner with the date under it. An example of a saver whose one place is
-# the step's own picture (saver:picture), and of a saver the screen moves: the time drifts a millimetre every minute
-# with the photo. docs/MANIFEST.md has every field.
+# the step's own picture (saver:picture), and of a saver that moves only a part of itself: the photo fills the glass and
+# stays put (a moved photo would leave a black edge), the time walks Tessera's slow circle (tessera::drift). docs/MANIFEST.md has every field.
 id: photo_clock
 version: 0.1.0
 api: "0.14"
@@ -26,8 +26,8 @@ savers:
     memory: 500
     # One place: the photo of the photos step (saver:picture).
     pictures: 1
-    # The screen moves the whole saver a millimetre every minute; it does not move itself.
-    moves: false
+    # It moves itself: the time and date walk the slow circle each minute, the photo changes on its own.
+    moves: true
     example: saver_example
     options:
       - id: corner

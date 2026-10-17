@@ -13,7 +13,8 @@ namespace ui = tessera::ui;
 //
 // The photo is the step's own picture: one place with the address "saver:picture", which the app answers with the
 // photo on the glass, cut to the place. Its key carries the photo's mark, so the next photo comes under the same
-// address by itself. The screen moves the whole saver a millimetre every minute (`moves: false`), the time with it.
+// address by itself. The photo fills the glass and stays put; the time and date walk Tessera's slow circle against
+// burn-in (tessera::drift, `moves: true`), so nothing stands on the same pixels for hours and no black edge shows.
 class PhotoSaver : public tessera::Saver {
  public:
   void show(const tessera::SaverContext &c) override {
@@ -59,7 +60,8 @@ class PhotoSaver : public tessera::Saver {
     lv_obj_set_pos(time_, right_ ? w - pad - tw : pad, pad);
     lv_obj_set_pos(date_, right_ ? w - pad - dw : pad, pad + th);
     lv_obj_set_size(shade_, w, h);
-    lv_obj_set_pos(shade_, right_ ? width_ - m - w : m, top_ ? m : height_ - m - h);
+    const tessera::Point at = tessera::drift(epoch);
+    lv_obj_set_pos(shade_, (right_ ? width_ - m - w : m) + at.x, (top_ ? m : height_ - m - h) + at.y);
     lv_obj_remove_flag(shade_, LV_OBJ_FLAG_HIDDEN);
   }
 

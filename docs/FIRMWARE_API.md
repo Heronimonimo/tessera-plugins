@@ -503,7 +503,8 @@ add_saver("dial", tessera::SaverStep::CLOCK, []() { return new Dial(); });   // 
 | `on_tap()` (0.14) | A short tap on a part made with `ui::takes_taps`; `tessera::tap_point()` says where, in the glass's pixels. |
 | `on_hold()` (0.14) | A finger held on such a part for a second and a half (as volume down held mutes on Tessera's own player). `tap_point()` says where. |
 | `SaverContext` (0.14) | `parent` (the whole glass: everything goes in here), `width` and `height` (the glass in pixels), `step`, `level` (the backlight in percent, the standby or the night level, never 0), `night` (the night levels hold now: a face may go darker still) and `options` (the person's options of the saver; valid during `show()` only, copy what you keep). |
-| `ui::takes_taps(part)` (0.14) | A part a finger may tap without waking the screen: its taps go to `on_tap`, a hold to `on_hold`. Call it in `show()`, for a saver of the manifest's `taps: true`. |
+| `ui::takes_taps(part)` (0.14) | A part a finger may tap without waking the screen: its taps go to `on_tap`, a hold to `on_hold`. Call it in `show()`, for a saver of the manifest's `taps: true` (the screen refuses it for any other, and logs why). |
+| `tessera::drift(epoch)` (0.14) | Where Tessera's slow circle against burn-in stands this minute, an offset of at most a millimetre. For a saver of `moves: true` that moves only some of its parts: a clock over a photo that fills the glass walks the circle while the photo stays put, so no black edge shows (the `photo_clock` plugin). |
 | `tessera::wish(entity, field, value)` (0.14) | A value a finger changed (`Wish::PLAYING` "1" or "0", `Wish::MUTED` "1" or "0", `Wish::ON_OFF` "on" or "off"): it shows at once and Home Assistant squares it. False when it was not sent. |
 | `"saver:picture"` (0.14) | The address of the step's own picture for `ui::set_picture`: the cover of the music on the glass, the photo of the photos step. |
 

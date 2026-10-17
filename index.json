@@ -1,7 +1,7 @@
 {
  "format": 1,
- "generated": "2026-10-16T12:46:40Z",
- "plugin_api": "0.13",
+ "generated": "2026-10-17T09:22:06Z",
+ "plugin_api": "0.14",
  "blocked": [],
  "featured": [
   "ov_departures",
@@ -28,6 +28,11 @@
    "repo_id": 1414532919,
    "path": "."
   },
+  "flip_clock": {
+   "repo": "https://github.com/maxgramser/tessera-plugins",
+   "repo_id": 1408945265,
+   "path": "plugins/flip_clock"
+  },
   "guition_relays": {
    "repo": "https://github.com/maxgramser/tessera-plugins",
    "repo_id": 1408945265,
@@ -53,6 +58,11 @@
    "repo_id": 1408945265,
    "path": "plugins/p4_audio"
   },
+  "photo_clock": {
+   "repo": "https://github.com/maxgramser/tessera-plugins",
+   "repo_id": 1408945265,
+   "path": "plugins/photo_clock"
+  },
   "picture_frame": {
    "repo": "https://github.com/maxgramser/tessera-plugins",
    "repo_id": 1408945265,
@@ -67,6 +77,11 @@
    "repo": "https://github.com/maxgramser/tessera-plugins",
    "repo_id": 1408945265,
    "path": "plugins/tap_sound"
+  },
+  "vinyl_deck": {
+   "repo": "https://github.com/maxgramser/tessera-plugins",
+   "repo_id": 1408945265,
+   "path": "plugins/vinyl_deck"
   },
   "voice_assist": {
    "repo": "https://github.com/maxgramser/tessera-plugins",
@@ -882,6 +897,92 @@
    "image": "store.png"
   },
   {
+   "id": "flip_clock",
+   "repo": "https://github.com/maxgramser/tessera-plugins",
+   "repo_id": 1408945265,
+   "path": "plugins/flip_clock",
+   "label": "tessera",
+   "status": "ok",
+   "release": {
+    "version": "0.1.0",
+    "sha": "b41c300c7e438fea719d1ab9d8c7a2d52b21b49d",
+    "date": "2026-10-17"
+   },
+   "manifest": {
+    "id": "flip_clock",
+    "version": "0.1.0",
+    "api": "0.14",
+    "icon": "clock-outline",
+    "maintainer": "MaxGramser",
+    "license": "MIT",
+    "stage": "example",
+    "topics": [
+     "time"
+    ],
+    "requires": {
+     "esphome": "2026.6.2"
+    },
+    "boards": "any",
+    "flash_kb": 4,
+    "savers": [
+     {
+      "id": "flip",
+      "name": "saver_name",
+      "icon": "clock-outline",
+      "step": "clock",
+      "memory": 1000,
+      "example": "saver_example",
+      "options": [
+       {
+        "id": "seconds",
+        "kind": "toggle",
+        "label": "seconds",
+        "hint": "seconds_hint",
+        "default": true
+       }
+      ]
+     }
+    ]
+   },
+   "translations": {
+    "en": {
+     "_meta": {
+      "name": "English"
+     },
+     "screen": {},
+     "app": {
+      "name": "Flip clock",
+      "summary": "A screensaver clock of two flip cards, with the date and the outside temperature under them.",
+      "saver_name": "Flip clock",
+      "saver_example": "14:05 on two flip cards, Fri 9 Oct and 21° under them",
+      "seconds": "Seconds dot",
+      "seconds_hint": "A dot between the cards that blinks every second."
+     }
+    },
+    "nl": {
+     "_meta": {
+      "name": "Nederlands"
+     },
+     "screen": {},
+     "app": {
+      "name": "Klapklok",
+      "summary": "Een schermbeveiliging met de tijd op twee klapkaarten, en de datum en de buitentemperatuur eronder.",
+      "saver_name": "Klapklok",
+      "saver_example": "14:05 op twee klapkaarten, met vr 9 okt en 21° eronder",
+      "seconds": "Secondepunt",
+      "seconds_hint": "Een punt tussen de kaarten die elke seconde knippert."
+     }
+    }
+   },
+   "readme": {
+    "en": "# Flip clock\n\nA face for the screensaver's clock: the hours and the minutes on two flip cards in the screen's largest digits, with\nthe date and the outside temperature under them, white on black like every screensaver. A dot between the cards blinks\nevery second; you can turn it off.\n\nIt is the smallest screensaver of a plugin and an example to learn from: no pictures, no taps, nothing to fetch. It\nworks on every screen, the CYD too.\n\n## Set up\n\n1. Add the plugin to a screen in Tessera. The screen builds once.\n2. Open the screen's **Settings** and the **Screensaver** card. Turn on **Show in standby** (the screen needs **Auto\n   standby** on too).\n3. Click the **Clock** step and choose **Flip clock** under **Face**.\n4. Choose the temperature under the clock in the same drawer, or none. Turn **Seconds dot** off for a clock that is\n   quite still.\n\n## Good to know\n\n- The clock shows the time as the screen writes it, 24 hours or AM and PM, and the date in the screen's language.\n- The screen moves the whole clock a millimetre every minute, so nothing stands on the same pixels for hours.\n- A screen without the plugin shows Tessera's own clock instead.\n"
+   },
+   "changelog": {
+    "en": "# Changelog\n\n## 0.1.0\n- First version: a face of the screensaver's clock, the time on two flip cards with the date and the outside\n  temperature under them, and a seconds dot you can turn off. Needs a screen with plugin API 0.14.\n"
+   },
+   "image": "store.png"
+  },
+  {
    "id": "guition_relays",
    "repo": "https://github.com/maxgramser/tessera-plugins",
    "repo_id": 1408945265,
@@ -1424,6 +1525,120 @@
    "image": "store.png"
   },
   {
+   "id": "photo_clock",
+   "repo": "https://github.com/maxgramser/tessera-plugins",
+   "repo_id": 1408945265,
+   "path": "plugins/photo_clock",
+   "label": "tessera",
+   "status": "ok",
+   "release": {
+    "version": "0.1.0",
+    "sha": "9e1498bb64513cd4928dcfa69c2096ae46576e0c",
+    "date": "2026-10-17"
+   },
+   "manifest": {
+    "id": "photo_clock",
+    "version": "0.1.0",
+    "api": "0.14",
+    "icon": "image",
+    "maintainer": "MaxGramser",
+    "license": "MIT",
+    "stage": "example",
+    "topics": [
+     "photos",
+     "time"
+    ],
+    "requires": {
+     "esphome": "2026.6.2"
+    },
+    "boards": "any",
+    "flash_kb": 4,
+    "savers": [
+     {
+      "id": "photo",
+      "name": "saver_name",
+      "icon": "image",
+      "step": "photos",
+      "memory": 400,
+      "backdrop": true,
+      "example": "saver_example",
+      "options": [
+       {
+        "id": "corner",
+        "kind": "choice",
+        "label": "corner",
+        "hint": "corner_hint",
+        "default": "bottom_left",
+        "choices": [
+         {
+          "value": "bottom_left",
+          "label": "bottom_left"
+         },
+         {
+          "value": "bottom_right",
+          "label": "bottom_right"
+         },
+         {
+          "value": "top_left",
+          "label": "top_left"
+         },
+         {
+          "value": "top_right",
+          "label": "top_right"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   "translations": {
+    "en": {
+     "_meta": {
+      "name": "English"
+     },
+     "screen": {},
+     "app": {
+      "name": "Photo clock",
+      "summary": "Your photos over the whole screensaver, with the time and the date small in a corner.",
+      "saver_name": "Photo clock",
+      "saver_example": "A photo over the whole glass, 14:05 and Fri 9 Oct in the corner",
+      "corner": "Corner",
+      "corner_hint": "Where the time and the date stand on the photo.",
+      "bottom_left": "Bottom left",
+      "bottom_right": "Bottom right",
+      "top_left": "Top left",
+      "top_right": "Top right"
+     }
+    },
+    "nl": {
+     "_meta": {
+      "name": "Nederlands"
+     },
+     "screen": {},
+     "app": {
+      "name": "Fotoklok",
+      "summary": "Je foto's over de hele schermbeveiliging, met de tijd en de datum klein in een hoek.",
+      "saver_name": "Fotoklok",
+      "saver_example": "Een foto over het hele scherm, 14:05 en vr 9 okt in de hoek",
+      "corner": "Hoek",
+      "corner_hint": "Waar de tijd en de datum op de foto staan.",
+      "bottom_left": "Linksonder",
+      "bottom_right": "Rechtsonder",
+      "top_left": "Linksboven",
+      "top_right": "Rechtsboven"
+     }
+    }
+   },
+   "readme": {
+    "en": "# Photo clock\n\nA face for the screensaver's photos: each photo of the folder you chose over the whole glass, and the time small in a\ncorner with the date under it, on a soft shade so it reads on a bright photo too.\n\nIt is an example to learn from: a screensaver whose one picture is the step's own photo, and that lets the screen move\nit a little every minute, so the time never stands on the same pixels for hours.\n\n## Set up\n\n1. Add the plugin to a screen in Tessera. The screen builds once.\n2. Open the screen's **Settings** and the **Screensaver** card. Turn on **Show in standby** (the screen needs **Auto\n   standby** on too).\n3. Click the **Photos** step, choose a folder of Home Assistant's media and how long each photo stands, and choose\n   **Photo clock** under **Face**.\n4. Choose the **Corner** the time stands in.\n\n## Good to know\n\n- It shows on screens that show pictures, as the photos step does. The CYD, the Waveshare 3.5-inch and the Hosyond\n  4-inch show the clock instead.\n- The photo fills the glass and is cut to it, whatever the step's own fill says.\n- A screen without the plugin shows Tessera's own photos.\n"
+   },
+   "changelog": {
+    "en": "# Changelog\n\n## 0.1.0\n- First version: a face of the screensaver's photos, the time and the date small in a corner you choose, over the\n  photo, which moves slowly when you set Motion to Slow. Needs a screen with plugin API 0.14.\n"
+   },
+   "image": "store.png"
+  },
+  {
    "id": "picture_frame",
    "repo": "https://github.com/maxgramser/tessera-plugins",
    "repo_id": 1408945265,
@@ -1718,6 +1933,102 @@
    "changelog": {
     "en": "# Changelog\n\n## 0.2.1 - 2026-10-16\n- Builds with the current firmware again: a screen that still had the first 0.2.0 failed its update with\n  \"on_step marked override, but does not override\". Update the plugin, then the screen.\n\n## 0.2.0 - 2026-10-15\n- The tick comes the moment your finger lands on a tile, a key, a slider or a row of the settings, no longer after you\n  let go. A push that wakes a dimmed screen and a touch between the tiles stay silent.\n- Dragging a slider ticks softly at every step, evenly however fast you drag: every 5 %, or every position of a slider\n  with only a few. The end of a slider ticks firmer, and holding - or + ticks at every step.\n- Needs Tessera's firmware with plugin API 0.11.\n\n## 0.1.0 - 2026-10-10\n- First version: a short, soft tick on the screen's speaker for every tap, with a setting to turn it off.\n",
     "nl": "# Wijzigingen\n\n## 0.2.1 - 2026-10-16\n- Bouwt weer met de huidige firmware: een scherm dat nog de eerste 0.2.0 had, faalde bij zijn update met\n  \"on_step marked override, but does not override\". Werk de plugin bij, en dan het scherm.\n\n## 0.2.0 - 2026-10-15\n- Het tikje komt zodra je vinger een tegel, een toets, een slider of een rij van de instellingen raakt, niet meer pas\n  als je loslaat. Een druk die een gedimd scherm wekt en een aanraking tussen de tegels blijven stil.\n- Een slider slepen tikt zacht bij elke stap, gelijkmatig hoe snel je ook sleept: elke 5 %, of elke stand van een\n  slider met maar een paar. Het einde van een slider tikt steviger, en - of + vasthouden tikt bij elke stap.\n- Vraagt de firmware van Tessera met plugin-API 0.11.\n\n## 0.1.0 - 2026-10-10\n- Eerste versie: een kort, zacht tikje op de luidspreker van het scherm bij elke tik, met een instelling om het uit te zetten.\n"
+   },
+   "image": "store.png"
+  },
+  {
+   "id": "vinyl_deck",
+   "repo": "https://github.com/maxgramser/tessera-plugins",
+   "repo_id": 1408945265,
+   "path": "plugins/vinyl_deck",
+   "label": "tessera",
+   "status": "ok",
+   "release": {
+    "version": "0.1.0",
+    "sha": "b41c300c7e438fea719d1ab9d8c7a2d52b21b49d",
+    "date": "2026-10-17"
+   },
+   "manifest": {
+    "id": "vinyl_deck",
+    "version": "0.1.0",
+    "api": "0.14",
+    "icon": "record-player",
+    "maintainer": "MaxGramser",
+    "license": "MIT",
+    "stage": "example",
+    "topics": [
+     "media"
+    ],
+    "requires": {
+     "esphome": "2026.6.2"
+    },
+    "boards": "any",
+    "flash_kb": 6,
+    "permissions": {
+     "home_assistant_actions": [
+      "media_player.media_play_pause",
+      "media_player.volume_mute",
+      "media_player.volume_up",
+      "media_player.volume_down"
+     ]
+    },
+    "savers": [
+     {
+      "id": "deck",
+      "name": "saver_name",
+      "icon": "record-player",
+      "step": "media",
+      "memory": 1500,
+      "pictures": 1,
+      "taps": true,
+      "example": "saver_example",
+      "options": [
+       {
+        "id": "keys",
+        "kind": "toggle",
+        "label": "keys",
+        "hint": "keys_hint",
+        "default": true
+       }
+      ]
+     }
+    ]
+   },
+   "translations": {
+    "en": {
+     "_meta": {
+      "name": "English"
+     },
+     "screen": {},
+     "app": {
+      "name": "Vinyl deck",
+      "summary": "The music that plays as a record in its sleeve on the screensaver, with keys for play and the volume.",
+      "saver_name": "Vinyl deck",
+      "saver_example": "The cover as a record sleeve, the title and the artist beside it",
+      "keys": "Keys",
+      "keys_hint": "Play, pause and the volume on the screensaver. A tap anywhere else wakes the screen."
+     }
+    },
+    "nl": {
+     "_meta": {
+      "name": "Nederlands"
+     },
+     "screen": {},
+     "app": {
+      "name": "Platenspeler",
+      "summary": "De muziek die speelt als een plaat in zijn hoes op de schermbeveiliging, met toetsen voor afspelen en volume.",
+      "saver_name": "Platenspeler",
+      "saver_example": "De hoes als platenhoes, met de titel en de artiest ernaast",
+      "keys": "Toetsen",
+      "keys_hint": "Afspelen, pauzeren en het volume op de schermbeveiliging. Een tik ergens anders wekt het scherm."
+     }
+    }
+   },
+   "readme": {
+    "en": "# Vinyl deck\n\nA face for the screensaver's music: the cover of what plays as a record sleeve, with the record peeking out of it, and\nthe title and the artist beside it. Three round keys under the words play or pause the player and turn its volume down\nor up, and the screen stays in standby while you tap them. Hold the volume down key for a second and a half to mute the\nplayer; the next tap on a volume key takes the mute off.\n\nIt is an example to learn from: a screensaver with a picture (the step's own cover), keys that take a tap without\nwaking the screen, and a key that shows its change at once.\n\n## Set up\n\n1. Add the plugin to a screen in Tessera. The screen builds once.\n2. Open the screen's **Settings** and the **Screensaver** card. Turn on **Show in standby** (the screen needs **Auto\n   standby** on too).\n3. Click the **Music playing** step, choose your players, and choose **Vinyl deck** under **Face**.\n4. Turn **Keys** off for a screensaver that only shows the music. A tap then wakes the screen wherever it lands.\n\n## Good to know\n\n- It shows on screens that show pictures, as the music step does. The CYD, the Waveshare 3.5-inch and the Hosyond\n  4-inch show the clock instead.\n- A key shows only when the player has it in Home Assistant: a player without a volume has the play key alone.\n- The screen must be allowed to perform actions in Home Assistant (it is when the app added it).\n- A screen without the plugin shows Tessera's own cover with its keys.\n"
+   },
+   "changelog": {
+    "en": "# Changelog\n\n## 0.1.0\n- First version: a face of the screensaver's music, the cover as a record sleeve with the title and the artist, and\n  keys for play, pause and the volume that work while the screen stays in standby. Needs a screen with plugin API 0.14.\n"
    },
    "image": "store.png"
   },

@@ -11,20 +11,23 @@ of your `preview.yaml` the way the Tessera app would, and photographs everything
   and dark;
 - the card a tap on each tile opens, and every card of the manifest opened by its id, light and dark;
 - its top bar items, with their words and as their icon alone;
+- its screensavers (plugin API 0.14), in standby, on every screen that shows them, with the screen light and dark;
 - its pages on the screen's settings page (Settings, Plugins);
 - the full pages, light and dark.
 
 It reads what your plugin adds from its manifest and from its code (`add_tile`, `add_card`, `add_bar_item`,
-`add_tap_action`, `settings()`, `tessera::action`), and renders only what is there. And it checks:
+`add_tap_action`, `add_saver`, `settings()`, `tessera::action`), and renders only what is there. And it checks:
 
-- a part of a tile or a card outside its area;
+- a part of a tile, a card or a screensaver outside its area;
 - a label cut with dots;
 - a character the font does not have (it draws as nothing);
 - a word too faint to read on its ground, in light and in dark (a colour `on_theme` forgot, most often);
 - two parts over each other (a number under a bar), and a label lower than its own letters;
 - a tile, card or top bar item the code registers and the manifest does not name, or the other way round;
 - an action the code calls that `permissions.home_assistant_actions` does not name;
-- `Font::DIGITS` in code whose manifest names an API before 0.9;
+- `Font::DIGITS` in code whose manifest names an API before 0.9, a part of a screensaver before 0.14, and
+  `ui::takes_taps` in code whose manifest gives no saver `taps: true`;
+- a screensaver that stands still: the same picture two minutes later;
 - a question to Home Assistant without an answer in `preview.yaml`, and a tile that waits for data it never gets.
 
 Everything lands in your plugin's folder under `.preview/`: `index.html` to look at it all, `overview.png` with every
@@ -129,7 +132,8 @@ python3 tools/preview.py plugins/<id> --strict    # or from the plugin's folder:
   dark: 1 too faint to read on its ground: faint[Tomorrow]`), and are in `.preview/summary.json`.
 - **Then look.** `.preview/overview.png` has every tile at every size on every screen on one picture. Each picture is
   also its own file: `.preview/<screen>/tile-<example>-<size>-<light|dark>.png`, `card-<id>-<theme>.png`,
-  `tap-<example>-<size>.png`, `bar-<theme>.png`, `bar-icon-<theme>.png`, `settings-<n>.png`, `page-<n>-<theme>.png`; a
+  `tap-<example>-<size>.png`, `bar-<theme>.png`, `bar-icon-<theme>.png`, `saver-<example>-<theme>.png`,
+  `settings-<n>.png`, `page-<n>-<theme>.png`; a
   grid of `--grid` has a folder of its own under the screen (`.preview/guition/4x5/`). Look at the smallest screen
   (`cyd`) and the largest, light and dark: a finding only catches what can be measured, a picture shows what looks wrong.
 - **Give it real data.** Without a `preview.yaml` the tiles wait for data and the pictures show nothing of what the
@@ -145,9 +149,9 @@ python3 tools/preview.py plugins/<id> --strict    # or from the plugin's folder:
 | Field | What |
 |---|---|
 | `plugin`, `version`, `rendered` | The plugin and when the bench ran. |
-| `adds` | What the plugin adds: `tiles` (id, name, sizes, data, memory: the manifest's), `cards`, `bar_items`, `tap_actions`, `settings_entities`, `settings_rows`, `questions`, `actions`, `api_0_9` (it uses a part of plugin API 0.9), and `mismatches` between manifest and code. |
+| `adds` | What the plugin adds: `tiles` (id, name, sizes, data, memory: the manifest's), `cards`, `bar_items`, `tap_actions`, `savers` (id, name, step, pictures, taps, moves, memory), `settings_entities`, `settings_rows`, `questions`, `actions`, `api_0_9` (it uses a part of plugin API 0.9), and `mismatches` between manifest and code. |
 | `screens[]` | Each screen: `key`, `title`, `width`, `height`, `dpi`, `look`, `error` when it failed, and its `views`. |
-| `screens[].views[]` | Each grid of it: `grid`, `folder` (empty for its own grid), `tiles[]` (`name`, `span` as `2x1`, `size`, `px`, the `light` and `dark` file), `cards[]`, `taps[]` (with the `actions` a tap asked Home Assistant for), `bar`, `bar_icon`, `settings[]`, `pages[]`. |
+| `screens[].views[]` | Each grid of it: `grid`, `folder` (empty for its own grid), `tiles[]` (`name`, `span` as `2x1`, `size`, `px`, the `light` and `dark` file), `cards[]`, `taps[]` (with the `actions` a tap asked Home Assistant for), `bar`, `bar_icon`, `savers[]` (`key`, `name`, `id`, `step`, the `light` and `dark` file; on the screen's own grid), `settings[]`, `pages[]`. |
 | `findings[]` | `level` (`error`, `warning` or `info`), `screen`, `where` and `text`. Fix every `error` and `warning`; an `info` says what was not shown and why. |
 
 ## preview.yaml: the data your plugin is shown with
@@ -190,6 +194,15 @@ cards:                         # the entity and title a card opens with, when th
 pictures:                      # the pictures of a tile's places (plugin API 0.10): a file beside this one per address
   "https://image.tmdb.org/t/p/w342/poster.jpg": preview/poster.jpg
 
+savers:                        # the screensavers to show (plugin API 0.14); without it, each once with its step's sample
+  - saver: deck                # a saver id of the manifest
+    name: Playing              # the name of its pictures (default: the saver's name)
+    options: { keys: true }    # its options, as the Screensaver card sets them
+    data: { title: Evening Drive, artist: Nova Coast, state: playing }   # over the step's sample (below)
+    picture: preview/cover.png # what saver:picture shows: the music's cover, the photos' photo
+  - saver: rain                # a step of its own: from `answers` and `states`, as a tile
+    entity: weather.home
+
 time_zone: Europe/Amsterdam    # the zone of the moments below (default Europe/Amsterdam)
 ```
 
@@ -207,6 +220,41 @@ time_zone: Europe/Amsterdam    # the zone of the moments below (default Europe/A
   with a note. The app's own checks hold here too: a tile without `pictures` in the manifest, or an address on a host
   `permissions.network` does not name, gets a warning and no picture.
 - Never put a secret here: the file is shared with your plugin.
+
+## Screensavers
+
+The bench shows each saver of `savers` (or each of the manifest once) the way a screen shows it: the screen goes into
+standby, and the bench sends the app's word for the step with the saver in it, so the saver gets its `show()`, its
+options, its step's data in `on_state` and its ticks on the screen's own clock. It does that with the screen in its
+light look and in its dark look; the saver is drawn dark in both, so the two pictures should look alike. For each it
+keeps `saver-<example>-<light|dark>.png` and runs the audit of a tile (a part outside the glass, a label cut with dots, a
+character its font lacks, a word too faint), and then it moves the clock two minutes on and photographs it again: the
+two pictures must differ, since the screen moves a saver a millimetre every minute (or the saver moves itself, with
+`moves: true`). A saver that stands still is a warning: it marks the glass over a night.
+
+This part of the bench is `Bench.savers` in `tools/bench.py`, with the saver's audit among its actions
+(`render_plugin_audit` with `saver`). It needs a Tessera with plugin API 0.14 and its standby action for the bench
+(`render_standby`): Tessera's `dev` until its next release, which the bench takes by itself for a plugin of `api: "0.14"`.
+
+What a saver gets, unless `data` says otherwise (`data` goes over it, field by field):
+
+| Step | The sample |
+|---|---|
+| clock | `temperature: "21°"`, `items: []` |
+| media | the player `media_player.living_room` ("Living room") playing "Evening Drive" by "Nova Coast" from "Coastlines", every key in `features` (PAUSE, VOLUME_SET, VOLUME_MUTE, the tracks, VOLUME_STEP, PLAY), not muted, `volume: 0.4`, `picture: saver:picture`, a `mark` and a `colour` |
+| photos | `picture: saver:picture`, a `mark`, photo 3 of 24 of the album "Summer" |
+| own | the app's own shaping, as for a tile: the answer of its fetch from `answers` (or the example's own `answers`) and its entity (`entity`, from `states`); `data` gives it whole instead |
+
+- **The picture of the step** (`saver:picture`): the file of the example's `picture`, relative to the plugin's folder,
+  or a drawn cover for the music and a drawn landscape for the photos. Any other address of a saver's places comes from
+  `pictures`, as for a tile.
+- **Where a saver shows.** The music and the photos show only on a screen with pictures, so the bench shows a face of
+  them on the Guition and the 10-inch, not on the CYD (an `info` says so). The Waveshare 4.3, 5 and 7-inch never go
+  into standby: no saver shows there (an `info` too).
+- **Its keys.** The bench photographs a saver; it does not tap its keys. Try them on a screen: a tap on a key keeps
+  the screen in standby, a tap beside it wakes it.
+- **When it shows.** The bench shows every saver, also a step of its own whose `when` does not hold; on a screen the app
+  goes on to the next step then.
 
 [`plugins/ov_departures/preview.yaml`](../plugins/ov_departures/preview.yaml) (a fetch) and
 [`plugins/waste_collection/preview.yaml`](../plugins/waste_collection/preview.yaml) (an entity, a card that asks Home
@@ -233,7 +281,9 @@ the bench names its page "Home", so the item shows.
 | too faint to read on its ground, dark | `on_theme` does not set the colour of that label again. A screen with memory to spare keeps its pages and only calls `on_theme`; a small one builds the tile anew, which hides the mistake there. |
 | cut with dots | The text is longer than the room on the smallest screen or the finest grid. Take a smaller font there (`ui::text_width`), or a shorter text. |
 | with a character its font lacks | `Font::DIGITS` with a letter, or a sign the screen's fonts do not carry. Test with `ui::covers(text, Font::DIGITS)` and step down to `VALUE`. |
-| outside its area | A position or size worked out from a fixed number instead of `TileContext`'s `width` and `height`. |
+| outside its area | A position or size worked out from a fixed number instead of `TileContext`'s `width` and `height` (a saver's: `SaverContext`'s). |
+| it stands still | A screensaver looks the same two minutes later: it says `moves: true` and does not move, or it made a part outside `SaverContext::parent`, which the screen moves. |
+| the screen does not name it in its hello | The manifest names a saver the code does not register with `add_saver`, or under another id. |
 | over another part | Two parts on one place: a number under a bar, two lines on top of each other. On a short tile (the finest grid, `--grid max`) something has to give way: a line, then the name. |
 | lower than its letters | A label given less height than its font's line: its letters are cut off. Take its height from `ui::line_height`, or a smaller font. |
 | not on a 1 x 4 grid | The grid has no room for that size (a 2x1 tile on one column). Nothing to fix: the editor never offers it there. |

@@ -4,8 +4,8 @@ everything it draws photographed and checked. Run it through tools/preview.py, w
 
 For each screen (a board of Tessera's catalog lying down or standing up, or a glass of any size and density) and each
 grid asked for, it shows every tile of the plugin at every size it offers, light and dark, the card a tap on each
-opens, every card of the manifest opened by its id, its top bar items with words and as icons, and its pages on the
-settings page. It checks what it draws (a part outside its tile, a label cut with dots, a character its font lacks, a
+opens, every card of the manifest opened by its id, its top bar items with words and as icons, its screensavers in
+standby (plugin API 0.14) with the sample data of their step, and its pages on the settings page. It checks what it draws (a part outside its tile, a label cut with dots, a character its font lacks, a
 word too faint to read), answers the plugin's questions to Home Assistant and the states its screen reads from
 preview.yaml, and writes index.html, overview.png and summary.json into <plugin>/.preview/.
 
@@ -55,7 +55,7 @@ import propose_grid  # noqa: E402
 # What the bench asks of the screen besides the harness's own actions (tools/render/host.py): a plugin's settings page,
 # where a tile lies, any card of the plugin opened by its id, what a top bar item says, and an audit of what the
 # plugin drew. The audit walks every object of each plugin tile on the glass (or, with `card`, of the card that is
-# open) and counts what a person would see wrong: a part outside its tile (or the glass), a label cut with dots, a
+# open, and with `saver`, of the plugin's screensaver in standby) and counts what a person would see wrong: a part outside its tile (or the glass), a label cut with dots, a
 # character its font lacks, a word too faint to read on its ground.
 BENCH_ACTIONS = '''    - action: render_settings
       variables:
@@ -96,6 +96,7 @@ BENCH_ACTIONS = '''    - action: render_settings
     - action: render_plugin_audit
       variables:
         card: bool
+        saver: bool
       then:
         - lambda: |-
             lv_obj_update_layout(lv_screen_active());
@@ -111,10 +112,12 @@ BENCH_ACTIONS = '''    - action: render_settings
               auto channel = [](uint8_t v) {{ const float s = v / 255.0f; return s <= 0.03928f ? s / 12.92f : std::pow((s + 0.055f) / 1.055f, 2.4f); }};
               return 0.2126f * channel(c.red) + 0.7152f * channel(c.green) + 0.0722f * channel(c.blue);
             }};
-            auto ground = [](lv_obj_t *o) {{
+            // A screensaver stands on the black glass, or on the step's own picture under a clear glass (`backdrop`),
+            // which the screensaver darkens or which the saver lays a shade over: the ground is the glass's black there.
+            auto ground = [&](lv_obj_t *o) {{
               for (lv_obj_t *p = lv_obj_get_parent(o); p; p = lv_obj_get_parent(p))
                 if (lv_obj_get_style_bg_opa(p, LV_PART_MAIN) >= LV_OPA_80) return lv_obj_get_style_bg_color(p, LV_PART_MAIN);
-              return theme::color(theme::PAGE);
+              return theme::color(saver ? theme::CAMERA_PAGE : theme::PAGE);
             }};
             std::function<void(lv_obj_t *, const lv_area_t &, Count &)> walk = [&](lv_obj_t *o, const lv_area_t &room, Count &n) {{
               if (!o || lv_obj_has_flag(o, LV_OBJ_FLAG_HIDDEN)) return;
@@ -163,6 +166,21 @@ BENCH_ACTIONS = '''    - action: render_settings
                   }}
                 }}
             }};
+            if (saver) {{
+              // A plugin's screensaver (plugin API 0.14): its parts in the stage the host gave it (a child of the black
+              // glass runtime_tiles laid on the top layer), whose area is the saver's, wherever the drift has moved it.
+              Count n;
+              lv_obj_t *root = runtime_tiles::saver_root;
+              for (uint32_t s = 0; root && s < lv_obj_get_child_count(root); ++s) {{
+                lv_obj_t *stage = lv_obj_get_child(root, s);
+                lv_area_t room; lv_obj_get_coords(stage, &room);
+                for (uint32_t i = 0; i < lv_obj_get_child_count(stage); ++i) walk(lv_obj_get_child(stage, i), room, n);
+              }}
+              overlaps(n);
+              ESP_LOGI("render", "audit saver objects=%d outside=%d cut=%d glyph=%d faint=%d clipped=%d overlap=%d notes=%s", n.objects,
+                       n.outside, n.cut, n.glyph, n.faint, n.clipped, n.overlap, n.notes.c_str());
+              return;
+            }}
             if (card) {{
               Count n; const lv_area_t glass{{0, 0, (int32_t) (sw - 1), (int32_t) (sh - 1)}};
               // The card's root is the newest object on the screen (plugin_host::open_card).
@@ -232,6 +250,26 @@ class BenchBuild(host.Build):
         return text + BENCH_ACTIONS.format(plugin=plugin_id)
 
 
+def sample_photo(width, height):
+    """A photo for the photos step when preview.yaml names none: a sky, a sun and hills, the glass's shape, as PNG."""
+    import io
+    width, height = max(64, width), max(64, height)
+    image = Image.new('RGB', (width, height))
+    draw = ImageDraw.Draw(image)
+    for y in range(height):
+        t = y / height
+        draw.line((0, y, width, y), fill=(round(70 + 150 * t), round(130 + 80 * t), round(210 - 40 * t)))
+    sun = min(width, height) // 7
+    draw.ellipse((width * 0.68 - sun, height * 0.3 - sun, width * 0.68 + sun, height * 0.3 + sun), fill=(255, 226, 150))
+    draw.polygon([(0, height * 0.72), (width * 0.3, height * 0.55), (width * 0.6, height * 0.7), (width, height * 0.58),
+                  (width, height), (0, height)], fill=(62, 110, 72))
+    draw.polygon([(0, height * 0.86), (width * 0.45, height * 0.74), (width, height * 0.88), (width, height), (0, height)],
+                 fill=(40, 78, 52))
+    out = io.BytesIO()
+    image.save(out, 'PNG')
+    return out.getvalue()
+
+
 def answer_of(entry, ask, result, zone=None):
     """What a screen gets of Home Assistant's answer to a plugin's command, as the app sends it (Plugins.answer): the
     fields of the manifest's `answers` when it maps that command, else the answer as it came; both bounded."""
@@ -250,10 +288,24 @@ CUSTOM_BASE = 'guition'
 PORT_OFFSET = 200   # beside run.py's plugin builds (+100), so the two never meet on one port
 REGION = dict(keepalive=120, clock_24h=True, numbers='point', group_min=1, percent_space=False)
 SETTINGS = re.compile(r'settings pages=(\d+)')
-AUDIT = re.compile(r'audit (?:tile=(\d+)|card) objects=(\d+) outside=(\d+) cut=(\d+) glyph=(\d+) faint=(\d+) clipped=(\d+) overlap=(\d+) notes=(.*)$')
+AUDIT = re.compile(r'audit (?:tile=(\d+)|card|saver) objects=(\d+) outside=(\d+) cut=(\d+) glyph=(\d+) faint=(\d+) clipped=(\d+) overlap=(\d+) notes=(.*)$')
 BOX = re.compile(r'box=(-?\d+),(-?\d+),(-?\d+),(-?\d+)')
 ZONE = 'Europe/Amsterdam'
 SHOWN = re.compile(r'[^a-z0-9_.-]+')
+# A plugin's screensaver (plugin API 0.14, docs/PREVIEW.md "Screensavers"): the step's own picture, the line the screen
+# logs when a saver comes on the glass, and what each step draws from when preview.yaml gives nothing (the contract of
+# docs/FIRMWARE_API.md, "A screensaver"). Home Assistant's MediaPlayerEntityFeature: PAUSE 1, VOLUME_SET 4,
+# VOLUME_MUTE 8, PREVIOUS_TRACK 16, NEXT_TRACK 32, VOLUME_STEP 1024, PLAY 16384.
+SAVER_PICTURE = 'saver:picture'
+SAVER_SHOWN = re.compile(r'screensaver (plugin:\S+) \(\w+\) on the glass')
+SAVER_STILL_SECONDS = 120
+STEP_SAMPLES = {
+    'clock': {'temperature': '21°', 'items': []},
+    'media': {'entity': 'media_player.living_room', 'name': 'Living room', 'title': 'Evening Drive', 'artist': 'Nova Coast',
+              'album': 'Coastlines', 'state': 'playing', 'features': 1 | 4 | 8 | 16 | 32 | 1024 | 16384, 'muted': False,
+              'volume': 0.4, 'picture': SAVER_PICTURE, 'mark': 'c0ffee1234', 'colour': '#35506b'},
+    'photos': {'picture': SAVER_PICTURE, 'mark': 'a1b2c3d4e5', 'index': 3, 'count': 24, 'album': 'Summer'},
+}
 
 
 # ---- the screens
@@ -344,8 +396,8 @@ def read_preview(folder):
     if not path.is_file():
         return {}
     spec = yaml.safe_load(path.read_text(encoding='utf-8')) or {}
-    if not isinstance(spec, dict) or set(spec) - {'tiles', 'answers', 'states', 'commands', 'cards', 'time_zone', 'pictures'}:
-        raise SystemExit(f'{path}: a mapping of tiles, answers, states, commands, cards, pictures and time_zone (docs/PREVIEW.md)')
+    if not isinstance(spec, dict) or set(spec) - {'tiles', 'answers', 'states', 'commands', 'cards', 'time_zone', 'pictures', 'savers'}:
+        raise SystemExit(f'{path}: a mapping of tiles, answers, states, commands, cards, savers, pictures and time_zone (docs/PREVIEW.md)')
     return spec
 
 
@@ -356,10 +408,13 @@ CODE = {
     'cards': re.compile(r'\badd_card\(\s*"(\w+)"'),
     'bar_items': re.compile(r'\badd_bar_item\(\s*"(\w+)"'),
     'tap_actions': re.compile(r'\badd_tap_action\(\s*"(\w+)"'),
+    'savers': re.compile(r'\badd_saver\(\s*"(\w+)"'),
 }
 SETTINGS_ROWS = re.compile(r'\bbool\s+(?:\w+::)?settings\s*\(\s*(?:tessera::)?SettingsPage\s*&')
 ACTION = re.compile(r'tessera::action\(\s*"([\w.]+)"')
 API_0_9 = re.compile(r'Font::DIGITS|ui::covers\(|Tone::GOOD|ui::set_fill\(|ui::tone_color\(')
+# The parts of a screensaver (plugin API 0.14), as tools/check.py's API_PARTS names them.
+API_0_14 = re.compile(r'\badd_saver\s*\(|\bSaver\b|\bSaverContext\b|\bSaverStep\b|\bui::takes_taps\s*\(|\btessera::wish\s*\(|\bWish::')
 
 
 def adds(entry, folder):
@@ -373,13 +428,15 @@ def adds(entry, folder):
            'cards': [{'id': c['id'], 'name': entry.text(c['name'])} for c in manifest['cards']],
            'bar_items': [{'id': b['id'], 'name': entry.text(b['label'])} for b in manifest['bar_items']],
            'tap_actions': [{'id': a['id'], 'name': entry.text(a['label']), 'domains': a['domains']} for a in manifest['tap_actions']],
+           'savers': [{'id': v['id'], 'name': entry.text(v['name']), 'step': v['step'], 'pictures': v['pictures'],
+                       'taps': v['taps'], 'moves': v['moves'], 'memory': v['memory']} for v in manifest.get('savers') or []],
            'settings_entities': [s['key'] for s in manifest['settings']],
            'settings_rows': bool(SETTINGS_ROWS.search(code)),
            'questions': manifest['permissions']['ha_commands'],
            'actions': sorted(set(ACTION.findall(code))),
            'api_0_9': bool(API_0_9.search(code)), 'mismatches': []}
     for part, pattern in CODE.items():
-        named = {item['id'] for item in manifest[part]}
+        named = {item['id'] for item in manifest.get(part) or []}
         found = set(pattern.findall(code))
         for missing in sorted(named - found):
             out['mismatches'].append(f'the manifest names {part[:-1].replace("_", " ")} {missing!r}, the code registers none of that id')
@@ -394,6 +451,12 @@ def adds(entry, folder):
     if out['api_0_9'] and api < (0, 9):
         out['mismatches'].append(f'the code uses a part of plugin API 0.9 (Font::DIGITS, ui::covers, Tone::GOOD, ui::set_fill, ui::tone_color): the manifest '
                                  f'says api "{manifest["api"]}"')
+    if API_0_14.search(code) and api < (0, 14):
+        out['mismatches'].append(f'the code uses a part of plugin API 0.14 (a screensaver: add_saver, Saver, ui::takes_taps, '
+                                 f'tessera::wish): the manifest says api "{manifest["api"]}"')
+    if re.search(r'\bui::takes_taps\s*\(', code) and not any(v['taps'] for v in manifest.get('savers') or []):
+        out['mismatches'].append('the code makes a part with ui::takes_taps, but no saver of the manifest says taps: true: '
+                                 'say it there, so the app and a person know a tap on the saver may do something')
     return out
 
 
@@ -522,6 +585,49 @@ async def messages(app, compiled, origins, spec, now):
     return out
 
 
+def saver_examples(entry, spec):
+    """preview.yaml's savers (docs/PREVIEW.md, "Screensavers"), or one per saver of the manifest with its step's sample
+    data; each with a key for the pictures."""
+    kinds = {kind['id']: kind for kind in entry.manifest.get('savers') or []}
+    given = spec.get('savers') or [{'saver': saver_id} for saver_id in kinds]
+    if not isinstance(given, list):
+        raise SystemExit('preview.yaml savers: a list of {saver, name, options, data, picture, entity, answers}')
+    out = []
+    for i, example in enumerate(given):
+        kind = kinds.get(example.get('saver')) if isinstance(example, dict) else None
+        if not kind:
+            raise SystemExit(f'preview.yaml savers[{i}]: saver {(example or {}).get("saver")!r} is not in the manifest '
+                             f'({", ".join(kinds) or "it has none"})')
+        if example.get('picture') and kind['step'] not in ('media', 'photos'):
+            raise SystemExit(f'preview.yaml savers[{i}]: a picture is the music\'s cover or the photos\' photo; a saver of '
+                             f'step {kind["step"]} has none')
+        name = example.get('name') or entry.text(kind['name'])
+        out.append({**example, 'kind': kind, 'name': name,
+                    'key': f'{i + 1}-{SHOWN.sub("-", name.lower()).strip("-") or kind["id"]}'})
+    return out
+
+
+def saver_word(entry, kind, options, data, motion=False):
+    """The app's word for the screensaver (screen_saver.message) with the plugin's saver in `pf`: a face goes with its
+    step's own fields, so a screen that lacks the plugin would show the step's own face; a step of its own is `plugin`."""
+    pf = {'p': f'plugin:{entry.id}.{kind["id"]}', 'o': dict(options or {}), 'x': data}
+    word = {'v': 1, 'op': 'saver', 'pf': pf}
+    step = kind['step']
+    if step == 'clock':
+        return {**word, 'k': 'clock', 'w': data.get('temperature') or ''}
+    if step == 'media':
+        extra = {key: data[key] for key in ('artist', 'album') if data.get(key)}
+        if data.get('mark'):
+            extra['pic'] = data['mark']
+        return {**word, 'k': 'media', 'e': data.get('entity') or STEP_SAMPLES['media']['entity'], 'n': data.get('name') or '',
+                't': data.get('title') or '', 'x': extra, 's': data.get('state') or '', 'f': int(data.get('features') or 0),
+                **({'m': 1} if data.get('muted') else {})}
+    if step == 'photos':
+        # `motion: true` of the example: the photos move slowly (the person's Motion: Slow), under a face of `backdrop`.
+        return {**word, 'k': 'photos', 'e': 'saver.photos', 'n': '', 'x': {'pic': data.get('mark') or '', **({'mv': 1} if motion else {})}}
+    return {**word, 'k': 'plugin'}
+
+
 # ---- one screen's program
 
 class Bench(run.Run):
@@ -536,6 +642,7 @@ class Bench(run.Run):
         self.states = {entity: {'state': str(value.get('state', '')), 'attributes': value.get('attributes') or {}}
                        for entity, value in moments(spec.get('states') or {}, spec.get('time_zone') or ZONE, self.now).items()}
         self.read = set()
+        self.saver_shown = None   # the example of preview.yaml's savers on the glass, for its picture
 
     def find(self, level, where, text):
         self.findings.append({'level': level, 'screen': self.screen.key, 'where': where, 'text': text})
@@ -588,10 +695,15 @@ class Bench(run.Run):
         self.client.send_home_assistant_state(entity, attribute, text)
 
     def heard(self, call):
-        """A call of the screen to Home Assistant: a plugin's question (answered from preview.yaml), a plugin tile's
-        question for its pictures (answered from preview.yaml's pictures, plugin API 0.10) or an action."""
+        """A call of the screen to Home Assistant: a plugin's question (answered from preview.yaml), a plugin tile's,
+        card's or screensaver's question for its pictures (answered from preview.yaml's pictures, plugin API 0.10) or an
+        action."""
         if call.service == 'esphome.screen_plugin':
             asyncio.get_running_loop().create_task(self.answer(call.data))
+        elif call.service == 'esphome.screen_camera' and call.data.get('saver') in ('media', 'photos'):
+            # The step's own picture under a face of `backdrop: true` (plugin API 0.14): as the app makes it.
+            asyncio.get_running_loop().create_task(self.answer_backdrop(dict(call.data)))
+            self.last_ask = time.monotonic()
         elif call.service == 'esphome.screen_camera' and core.plugin_tile(str(call.data.get('tiles') or '')):
             job = asyncio.get_running_loop().create_task(self.answer_pictures(dict(call.data)))
             self.picture_jobs = getattr(self, 'picture_jobs', set())
@@ -612,25 +724,65 @@ class Bench(run.Run):
         if getattr(self, 'last_ask', 0):
             await asyncio.sleep(0.6)
 
+    async def answer_backdrop(self, data):
+        """The step's own picture under a face of `backdrop: true`: the example's `picture` or a drawn cover or photo, made
+        as the app makes the screensaver's (camera_feed.encode_photo, moving a little larger where the word says `mv`;
+        encode_saver for the music), answered as "saver"."""
+        import camera_feed
+        import media_art
+        shown = self.saver_shown or {}
+        kind = data.get('saver')
+        box = camera_feed.capped((self.screen.width, self.screen.height), cap=camera_feed.picture_cap(data))
+        if shown.get('picture'):
+            raw = (self.args.plugin.resolve() / str(shown['picture'])).read_bytes()
+        else:
+            raw = sample_photo(self.screen.width, self.screen.height) if kind == 'photos' else media_art.png(7, 640)
+        if kind == 'photos':
+            moving = camera_feed.motion_box(box, camera_feed.picture_cap(data)) if shown.get('motion') else None
+            body = camera_feed.encode_photo(raw, box, 'fill', moving)
+        else:
+            body = camera_feed.encode_saver(raw, box, 'media', 0)
+        try:
+            view = int(data.get('view', 0))
+        except (TypeError, ValueError):
+            view = 0
+        url = self.pictures.url(f'{self.screen.key}-backdrop-{view}.bmp', body)
+        await self.send({'v': 1, 'op': 'camera', 't': 'saver', 'e': data.get('entity', ''), 'u': url, 'view': view})
+
     async def answer_pictures(self, data):
-        """The pictures of a plugin tile's places, as the app would answer (server.answer_plugin_pictures): the frames of
+        """The pictures of a plugin tile's, card's or screensaver's places (a card: plugin API 0.13, a screensaver: 0.14),
+        as the app would answer (server.answer_plugin_pictures): the frames of
         the question painted with the files preview.yaml's `pictures` names for each address (relative to the plugin's
         folder), a drawn stand-in for an address it does not name, and the checks the app makes (the manifest's
-        `pictures`, where a picture may come from)."""
+        `pictures`, where a picture may come from). A screensaver's `saver:picture`, the step's own picture, is the
+        example's `picture` of preview.yaml's `savers`, or a drawn cover (the music) or photo (the photos)."""
         import plugin_pictures
         import tile_art
         import media_art
         question = plugin_pictures.parse(data, (self.screen.width, self.screen.height))
-        reply = {'v': 1, 'op': 'camera', 't': 'live', 'e': data.get('tiles', ''), 'u': ''}
+        # A card over the page asks too (plugin API 0.13, `card`): the app answers it as "pcard".
+        card = bool(getattr(question, 'card', False))
+        # A screensaver asks too (plugin API 0.14, `saver`): the app answers it as "psaver".
+        saver = bool(getattr(question, 'saver', False))
+        reply = {'v': 1, 'op': 'camera', 't': 'pcard' if card else 'psaver' if saver else 'live', 'e': data.get('tiles', ''), 'u': ''}
         try:
             view = int(data.get('view', 0))
         except (TypeError, ValueError):
             view = 0
         if not question:
-            self.find('warning', 'pictures', f'a tile asked for pictures in a way the app does not take: {data}')
+            self.find('warning', 'pictures', f'a tile or card asked for pictures in a way the app does not take: {data}')
             return
-        kind = self.entry.tile(question.tile)
-        problem = plugin_pictures.refused(question, self.entry.manifest, kind)
+        if saver:
+            kind = self.entry.saver(question.tile) if hasattr(self.entry, 'saver') else None
+            problem = plugin_pictures.refused(question, self.entry.manifest, kind, bool(question.of))
+        elif card:
+            # The manifest's card; Home Assistant's own pictures when the card was opened for an entity (`for`), as the
+            # app allows them for a card shown for an entity of the layout.
+            kind = next((c for c in self.entry.manifest.get('cards') or [] if c['id'] == question.tile), None)
+            problem = plugin_pictures.refused(question, self.entry.manifest, kind, bool(question.of))
+        else:
+            kind = self.entry.tile(question.tile)
+            problem = plugin_pictures.refused(question, self.entry.manifest, kind)
         if problem:
             self.find('warning', 'pictures', f'{question.entity} asked for pictures the app refuses: {problem}')
         else:
@@ -638,7 +790,14 @@ class Bench(run.Run):
             raws = []
             for n, url in enumerate(question.sources):
                 file = named.get(url) if isinstance(named, dict) else None
-                if file:
+                if url == SAVER_PICTURE:
+                    shown = self.saver_shown or {}
+                    if shown.get('picture'):
+                        raws.append((self.args.plugin.resolve() / str(shown['picture'])).read_bytes())
+                    else:
+                        raws.append(sample_photo(self.screen.width, self.screen.height) if shown.get('step') == 'photos'
+                                    else media_art.png(7, 640))
+                elif file:
                     raws.append((self.args.plugin.resolve() / str(file)).read_bytes())
                 else:
                     self.find('info', 'pictures', f'preview.yaml names no picture for {url[:80]}: a drawn one stands in')
@@ -691,11 +850,12 @@ class Bench(run.Run):
         self.client.switch_command(self.dark_switch.key, on)
         await asyncio.sleep(0.6)
 
-    async def audit(self, card=False):
+    async def audit(self, card=False, saver=False):
         start = len(self.lines)
-        await self.call('render_plugin_audit', card=card)
-        if card:
-            line = await self.until(lambda l: 'audit card ' in l, 5, 'the card audit', start)
+        await self.call('render_plugin_audit', card=card, saver=saver)
+        if card or saver:
+            what = 'saver' if saver else 'card'
+            line = await self.until(lambda l: f'audit {what} ' in l, 5, f'the {what} audit', start)
             return [AUDIT.search(line).groups()]
         await self.until(lambda l: 'audit end' in l, 5, 'the tile audit', start)
         return [AUDIT.search(l).groups() for l in self.lines[start:] if 'audit tile=' in l]
@@ -731,6 +891,7 @@ class Bench(run.Run):
         for grid in grids:
             await self.view(app, examples, grid, first)
             first = False
+        await self.savers(app)
         await self.settings()
         if self.args.window:
             await self.stay(app, examples, own)
@@ -938,6 +1099,121 @@ class Bench(run.Run):
             await self.dark(False)
             view['cards'].append(item)
 
+    async def saver_data(self, app, example):
+        """What a saver draws from: its step's contract (STEP_SAMPLES, with preview.yaml's `data` over it), or for a step
+        of its own the app's own shaping of its fetch's answer and its entity, as a plugin tile's, unless `data` gives
+        it whole."""
+        kind = example['kind']
+        if kind['step'] != 'own':
+            return {**STEP_SAMPLES[kind['step']], **(example.get('data') or {})}
+        if 'data' in example:
+            return example['data']
+        zone = self.spec.get('time_zone') or ZONE
+        if isinstance(app.fetcher, SampleFetcher):
+            app.fetcher.answers = moments({**(self.spec.get('answers') or {}), **(example.get('answers') or {})}, zone, self.now)
+        options = app.values_of(self.entry, kind, example.get('options'))
+        _, part = app.entity_part(kind, {'options': {'plugin_entity': example.get('entity') or ''}})
+        fetched = await app.tile_data(self.entry, kind, options, True, None)
+        return {**(part or {}), **(fetched or {})}
+
+    async def session(self):
+        """A layout on the screen, so it takes the screensaver's word: an empty page for a plugin without tiles."""
+        if self.sender.session is not None:
+            return
+        record, _, _, bars, _ = layout_of(self.entry, [], send_layout.Grid(self.screen.columns, self.screen.rows))
+        await self.sender.synchronize(self.inbox.object_id, record, REGION, [], bars or [[{'k': 'clock'}]])
+
+    async def show_saver(self, example, data, theme):
+        """The screen awake in this look, then in standby with the example's word: the saver as it comes on the glass,
+        its first ticks and its pictures, photographed. None when the screen shows no screensaver."""
+        kind = example['kind']
+        await self.call('render_standby', enter=0)
+        # No word while awake, so the next one is shown fresh (show()) rather than painted into the last (on_state).
+        await self.send({'v': 1, 'op': 'saver', 'k': ''})
+        await self.dark(theme == 'dark')
+        await self.call('render_time', epoch=self.now)
+        await self.call('render_standby', enter=1)
+        await asyncio.sleep(0.4)
+        self.saver_shown = {'step': kind['step'], 'picture': example.get('picture'), 'motion': bool(example.get('motion'))}
+        start = len(self.lines)
+        await self.send(saver_word(self.entry, kind, example.get('options'), data, bool(example.get('motion'))))
+        key = f'plugin:{self.entry.id}.{kind["id"]}'
+        try:
+            await self.until(lambda l: (SAVER_SHOWN.search(l) or [None, None])[1] == key, 8, f'the saver {kind["id"]}', start)
+        except RuntimeError:
+            return None
+        await asyncio.sleep(1.2)   # its first ticks
+        await self.pictures_settled()
+        return await self.render('_saver', keep=False)
+
+    async def still(self, example, first):
+        """Two minutes later the saver must look otherwise: the screen moves a saver a little every minute (its drift),
+        and one that says it moves itself (`moves: true`) must do so; a saver that stands still marks the glass."""
+        kind = example['kind']
+        await self.call('render_time', epoch=self.now + SAVER_STILL_SECONDS)
+        await asyncio.sleep(2.2)   # its tick, and the drift's
+        later = await self.render('_saver-later', keep=False)
+        await self.call('render_time', epoch=self.now)
+        if later.tobytes() != first.tobytes():
+            return
+        if kind['moves']:
+            why = ('the manifest says moves: true, so the screen leaves it where it draws: move it yourself in on_tick '
+                   '(a minute at a time is enough), or leave moves out and the screen moves it')
+        else:
+            why = ('the screen\'s drift did not move it: make every part in SaverContext::parent, the stage the screen '
+                   'moves')
+        self.find('warning', f'saver {example["name"]}', f'it stands still: {SAVER_STILL_SECONDS // 60} minutes later every '
+                  f'pixel is the same, which marks the glass over the hours of a night; {why}')
+
+    async def savers(self, app):
+        """Every screensaver of the plugin (plugin API 0.14) in standby, with preview.yaml's data of its step (or the
+        step's sample), on the screen light and dark (the saver itself is drawn dark in both): its picture, the audit
+        that tiles and cards get, and the same saver two minutes later, which must not be the same picture."""
+        examples = saver_examples(self.entry, moments(self.spec, self.spec.get('time_zone') or ZONE, self.now))
+        if not examples:
+            return
+        view = self.views[0]
+        view['savers'] = []
+        if 'render_standby' not in self.services:
+            self.find('info', 'screensavers', 'this copy of Tessera has no standby for the bench (render_standby): '
+                      'python3 tools/preview.py --setup fetches a newer one')
+            return
+        await self.session()
+        mine = next((p for p in self.sender.plugins if p['id'] == self.entry.id), {})
+        named = set(mine.get('savers') or [])
+        shape = json.loads((REPO / 'screen_manager/app/boards.json').read_text()).get(self.item.board) or {}
+        pictured = 'camera' in shape
+        for example in examples:
+            kind = example['kind']
+            if kind['id'] not in named:
+                self.find('warning', f'saver {kind["id"]}', 'the screen does not name it in its hello: the code registers '
+                          'no saver of that id in setup() (add_saver), so the app never shows it')
+                continue
+            if kind['step'] in ('media', 'photos') and not pictured:
+                self.find('info', f'saver {example["name"]}', f'not on this screen: the {kind["step"]} step shows only on '
+                          'a screen with pictures')
+                continue
+            data = await self.saver_data(app, example)
+            item = {'key': example['key'], 'name': example['name'], 'id': kind['id'], 'step': kind['step']}
+            for theme in ('light', 'dark'):
+                image = await self.show_saver(example, data, theme)
+                if image is None:
+                    self.find('info', f'saver {example["name"]}', 'this screen showed no screensaver: it never goes into '
+                              'standby (the Waveshare 4.3, 5 and 7-inch), or its standby level is 0')
+                    break
+                file = f'saver-{example["key"]}-{theme}.png'
+                image.save(self.out / file)
+                item[theme] = file
+                self.faults(await self.audit(saver=True), f'saver {example["name"]}, {theme} screen')
+                if theme == 'light':
+                    await self.still(example, image)
+            if item.get('light') or item.get('dark'):
+                view['savers'].append(item)
+        self.saver_shown = None
+        await self.call('render_standby', enter=0)
+        await self.send({'v': 1, 'op': 'saver', 'k': ''})
+        await self.dark(False)
+
     async def settings(self):
         """The plugin's pages on the screen's settings page (Settings, Plugins), when it adds rows there."""
         start = len(self.lines)
@@ -1101,6 +1377,11 @@ def index_page(out, entry, screens, findings, started, parts_of):
     row('Cards', ', '.join(f'<b>{e(c["name"])}</b> <span class="muted">{e(c["id"])}</span>' for c in parts_of['cards']))
     row('Top bar', ', '.join(f'<b>{e(b["name"])}</b> <span class="muted">{e(b["id"])}</span>' for b in parts_of['bar_items']))
     row('Tap actions', ', '.join(f'<b>{e(a["name"])}</b> on {e(", ".join(a["domains"]))}' for a in parts_of['tap_actions']))
+    row('Screensavers', '<br>'.join(f'<b>{e(v["name"])}</b> <span class="muted">{e(v["id"])}</span>: '
+                                    + (f'a step of its own' if v['step'] == 'own' else f'a face of the {e(v["step"])} step')
+                                    + (f', {v["pictures"]} pictures' if v['pictures'] else '') + (', takes taps' if v['taps'] else '')
+                                    + (', moves itself' if v['moves'] else '') + f', {v["memory"]} bytes'
+                                    for v in parts_of.get('savers') or []))
     row('Settings', ', '.join(filter(None, ['rows on the screen\'s settings page' if parts_of['settings_rows'] else '',
                                             ', '.join(e(s) for s in parts_of['settings_entities'])])))
     row('Asks Home Assistant', ', '.join(e(q) for q in parts_of['questions']))
@@ -1157,6 +1438,13 @@ def index_page(out, entry, screens, findings, started, parts_of):
             else:
                 parts.append(f'<div class="gallery"><b>{e(screen["key"])}</b> <span class="muted">{e(caption(item))}</span><br>'
                              f'{both(screen, view, item, screen["dpi"])}</div>')
+    savers = [(s, v, item) for s, v in views for item in v.get('savers') or []]
+    if savers:
+        parts.append('<h2>Screensavers</h2><p class="muted">In standby, with the screen light and dark: a screensaver is '
+                     'drawn dark in both.</p>')
+        for screen, view, item in savers:
+            parts.append(f'<div class="gallery"><b>{e(screen["key"])}</b> <span class="muted">{e(item["name"])}, '
+                         f'{e(item["step"])}</span><br>{both(screen, view, item, screen["dpi"])}</div>')
     bars = [(s, v) for s, v in views if v['bar']]
     if bars:
         parts.append('<h2>Top bar</h2><p class="muted">With its words, and as its icon alone (the editor\'s Show: icon).</p>'
@@ -1239,9 +1527,11 @@ def once(args, folder, screens, esphome, watch=None):
     started = time.strftime('%Y-%m-%d %H:%M')
     results, findings, failed = [], [], 0
     parts_of = adds(entry, folder)
+    saver_examples(entry, spec)   # preview.yaml's savers name savers of the manifest, before anything builds
     findings += [{'level': 'warning', 'screen': 'all', 'where': 'manifest and code', 'text': text} for text in parts_of['mismatches']]
     print(f'{entry.id} {entry.version}: {len(parts_of["tiles"])} tiles, {len(parts_of["cards"])} cards, '
-          f'{len(parts_of["bar_items"])} top bar items, settings rows: {"yes" if parts_of["settings_rows"] else "no"}', flush=True)
+          f'{len(parts_of["bar_items"])} top bar items, {len(parts_of["savers"])} screensavers, '
+          f'settings rows: {"yes" if parts_of["settings_rows"] else "no"}', flush=True)
     for text in parts_of['mismatches']:
         print(f'  warning: {text}', flush=True)
     for screen in screens:

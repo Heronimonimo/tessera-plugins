@@ -1,8 +1,9 @@
-# Tap sound: a short, soft tick on the screen's speaker for every tap the screen takes, with a setting to turn it off.
+# Tap sound: a short, soft tick on the screen's speaker the moment a finger lands on something that takes a tap, and a
+# softer one for every step of a dragged slider, with a setting to turn it off.
 # It needs a speaker, which a board brings (features/audio.yaml) or a plugin; the tick follows the screen's volume.
 id: tap_sound
-version: 0.1.0
-api: "0.8"
+version: 0.2.1
+api: "0.11"
 icon: gesture-tap-button
 maintainer: MaxGramser
 license: MIT

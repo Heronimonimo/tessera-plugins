@@ -1,4 +1,5 @@
-# index.json again, committed by the workflow when it changed, so the app sees a new release: after a push to main that
+# index.json again, committed by the workflow when it changed, so the app sees a new release: after a push to main or dev
+# (each branch has its own index: AGENTS.md, "Branches") that
 # changes a plugin, a community entry, the blocked, featured or transfers list, and every hour for the community plugins
 # that follow their newest release, so a maker's release reaches the app without a pull request. Each plugin of
 # plugins/ is pinned to the last commit that changed its folder, each community plugin to its release's commit
@@ -7,7 +8,7 @@
 name: index
 on:
   push:
-    branches: [main]
+    branches: [main, dev]
     paths: ["plugins/**", "community/**", "blocked.yaml", "featured.yaml", "transfers.yaml", "tools/build_index.py"]
   schedule:
     - cron: "17 * * * *"

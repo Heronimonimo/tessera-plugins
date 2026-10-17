@@ -1,0 +1,41 @@
+# Photo clock: a face of the screensaver's photos (plugin API 0.14, docs/FIRMWARE_API.md "A screensaver"). The time
+# small in a corner with the date under it, over the photo. An example of `backdrop: true`: the screen shows the step's
+# own photo under the saver, over the whole glass and moving slowly when the person chose Motion: Slow, and the saver
+# draws only what goes over it. docs/MANIFEST.md has every field.
+id: photo_clock
+version: 0.1.0
+api: "0.14"
+icon: image
+maintainer: MaxGramser
+license: MIT
+stage: example
+topics: [photos, time]
+requires:
+  esphome: 2026.6.2
+boards: any
+flash_kb: 4
+
+savers:
+  # A face of the photos step: a person picks it under Face in the drawer of Photos. It shows only on a screen with
+  # pictures, as the photos step does.
+  - id: photo
+    name: saver_name
+    icon: image
+    step: photos
+    # Three LVGL objects: the shade in the corner and its two lines.
+    memory: 400
+    # The photo of the photos step under the saver, moving as the person chose; the screen moves the shade a
+    # millimetre every minute over it.
+    backdrop: true
+    example: saver_example
+    options:
+      - id: corner
+        kind: choice
+        label: corner
+        hint: corner_hint
+        default: bottom_left
+        choices:
+          - { value: bottom_left, label: bottom_left }
+          - { value: bottom_right, label: bottom_right }
+          - { value: top_left, label: top_left }
+          - { value: top_right, label: top_right }

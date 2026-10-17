@@ -1,0 +1,12 @@
+{
+  "_meta": { "name": "Nederlands" },
+  "screen": {},
+  "app": {
+    "name": "Platenspeler",
+    "summary": "De muziek die speelt als een plaat in zijn hoes op de schermbeveiliging, met toetsen voor afspelen en volume.",
+    "saver_name": "Platenspeler",
+    "saver_example": "De hoes als platenhoes, met de titel en de artiest ernaast",
+    "keys": "Toetsen",
+    "keys_hint": "Afspelen, pauzeren en het volume op de schermbeveiliging. Een tik ergens anders wekt het scherm."
+  }
+}

@@ -1,0 +1,83 @@
+# New music: the newest albums, EPs and singles of the artists you pick, from Deezer, as a cover flow of their covers
+# that moves on by itself: the release in the middle large with how new it is, the ones beside it turned towards it, a
+# reflection under each. A tap at the left goes back, at the right on; a tap on the middle one opens it, with a key that
+# plays it through Music Assistant. A board without pictures shows records instead of covers. docs/MANIFEST.md has
+# every field.
+id: new_music
+version: 0.1.1
+api: "0.13"
+icon: album
+maintainer: MaxGramser
+license: MIT
+stage: beta
+topics: [media, fun]
+requires:
+  esphome: 2026.6.2
+boards: any
+flash_kb: 12
+
+permissions:
+  # The artists and their releases from Deezer's API, the covers from Deezer's picture host.
+  network: [api.deezer.com, cdn-images.dzcdn.net]
+  # A release played on the tile's Music Assistant player, found by its title and artist.
+  home_assistant_actions: [music_assistant.play_media]
+attributes: [cloud]
+privacy: https://github.com/MaxGramser/tessera-plugins/tree/main/plugins/new_music#privacy
+
+tiles:
+  - id: releases
+    name: tile_name
+    icon: album
+    sizes: { min: 1x1, max: 4x4 }
+    # The labels, the badge, up to 12 releases of a title, an artist and a cover, and seven places: a picture's, or
+    # on a board without pictures a record of five blocks.
+    memory: 5600
+    # The release in the middle and up to three on each side.
+    pictures: 7
+    # The player that plays a release: a Music Assistant player (only those carry `mass_player_type`). What it plays now
+    # marks the release it is.
+    domains: [media_player]
+    has_attributes: [mass_player_type]
+    attributes: [media_album_name, media_artist]
+    data: releases
+    example: tile_example
+    preview: { title: "{title}", badge: "{artist}" }
+    options:
+      - { id: artists, kind: choice, multiple: 8, options_from: artist_search, search: true, label: artists,
+          hint: artists_hint }
+      - { id: hide, kind: choice, label: hide, hint: hide_hint, default: none,
+          choices: [{ value: none, label: hide_none }, { value: single, label: hide_singles }] }
+      - { id: every, kind: number, min: 0, max: 60, step: 5, unit: s, default: 15, label: every, hint: every_hint }
+
+cards:
+  # A release, opened by a tap on the one in the middle: its cover large, its title, artist, kind and day, and a key
+  # that plays it.
+  - { id: release, name: card_name, pictures: 1 }
+
+fetch:
+  # The artists whose name holds what the person types, for the list they pick from.
+  - id: artist_search
+    url: https://api.deezer.com/search/artist?q={search}&limit=25
+    every: 1d
+    map:
+      items: "$.data[*]"
+      value: id
+      label: name
+  # Every release of each artist picked, newest first over all of them. Deezer lists an artist's albums first, then EPs,
+  # then singles, each group about newest first, so fifty reach the newest single of an artist with many albums; they
+  # stay under the 64 KB an answer may be.
+  - id: releases
+    each: artists
+    url: https://api.deezer.com/artist/{artists}/albums?limit=50
+    every: 6h
+    map:
+      items: "$.data[*]"
+      fields:
+        title: title
+        date: { path: release_date, as: epoch }
+        kind: record_type
+        cover: md5_image
+        artist: { each: label }
+      skip: { kind: "{hide}" }
+      sort: -date
+      limit: 12

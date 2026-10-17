@@ -1,0 +1,15 @@
+# What tools/preview.py shows (docs/PREVIEW.md, "Screensavers"): a player that plays, with every key, and a radio with
+# a long title that has no volume, paused. The cover comes from the file below, never from the internet.
+savers:
+  - saver: deck
+    name: Playing
+    data: { title: "Evening Drive", artist: "Nova Coast", state: playing }
+    picture: preview/cover.png
+  - saver: deck
+    name: Paused radio
+    data:
+      title: "The Long Road Home Through the Valley of the Quiet Rivers"
+      artist: "Morning Radio"
+      state: paused
+      features: 16385
+    picture: preview/cover.png

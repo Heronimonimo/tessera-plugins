@@ -2,9 +2,16 @@
 
 namespace esphome::tap_sound {
 
-void TapSound::on_touch() {
+void TapSound::on_press() {
   if (sound_on_ != nullptr && !sound_on_->state) return;
   sounds_.play(tick_);
+}
+
+void TapSound::on_step(const tessera::Step &step) {
+  if (sound_on_ != nullptr && !sound_on_->state) return;
+  // Each step after the one before, 30 ms apart at the least: a quick drag ticks evenly instead of in clumps. The end of
+  // a range clicks firmer, as a slider that stops.
+  sounds_.add(step.edge ? tick_ : step_, STEP_SPAN_MS);
 }
 
 bool TapSound::settings(tessera::SettingsPage &page) {

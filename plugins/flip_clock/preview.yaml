@@ -1,0 +1,10 @@
+# What tools/preview.py shows (docs/PREVIEW.md, "Screensavers"): the clock with the seconds dot and the temperature,
+# and without the dot and without a temperature.
+savers:
+  - saver: flip
+    name: Flip clock
+    data: { temperature: "21°" }
+  - saver: flip
+    name: Quiet
+    options: { seconds: false }
+    data: { temperature: "" }

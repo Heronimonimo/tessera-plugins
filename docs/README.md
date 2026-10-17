@@ -27,9 +27,12 @@ The docs use a few plain words of their own. In the usual terms:
 | A tile | A widget in one or more cells of a page's grid |
 | A card | Two things: the drawn box a tile lives in on the page, and a screen of a plugin's own that opens over the page (a modal view) |
 | A hand's width | The width of Tessera's own cards that open over the page, narrower than the whole display |
-| Moments | Lifecycle callbacks: `on_ready`, `on_interval`, `on_standby`, `before_update`, `on_touch` and the others |
-| A tick, `on_tick` | The once-a-second update callback of a tile or a card |
+| Moments | Lifecycle callbacks: `on_ready`, `on_interval`, `on_standby`, `before_update`, `on_touch`, `on_press`, `on_step` and the others |
+| A tick, `on_tick` | The once-a-second update callback of a tile, a card or a screensaver |
 | Standby | The display dimmed or off after a while without a touch |
+| The screensaver | What the display shows over all of it in standby, instead of the dimmed tiles (a screen saver) |
+| A step | One of the screensaver's sources in the order a person puts them: the music, the photos, a camera, the clock, or a plugin's step of its own; the first that has something to show is shown |
+| A face | Another look for a step the screen already has (a plugin's clock, player or photo view), drawn from that step's data |
 | A tap, a hold | A click and a long press on the touch screen |
 | The top bar | The status bar at the top of a page |
 | The library, the inspector | The editor's palette of tiles, and its properties panel for the chosen tile |

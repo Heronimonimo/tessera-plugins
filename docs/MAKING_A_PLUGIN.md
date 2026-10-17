@@ -11,7 +11,9 @@ A plugin is right for something that not every screen needs and that the screen 
 - a tile that draws what Home Assistant already knows in a way Tessera's own tiles do not (a day of electricity prices
   as a chart, a calendar's next event);
 - a tile that only needs the screen's clock (a countdown, a timer of your own);
-- hardware on the board or on its free pins (a sensor, a relay, a speaker), with settings a person can change.
+- hardware on the board or on its free pins (a sensor, a relay, a speaker), with settings a person can change;
+- a screensaver: another look for the clock, the music or the photos in standby, or a step of its own (the rain radar
+  while it rains), below in "A screensaver".
 
 It is the wrong tool for:
 
@@ -213,6 +215,47 @@ version, before you publish it.
 See [PUBLISHING.md](PUBLISHING.md): a plugin in this repository through a pull request, or in a repository of your own,
 added with a link or listed in the index.
 
+## A screensaver
+
+A plugin can bring a screensaver (plugin API 0.14): what a screen shows over the whole glass while Auto standby dims
+it. Tessera's app decides when it shows; your plugin decides how it looks. [FIRMWARE_API.md](FIRMWARE_API.md), "A
+screensaver", has the whole contract, [MANIFEST.md](MANIFEST.md), "savers", every field.
+
+**Pick the kind.**
+
+| You want | Kind | Example |
+|---|---|---|
+| Another clock (flip cards, a word clock, a dial) | A face of the clock: `step: clock`. It gets the temperature and the row of entities the person chose for the clock, and works on every board, the CYD too. | [`plugins/flip_clock/`](../plugins/flip_clock) |
+| Another look for the music that plays, with its cover and keys | A face of the music: `step: media`, `pictures: 1` for the cover (`saver:picture`), `taps: true` for keys. Screens with pictures only. | [`plugins/vinyl_deck/`](../plugins/vinyl_deck) |
+| Another look for the photos of a folder | A face of the photos: `step: photos`, `pictures: 1` for the photo (`saver:picture`). Screens with pictures only. | [`plugins/photo_clock/`](../plugins/photo_clock) |
+| Something no step shows: the rain radar while it rains, a quote of the day, the bins on the evening before | A step of its own: `step: own`, with a `fetch` (`data`) or an entity (`domains`), and `when` to say when it has something to show. | [MANIFEST.md](MANIFEST.md), "savers" |
+
+A face is the safer choice: a screen without your plugin shows the step's own face, and the person keeps the steps and
+the order they know.
+
+**Write it.** Start from the template as for any plugin (`python3 tools/new_plugin.py <id>`), set `api: "0.14"`,
+replace `tiles` with `savers`, and in the C++ replace the tile with a `tessera::Saver` and `add_tile` with
+`add_saver("<id>", tessera::SaverStep::CLOCK, ...)` (the step the manifest names). Then keep to these rules, which the
+bench checks where it can:
+
+1. Make every part in `show()`, in `context.parent`; `on_state` and `on_tick` only paint what changed. The glass draws
+   only the boxes that changed, and a saver stands there all night.
+2. Draw with theme roles as anywhere: a saver is always drawn in the dark look, white on black.
+3. Leave the moving to the screen (it moves the whole saver a millimetre every minute), unless the saver really moves
+   itself every minute; then say `moves: true`.
+4. A part a finger may tap without waking the screen is made with `ui::takes_taps`, and the manifest says `taps: true`.
+   Keep such parts few and large (`ui::mm(10)` or more). Everything else wakes the screen.
+5. A key that changes a value of an entity (play and pause, mute, on and off) calls `tessera::wish()`, never an action
+   with a value written first; it paints the key from `on_state`. A step (volume up) is an action.
+6. Read every option with its default (`c.options["seconds"] | true`): the app fills in the manifest's defaults, and the
+   default in the C++ keeps the saver right on an app that does not.
+
+**Try it.** Give `preview.yaml` a `savers` part with the data of its step ([PREVIEW.md](PREVIEW.md), "Screensavers"),
+and run the bench: it shows each saver in standby on every screen that shows it, with the screen light and dark,
+audits it as it audits a tile, and photographs it again two minutes later to see it does not stand still. On a real
+screen: add the plugin, open the screen's Settings, the Screensaver card, turn on **Show in standby**, pick your face
+under **Face** in its step's drawer (or add your step with **Add from plugins**), and wait for standby.
+
 ## The changelog
 
 `CHANGELOG.md` says, per version, what a person notices. When the app offers an update of a plugin, it shows the lines
@@ -361,7 +404,7 @@ came along is offered to go as well.
 | What happens | Why | Fix |
 |---|---|---|
 | The build says "No tessera-plugin.yaml above ..." | The component is not in `components/<id>/` next to the manifest. | Keep the folder layout of the template. |
-| The build says the plugin wants another plugin API | `api:` in the manifest is newer than the screen's core. | Name the lowest API whose parts you use; the core offers plugin API 0.10 now (0.8 in the release until the next one). Or update the screen's firmware. |
+| The build says the plugin wants another plugin API | `api:` in the manifest is newer than the screen's core. | Name the lowest API whose parts you use; the core offers plugin API 0.14 now (on Tessera's dev branch; the release has an older one until the next). Or update the screen's firmware. |
 | The build says a newer API "changed a name it may use" | `api:` is from before a minor that renamed something (0.4: `Plugin::on_tick` became `on_interval`). | Move the code to the new name and raise `api` ([FIRMWARE_API.md](FIRMWARE_API.md), "Versions"). |
 | `check.py` says a key "belongs to the core" or "opens the screen" | `plugin.yaml` sets something a plugin never sets, such as `wifi:` or `http_request:`. | Leave it to the core; data comes through a `fetch` ([LIMITS.md](LIMITS.md), "plugin.yaml"). |
 | `check.py` says "provides speaker, so it makes a speaker: with id: ts_speaker" | The plugin promises a feature it does not make, or gives it another id. | Give the component the feature's id. |
@@ -370,5 +413,8 @@ came along is offered to go as well.
 | A setting is grey | The screen is offline, or the entity is unavailable in Home Assistant. | Check the screen; a button that was never pressed is fine. |
 | The tile shows "Plugin missing" | The screen was not built with the plugin, or the tile id differs from `add_tile("...")`. | Build again; make the ids match. |
 | The tile stays empty | `on_state` got `{"wait": ...}`: the fetch is not filled in or failed. | Show the reason (see the bus plugin); check the options. |
+| The screensaver shows Tessera's own face, not yours | The screen was not built with the plugin, the saver's id differs from `add_saver("...")`, or its step differs from the manifest's. | Build again; make the ids and the step match (the bench says so in its findings). |
+| The screen wakes when a key of the screensaver is tapped | The key was not made with `ui::takes_taps`, or not in a call of the saver. | Call `ui::takes_taps(key)` in `show()`, and say `taps: true` in the manifest. |
+| A key of the screensaver shows the old value for a moment, or flips back | The key was painted from the tap, or the action went out without `wish()`. | Call `tessera::wish()` and paint the key from `on_state` alone. |
 | Text cut with dots | The label is wider than its room. | Take a smaller font from `tessera::Font`, or give the label more width. |
 | Squares instead of letters or icons | A character or icon the screen's fonts do not have. | Use plain text, and icons from Tessera's set only. |

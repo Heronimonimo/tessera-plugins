@@ -1,0 +1,39 @@
+# Vinyl deck: a face of the screensaver's music (plugin API 0.14, docs/FIRMWARE_API.md "A screensaver"). The cover of
+# what plays as a record sleeve with the record peeking out of it, the title and the artist beside it, and keys that
+# play, pause and change the volume while the screen stays in standby. An example of a saver's picture (the address
+# saver:picture), its taps (ui::takes_taps) and wish(). docs/MANIFEST.md has every field.
+id: vinyl_deck
+version: 0.1.0
+api: "0.14"
+icon: record-player
+maintainer: MaxGramser
+license: MIT
+stage: example
+topics: [media]
+requires:
+  esphome: 2026.6.2
+boards: any
+flash_kb: 6
+
+permissions:
+  # The keys: play and pause and the mute go through wish(), which sends Home Assistant's own actions for them; the
+  # volume steps go as actions.
+  home_assistant_actions: [media_player.media_play_pause, media_player.volume_mute, media_player.volume_up,
+                           media_player.volume_down]
+
+savers:
+  # A face of the music step: a person picks it under Face in the drawer of Music playing. It shows only on a screen
+  # with pictures, as the music step does.
+  - id: deck
+    name: saver_name
+    icon: record-player
+    step: media
+    # Twelve LVGL objects (the record, the sleeve, two lines of words, three keys with their icons) and the player's id.
+    memory: 1500
+    # One place: the sleeve, which shows the step's own picture, the cover (saver:picture).
+    pictures: 1
+    # Its keys take a tap without waking the screen.
+    taps: true
+    example: saver_example
+    options:
+      - { id: keys, kind: toggle, label: keys, hint: keys_hint, default: true }

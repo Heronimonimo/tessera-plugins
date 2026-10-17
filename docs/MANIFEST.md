@@ -87,7 +87,7 @@ fetch:
       label: [LinePublicNumber, DestinationName50]
 ```
 
-It names `api: "0.7"` and builds on today's core, which offers plugin API 0.10: no minor after 0.7 changed a name
+It names `api: "0.7"` and builds on today's core, which offers plugin API 0.14: no minor after 0.7 changed a name
 ([FIRMWARE_API.md](FIRMWARE_API.md), "Versions"). The fetch is plain `http` because OVapi offers nothing else and the
 fetch carries no secret.
 
@@ -109,7 +109,7 @@ fetch carries no secret.
 |---|---|---|
 | `id` | yes | The plugin's id. Unique in the index, the same as its folder and its component, and never changed. |
 | `version` | yes | Three numbers, `1.0.0`. Raise it for every change that reaches screens, and give it a `## 1.0.0` heading with its lines at the top of `CHANGELOG.md` ([MAKING_A_PLUGIN.md](MAKING_A_PLUGIN.md#the-changelog)). |
-| `api` | yes | The plugin API it was written for, as major and minor in quotes: `"0.8"`; the plugin API 0.10 is the one the core offers now. Without quotes YAML reads a number, which the check refuses. It builds on a core with the same major and at least that minor, unless a minor after its own up to the core's changed a name (0.4 did); `tools/check.py` refuses an `api` newer than the core it checks against, and one from before such a minor ([FIRMWARE_API.md](FIRMWARE_API.md), "Versions"). |
+| `api` | yes | The plugin API it was written for, as major and minor in quotes: `"0.8"`; the plugin API 0.14 is the one the core offers now (on Tessera's dev branch; the release has an older one until the next). Without quotes YAML reads a number, which the check refuses. It builds on a core with the same major and at least that minor, unless a minor after its own up to the core's changed a name (0.4 did); `tools/check.py` refuses an `api` newer than the core it checks against, and one from before such a minor ([FIRMWARE_API.md](FIRMWARE_API.md), "Versions"). |
 | `icon` | yes | <a id="icon"></a>A Material Design Icons name from Tessera's icon set (`screen_manager/app/tile_icons.py` in the Tessera repository, such as `bus`, `train`, `calendar`, `thermometer`, `lightbulb`). The screen's icon font holds only that set. Tiles and top bar items take it when they name no icon of their own. |
 | `maintainer` | yes | The GitHub name of whoever looks after the plugin, 1 to 39 characters. `tools/check.py` refuses the template's `your-github-name` in any folder but `template/`. |
 | `license` | yes | An SPDX name that goes with AGPL-3.0: `MIT`, `Apache-2.0`, `BSD-2-Clause`, `BSD-3-Clause`, `ISC`, `MPL-2.0`, `LGPL-2.1-or-later`, `LGPL-3.0-or-later`, `GPL-3.0-or-later`, `GPL-3.0-only`, `AGPL-3.0-or-later`, `AGPL-3.0-only`, `Unlicense`, `0BSD`, `CC0-1.0`. |
@@ -292,11 +292,31 @@ An option:
 | `default` | The value when nothing is chosen. It must fit the option: `true` or `false` for a toggle, a number from `min` to `max` for a number, a text of at most 64 characters for a text or a choice, and for a choice with `choices` one of their values (or `""`). |
 | `choices` | For `choice`: `[{ value: "a", label: key }]`, at most 48, each with both: `value` a text of 1 to 64 characters, `label` a text key. |
 | `options_from` | For `choice`: the id of a fetch of this plugin that fills the list (its `map` has `value` and `label`). A choice has either `choices` or `options_from`, never both or neither. |
+| `multiple` | For `text` and `choice` (0.12): the option keeps a list of up to this many values, 2 to 16, in the order the person put them (they drag them into another). A text list keeps texts; a choice keeps picks (below). Its default is `[]`; a text list may name a list of texts. A fetch uses a list through `each` or `{name\|,}` ([FETCH.md](FETCH.md)). |
+| `search` | For `choice` with `options_from` (0.12): `true` finds the choices by what the person types. The editor sends it, from two characters on, as `{search}` of that fetch: `url: https://api.deezer.com/search/artist?q={search}`. Without `multiple` the option keeps one pick. No option of the tile may be called `search`. |
 | `min`, `max`, `step`, `unit` | For `number`: the range (both required, `min` less than `max`), the step (more than 0, default 1), and a unit of up to 8 characters. |
 
 A field that belongs to another kind is an error (`min` on a text option, `choices` on a number). A text option's value
 is at most 64 characters. The tile gets every option in `context.options` of `create()`, with the defaults filled in.
 Options are also the placeholders of the tile's fetch: `{stop}` in a URL is the option `stop`.
+
+**What an option keeps** (0.12). A text, number or toggle keeps that value; a choice its value. A choice with `multiple`,
+or one found by `search`, keeps **picks**: `{"value": "9635624", "label": "Billie Eilish"}`, the label being the words the
+person saw in the list. A list from a fetch may be gone or other next week, so the words are kept with the value; for the
+plugin's own `choices` the label is the choice's text in the editor's language. Each value and label is at most 64
+characters, and a list holds each value once. All options of a tile together are at most 1280 bytes of JSON: they travel
+to the screen with the tile's data in one message, and the editor refuses a value that would not fit.
+
+```yaml
+options:
+  - { id: artists, kind: choice, multiple: 8, options_from: artist_search, search: true, label: artists }
+  - { id: tickers, kind: text, multiple: 6, label: tickers, default: [AAPL] }
+```
+
+```json
+{ "artists": [ { "value": "9635624", "label": "Billie Eilish" }, { "value": "27", "label": "Daft Punk" } ],
+  "tickers": [ "AAPL", "ASML" ] }
+```
 
 ### Fetches: `fetch`
 
@@ -305,9 +325,10 @@ At most 8. [FETCH.md](FETCH.md) explains them in full.
 | Field | Required | What |
 |---|---|---|
 | `id` | yes | The fetch's id; a tile names it in `data`, an option in `options_from`. Every fetch named there must be described here. |
-| `url` | yes | At most 512 characters. `https://`, or `http://` for a fetch that carries no secret. The host is fixed (no placeholder in it), one of `permissions.network`, with no user, no password and no port other than 80 or 443. Placeholders such as `{stop}` name an option of a tile that uses the fetch (through `data` or `options_from`) or an input. A secret may stand in the query, never in the path. |
+| `url` | yes | At most 512 characters. `https://`, or `http://` for a fetch that carries no secret. The host is fixed (no placeholder in it), one of `permissions.network`, with no user, no password and no port other than 80 or 443. Placeholders such as `{stop}` name an option of a tile that uses the fetch (through `data` or `options_from`) or an input; `{name\|,}` joins the values of a list option (0.12), and `{search}` is what the person types for a choice with `search`. A secret may stand in the query, never in the path. |
 | `headers` | no | Up to 8, each a text of at most 512 characters, with placeholders: `{ Authorization: "Bearer {api_key}" }`. |
 | `every` | yes | How old an answer may get: a whole number with `s`, `m`, `h` or `d` (`30s`, `5m`, `1h`, `1d`). At least 30 seconds. |
+| `each` | no | An option with `multiple` of every tile that uses the fetch (0.12): one ask per value, `{<option>}` in the URL being that value, and the answers come together as one list ([FETCH.md](FETCH.md), "Once per value"). Not for a fetch that fills a list of choices. |
 | `map` | yes | What of the answer reaches the screen. |
 
 The map's fields, in short ([FETCH.md](FETCH.md), "The map", has them in full):
@@ -315,7 +336,7 @@ The map's fields, in short ([FETCH.md](FETCH.md), "The map", has them in full):
 | Field | What |
 |---|---|
 | `items` | Where the list is, a path that starts with `$`. Required for a fetch that fills a list of choices. |
-| `fields` | 1 to 8 fields, each a path or `{ path, as, tz }`. `as` is `text` (default), `number`, `epoch` or `numbers` (0.5); `tz` only with `as: epoch`. Required for a fetch a tile shows. |
+| `fields` | 1 to 8 fields, each a path or `{ path, as, tz }`. `as` is `text` (default), `number`, `epoch` or `numbers` (0.5); `tz` only with `as: epoch`. In a fetch with `each`, `{ each: value }` or `{ each: label }` (0.12) is the value whose ask brought the item. Required for a fetch a tile shows. |
 | `where`, `skip` | Keep, or drop, the items whose field (named by its key) is one of the values: a value or a list of values, texts or numbers, which may hold placeholders. Only with `items`. |
 | `sort` | A field, with `-` in front for the other way round. Only with `items`. |
 | `limit` | How many items at most, a whole number from 1 to 48. Default 48. Only with `items`. |
@@ -350,6 +371,7 @@ A screen of the plugin's own over the page ([FIRMWARE_API.md](FIRMWARE_API.md), 
 ```yaml
 cards:
   - { id: upcoming, name: card_name }          # wide: true for the whole width of the glass
+  - { id: release, name: release_name, pictures: 1 }   # a place for a picture (0.13)
 ```
 
 | Field | What |
@@ -357,6 +379,7 @@ cards:
 | `id` | Required. `add_card("<id>", ...)` in the C++ uses the same. |
 | `name` | Required. Text key: what the editor calls it. On the screen the card's title is the tile's name, or what `open_card` passes. |
 | `wide` | `true`: as wide as the glass (a picture, a timeline); `false` (default): the width of Tessera's own cards. |
+| `pictures` | Places for pictures on the card (0.13), 1 to 8: how many the card makes at most with `ui::picture` ([FIRMWARE_API.md](FIRMWARE_API.md), "Pictures on a card"). The app paints only for a card that has this, from a host of `permissions.network`, or Home Assistant's own pictures when the card was opened for an entity of the screen's layout. Default: 0, no pictures. |
 
 ### Tap actions: `tap_actions`
 
@@ -389,6 +412,95 @@ bar_items:
 | `label` | Required. Text key: the item's name under "From plugins" when adding to a top bar. |
 | `icon` | From Tessera's set; the plugin's icon when left out. |
 | `example` | Text key: what the editor's mockup of the bar shows. |
+
+### Screensavers: `savers`
+
+A plugin's screensavers (0.14, [FIRMWARE_API.md](FIRMWARE_API.md), "A screensaver"): what a screen shows over the whole
+glass in standby. Each is either a **face** of a step of Tessera's own screensaver (`step: clock`, `media` or `photos`),
+which draws what that step knows and which a person picks under Face in the step's drawer, or a **step of its own**
+(`step: own`), a place in the screensaver's order that draws from the plugin's fetch and its entity, as a tile does. At
+most 4. A manifest with `savers` names `api: "0.14"` or later.
+
+| Field | Required | What |
+|---|---|---|
+| `id` | yes | The saver's id; `add_saver("<id>", step, ...)` in the C++ uses the same. The app and the screen call it `plugin:<plugin>.<id>`. |
+| `name` | yes | Text key: what the Screensaver card calls it, under Face or in the list of steps. |
+| `icon` | no | From Tessera's icon set; the plugin's icon when left out. |
+| `step` | yes | `clock`, `media` or `photos` for a face of that step, `own` for a step of its own. The C++ registers it with the same step (`SaverStep::CLOCK`, `MEDIA`, `PHOTOS`, `OWN`). |
+| `memory` | yes | What the saver costs while it is on the glass, a whole number of bytes from 64 to 16384, as a tile's `memory`: about 100 a label, 80 a block. |
+| `pictures` | no | Places for pictures, 0 to 8 (default 0): how many the saver makes at most with `ui::picture`. The address `saver:picture` is the step's own picture (the cover of the music, the photo of the photos), for a face of `media` or `photos`; any other address is on a host of `permissions.network`, or Home Assistant's own picture of a step of its own's entity. |
+| `taps` | no | `true` when the saver has parts made with `ui::takes_taps`, which a finger taps without waking the screen (default `false`): keys of a player, a switch. Say it whenever the code calls `ui::takes_taps`. |
+| `moves` | no | `true` when the saver moves itself so nothing stands on the same pixels for hours (a clock that turns, a picture that changes every minute); the screen then leaves it where it draws. Default `false`: the screen moves the whole saver up to a millimetre every minute. |
+| `backdrop` | no | (0.14) `true` for a face of the music or the photos that draws over the step's own picture: the screen shows the cover or the photo over the whole glass under the saver, the photo moving slowly when the person chose Motion: Slow, and the saver's glass is clear. Only for `step: media` or `photos`. |
+| `options` | no | At most 12 options the Screensaver card shows for it, as a tile's (above). The saver reads them in `SaverContext::options`; an option the person never touched may be missing there, so the C++ reads each with its default. |
+| `example` | no | Text key: a line the editor shows for it. |
+| `data` | only `own` | The id of the fetch whose answer the step gets in `on_state`. |
+| `domains`, `attributes`, `fields` | only `own` | The entity the step belongs to, as a tile's (above): the Screensaver card offers the entities of those domains, and the step gets its state, name, attributes and fields. `attributes` and `fields` need `domains`. |
+| `when` | only `own` | When the step has something to show: `always` (default), `data` (its fetch has an answer; needs `data`), or `{ state: [rainy, pouring] }` (its entity is in one of these states; needs `domains`, at most 16 states). While it has nothing, the app goes on to the next step. |
+
+A step of its own has `data`, `domains` or both. A face has none of `data`, `domains`, `attributes`, `fields` and
+`when`: it draws from its step, whose contract is in [FIRMWARE_API.md](FIRMWARE_API.md), "A screensaver".
+
+A face of the clock, which every screen has (the CYD too):
+
+```yaml
+api: "0.14"
+savers:
+  - id: flip
+    name: saver_name
+    step: clock
+    memory: 1000
+    example: saver_example
+    options:
+      - { id: seconds, kind: toggle, label: seconds, hint: seconds_hint, default: true }
+```
+
+A face of the music, with the cover and keys (a screen with pictures only):
+
+```yaml
+api: "0.14"
+permissions:
+  home_assistant_actions: [media_player.media_play_pause, media_player.volume_mute, media_player.volume_up,
+                           media_player.volume_down]
+savers:
+  - { id: deck, name: saver_name, step: media, memory: 1500, pictures: 1, taps: true }
+```
+
+A face of the photos:
+
+```yaml
+api: "0.14"
+savers:
+  - { id: photo, name: saver_name, step: photos, memory: 500, pictures: 1 }
+```
+
+A step of its own, from a weather entity, shown while it rains:
+
+```yaml
+api: "0.14"
+savers:
+  - id: rain
+    name: saver_rain
+    step: own
+    memory: 800
+    domains: [weather]
+    attributes: [temperature, precipitation]
+    when: { state: [rainy, pouring, lightning-rainy] }
+```
+
+A step of its own, from a fetch, shown while the fetch has an answer:
+
+```yaml
+api: "0.14"
+permissions:
+  network: [api.example.org]
+attributes: [cloud]
+privacy: https://example.org/privacy
+fetch:
+  - { id: quote, url: "https://api.example.org/today", every: 1h, map: { fields: { text: quote, by: author } } }
+savers:
+  - { id: quote, name: saver_quote, step: own, memory: 600, data: quote, when: data }
+```
 
 ### Settings a person changes: `settings`
 
@@ -470,12 +582,13 @@ shown, never set.
 
 ## The type of plugin
 
-The app shows a plugin as one of three types, one tab each on the Plugins page. A maker does not write it: the app
+The app shows a plugin as one of four types, one tab each on the Plugins page. A maker does not write it: the app
 reads it from the manifest, so it is never wrong.
 
 | Type | When |
 |---|---|
 | Tiles | It has `tiles`. |
+| Screensavers | No tiles, and it has `savers` (0.14). |
 | Hardware | No tiles, and it brings a feature (`provides`), asks for a pin (an input of kind `gpio`), or names its `boards`. |
 | Functions | The rest: something for the whole screen, such as top bar items, tap actions, a voice or a sound. |
 
@@ -493,6 +606,9 @@ These are the fields whose minor the core records:
 | 0.7 | `topics`, `provides`, `requires.features`, a part's `features`, plugins of `requires.plugins` that come along |
 | 0.8 | The features `camera` and `camera_sensor` |
 | 0.10 | A tile's `pictures` |
+| 0.12 | An option's `multiple` and `search`, a fetch's `each`, `{name\|,}` and `{search}` in a URL, a field `{ each: value }` |
+| 0.13 | A card's `pictures` |
+| 0.14 | `savers`, with every field of a saver |
 
 What each minor brought to the C++ is in [FIRMWARE_API.md](FIRMWARE_API.md), "Versions".
 
@@ -516,12 +632,15 @@ What each minor brought to the C++ is in [FIRMWARE_API.md](FIRMWARE_API.md), "Ve
 | A tile's size | 9 x 9 cells |
 | A tile's `memory` | 64 to 16384 bytes |
 | A tile's `domains` | 8 |
-| A tile's `pictures` | 8, each from an address of at most 512 characters, at most 2 MB |
+| A tile's `pictures`, a card's | 8, each from an address of at most 512 characters, at most 2 MB |
 | Attributes of a tile's entity | 16, and 8 `fields`, 8 `has_attributes` |
 | A text of a `preview` | 64 characters |
 | Options per tile | 12 |
 | Choices of an option | 48, each value 64 characters |
 | A text option's value | 64 characters |
+| Values of a list option (`multiple`) | 16, each value and label 64 characters |
+| A tile's options together | 1280 bytes of JSON |
+| What a person types in a search | 64 characters, asked from 2 |
 | A number option's unit | 8 characters |
 | Fetches | 8 |
 | A fetch's URL | 512 characters |
@@ -532,6 +651,7 @@ What each minor brought to the C++ is in [FIRMWARE_API.md](FIRMWARE_API.md), "Ve
 | Answers mapped | 8 |
 | Cards, tap actions | 8 each; a tap action's `domains` 16 |
 | Top bar items | 4 |
+| Screensavers | 4; each 64 to 16384 bytes of `memory`, 8 `pictures`, 12 options, 8 `domains`, 16 `attributes`, 16 states in `when` |
 | Settings | 8; a key or `status` 64 characters; a select's options 48 |
 | Bytes of a tile's data on the wire | about 2.6 KB (the last items are dropped to fit) |
 | Text of a mapped field | 48 bytes |

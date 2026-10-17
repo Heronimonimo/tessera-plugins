@@ -11,8 +11,9 @@ small square one and the CYD, and puts a page of each in a frame of its own: the
 square one dark. A page is laid out here from
 the bench's pictures of the plugin's tiles, the way a person would fill it: the tile at its larger sizes first, every
 example of preview.yaml once where there is room, and every cell used when the sizes allow it. A plugin with a card
-shows the card a tap on its first example opens on the small screen instead. The top bar of each page is the screen's
-own, from the bench.
+shows the card a tap on its first example opens on the small screen instead. A plugin with a screensaver and no tile
+shows its first screensaver on each screen that shows it, as the bench photographed it in standby (plugin API 0.14).
+The top bar of each page is the screen's own, from the bench.
 
 The words are the English ones: the picture is the same in every language of the app.
 docs/PUBLISHING.md, "The picture on the Plugins page", says what the app takes (store.png, 1280 x 720, at most 1 MB) and
@@ -214,6 +215,17 @@ def plain_page(folder, screen, theme):
     return None
 
 
+def saver_page(folder, screen, theme='dark'):
+    """The plugin's first screensaver on this screen, as the bench photographed it in standby (plugin API 0.14): the
+    screen in this look, the saver dark in both. None when the screen showed none (a face of the music or the photos on
+    a screen without pictures, a screen that never goes into standby)."""
+    for item in screen['views'][0].get('savers') or []:
+        file = item.get(theme) or item.get('light') or item.get('dark')
+        if file and (folder / file).is_file():
+            return Image.open(folder / file).convert('RGB')
+    return None
+
+
 def settings_page(folder, screen):
     """The plugin's own page on the screen's settings page, else the list of plugins there that leads to it."""
     pages = [s for s in screen['views'][0].get('settings') or [] if (folder / s['file']).is_file()]
@@ -226,7 +238,8 @@ def settings_page(folder, screen):
 def shot(source, summary, key, wanted):
     """What a screen shows on the picture: the first of `wanted` the bench has for it. ('tiles', theme) a page of the
     plugin's tiles, ('first', theme) of its first example alone, ('card',) the card a tap opens, ('bar', theme) the page of
-    a plugin that only adds to the top bar, ('settings',) its page on the settings page."""
+    a plugin that only adds to the top bar, ('saver', theme) its first screensaver in standby, ('settings',) its page on
+    the settings page."""
     screen = screen_of(summary, key) if summary else None
     if screen is None:
         return None
@@ -236,6 +249,7 @@ def shot(source, summary, key, wanted):
                  'first': lambda: compose_page(folder, screen, theme[0], first_only=True),
                  'card': lambda: card_page(folder, screen),
                  'bar': lambda: plain_page(folder, screen, theme[0]),
+                 'saver': lambda: saver_page(folder, screen, *theme),
                  'settings': lambda: settings_page(folder, screen)}[kind]()
         if image is not None:
             return image
@@ -338,8 +352,13 @@ def shadow(layer, blur, opacity):
 
 
 def font(weight, size):
-    """Roboto, the screens' own font, from the copy of Tessera the bench keeps."""
+    """Roboto, the screens' own font, from the checkout TESSERA_TREE names (as the bench takes it), else the copy of
+    Tessera the bench keeps."""
+    import os
     import preview
+    own = os.environ.get('TESSERA_TREE')
+    if own and (Path(own) / 'fonts' / f'Roboto-{weight}.ttf').is_file():
+        return ImageFont.truetype(str(Path(own) / 'fonts' / f'Roboto-{weight}.ttf'), size)
     for path in sorted(preview.CACHE.glob(f'tessera-*/fonts/Roboto-{weight}.ttf')):
         return ImageFont.truetype(str(path), size)
     raise SystemExit('store_image: no Roboto; run the bench once (python3 tools/preview.py --setup, then a render)')
@@ -478,9 +497,10 @@ def main():
         except (OSError, ValueError):
             summary = None   # the bench built nothing (hardware it cannot build): the icon tells it
         # An empty page with only the top bar shows little: the bar comes as a loupe instead (below).
-        large = shot(source, summary, args.large, [('tiles', 'light')])
-        small = shot(source, summary, args.small, [('card',), ('first', 'dark'), ('settings',)])
-        tiny = shot(source, summary, args.tiny, [('first', 'light'), ('settings',)])
+        # A plugin of screensavers alone shows them on every screen that has one (the CYD has no picture for the music).
+        large = shot(source, summary, args.large, [('tiles', 'light'), ('saver', 'light')])
+        small = shot(source, summary, args.small, [('card',), ('first', 'dark'), ('saver', 'dark'), ('settings',)])
+        tiny = shot(source, summary, args.tiny, [('first', 'light'), ('saver', 'light'), ('settings',)])
         bar = None
         if manifest.get('bar_items'):
             page = shot(source, summary, args.large, [('bar', 'light')]) or shot(source, summary, args.small, [('bar', 'light')])

@@ -1,0 +1,12 @@
+{
+  "_meta": { "name": "Nederlands" },
+  "screen": {},
+  "app": {
+    "name": "Klapklok",
+    "summary": "Een schermbeveiliging met de tijd op twee klapkaarten, en de datum en de buitentemperatuur eronder.",
+    "saver_name": "Klapklok",
+    "saver_example": "14:05 op twee klapkaarten, met vr 9 okt en 21° eronder",
+    "seconds": "Secondepunt",
+    "seconds_hint": "Een punt tussen de kaarten die elke seconde knippert."
+  }
+}

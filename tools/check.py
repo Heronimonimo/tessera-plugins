@@ -18,6 +18,7 @@ TESSERA_BOARDS=/path/to/boards.json the boards a local checkout knows (screen_ma
 
 It needs Python 3 with PyYAML (pip install pyyaml).
 """
+import ast
 import datetime
 import importlib.util
 import json
@@ -59,7 +60,11 @@ SCREEN_CODE = re.compile(r'plugin_api\.h|\btessera::|\blv_')
 # docs/FIRMWARE_API.md, "Memory"). A hint, not a failure: a short word costs little.
 KEPT_IN_CHIP = re.compile(r'^\s+(?:const\s+)?std::(?:string|vector<[^;]*>)\s+\w+_\s*(?:[;={]|,)', re.M)
 API_PARTS = [((0, 9), re.compile(r'Font::DIGITS|\bui::covers\s*\(|Tone::GOOD|\bui::set_fill\s*\(|\bui::tone_color\s*\('),
-               'Font::DIGITS, ui::covers, Tone::GOOD, ui::set_fill and ui::tone_color')]
+               'Font::DIGITS, ui::covers, Tone::GOOD, ui::set_fill and ui::tone_color'),
+             # A screensaver (docs/FIRMWARE_API.md, "A screensaver"): the manifest's `savers` needs 0.14 as well.
+             ((0, 14), re.compile(r'\badd_saver\s*\(|\bSaver(?:Context|Step)?\b|\bui::takes_taps\s*\(|\btessera::wish\s*\('
+                                  r'|\bWish::|\btessera::drift\s*\('),
+              'a screensaver (add_saver, Saver, SaverContext, SaverStep), ui::takes_taps, tessera::wish and tessera::drift')]
 
 # What plugin.yaml (and a part's file) never sets at its top level (docs/LIMITS.md, "plugin.yaml"). It is merged into
 # the screen's own configuration, so these would change what the core and the screen's own YAML hold, or open the
@@ -295,6 +300,11 @@ class Tagged(str):
     tag = ''
 
 
+class TaggedMap(dict):
+    """A mapping with a tag (`!include {file: x, vars: {...}}`), kept as the mapping."""
+    tag = ''
+
+
 class EsphomeLoader(yaml.SafeLoader):
     """Reads ESPHome YAML without ESPHome: a tag is no error, its value stays as it is written."""
 
@@ -303,7 +313,9 @@ def _tagged(loader, suffix, node):
     if isinstance(node, yaml.SequenceNode):
         return loader.construct_sequence(node, deep=True)
     if isinstance(node, yaml.MappingNode):
-        return loader.construct_mapping(node, deep=True)
+        value = TaggedMap(loader.construct_mapping(node, deep=True))
+        value.tag = '!' + suffix
+        return value
     value = Tagged(loader.construct_scalar(node))
     value.tag = '!' + suffix
     return value
@@ -323,6 +335,18 @@ def esphome_yaml(folder, name, file):
     if not isinstance(data, dict):
         fail(name, f'{file}: an ESPHome configuration is a mapping of components')
     return data
+
+
+def tagged_values(node):
+    """Every tagged value in an ESPHome file, however deep."""
+    if isinstance(node, (Tagged, TaggedMap)):
+        yield node
+    if isinstance(node, dict):
+        for value in node.values():
+            yield from tagged_values(value)
+    elif isinstance(node, list):
+        for value in node:
+            yield from tagged_values(value)
 
 
 def entries_of(value):
@@ -365,6 +389,16 @@ def check_esphome(folder, name, file, provides):
             fail(name, f'{file}: "{key}" belongs to the core and the screen\'s own YAML; a plugin never sets it')
         if key in NETWORK_KEYS and not (key == 'http_request' and coprocessor_update(data)):
             fail(name, f'{file}: "{key}" opens the screen to the network or fetches from it; data comes through the app')
+    for tagged in tagged_values(data):
+        # The screen's secrets.yaml (its Wi-Fi, its keys) is the screen's: a plugin's YAML never reads it.
+        if tagged.tag == '!secret':
+            fail(name, f'{file}: !secret {tagged}: the screen\'s secrets are not a plugin\'s to read; a value of a plugin '
+                       f'is an input of its manifest (docs/MANIFEST.md, "Inputs")')
+        # An include stays in the plugin's folder: not a file of the computer the screen is built on.
+        if tagged.tag.startswith('!include'):
+            where = tagged.get('file', '') if isinstance(tagged, dict) else str(tagged)
+            if str(where).startswith('/') or '..' in Path(str(where)).parts or '~' in str(where):
+                fail(name, f'{file}: {tagged.tag} {where}: an include names a file in the plugin\'s folder, by a relative path')
     promised = {pm().FEATURES[feature][1] for feature in provides}
     for made in made_ids(data):
         if made.startswith('ts_') and made not in promised:
@@ -380,6 +414,91 @@ def check_provides(name, manifest, esphome):
         ids = [item.get('id') for item in entries_of(esphome.get(domain))]
         if not any(isinstance(i, str) and not isinstance(i, Tagged) and i == wanted for i in ids):
             fail(name, f'plugin.yaml: provides {feature}, so it makes a "{domain}:" with id: {wanted}')
+
+
+# ---- A component's Python ----
+# ESPHome runs a component's __init__.py, and what it imports, where the screen is built: in the Tessera app's own
+# container, beside Home Assistant's config folder and on its network. A plugin's Python does what a component needs
+# and no more (docs/PUBLISHING.md, "What a plugin's Python may do"): it imports ESPHome and a little of the standard
+# library, reads files beside itself, and never reaches that computer's files, environment, processes or network.
+# Read as a syntax tree, not with a pattern, so a name in a string or a comment neither passes nor fails. Tessera's own
+# plugins keep to the same rules. A way around them for someone who wants one exists (nothing static holds every
+# door); what they stop is the plain `import os` and the honest slip, and they make the rest stand out in a diff.
+PYTHON_MODULES = {'esphome', 'pathlib', 'json', 're', 'math', 'struct', 'typing', 'dataclasses', 'enum', 'functools',
+                  'itertools', 'collections', 'logging', 'voluptuous', 'string', 'textwrap', 'base64', 'hashlib',
+                  'datetime', 'copy', 'operator', 'decimal', 'fractions', 'numbers', 'abc', 'contextlib', 'warnings'}
+# ESPHome's own parts that run commands, fetch, or read and write beyond a build: not a component's to use.
+PYTHON_NEVER = ('esphome.util', 'esphome.git', 'esphome.external_files', 'esphome.dashboard', 'esphome.storage_json',
+                'esphome.espota2', 'esphome.wizard', 'esphome.zeroconf', 'esphome.mqtt', 'esphome.helpers',
+                'esphome.__main__', 'esphome.log', 'esphome.vscode', 'esphome.platformio_api', 'esphome.idf_component')
+PYTHON_CALLS = {'open', 'eval', 'exec', 'compile', '__import__', 'globals', 'locals', 'vars', 'breakpoint', 'input',
+                'exit', 'quit', 'memoryview'}
+# A file beside the plugin is read through a Path made from __file__; nothing is written, and nothing else is read.
+PYTHON_READS = {'read_text', 'read_bytes', 'open', 'iterdir', 'glob', 'rglob', 'exists', 'is_file', 'is_dir', 'stat',
+                'walk', 'samefile', 'readlink'}
+PYTHON_WRITES = {'write_text', 'write_bytes', 'unlink', 'mkdir', 'rmdir', 'rename', 'replace', 'touch', 'chmod',
+                 'symlink_to', 'hardlink_to', 'link_to', 'lchmod', 'expanduser'}
+PYTHON_DUNDERS = {'__file__', '__name__', '__doc__', '__init__', '__call__', '__eq__', '__hash__', '__repr__', '__str__',
+                  '__lt__', '__le__', '__gt__', '__ge__', '__len__', '__iter__', '__getitem__', '__contains__',
+                  '__post_init__', '__slots__', '__enter__', '__exit__', '__version__', '__all__'}
+PYTHON_PLACES = ('/config', '/data', '/homeassistant', '/root', '/home', '/etc', '/proc', '/sys', '/run', '/var', '/tmp',
+                 '/ssl', '/share', '/media', '/addons', '/backup', '/usr', '/opt', '/mnt')
+
+
+def check_python(folder, name, path):
+    """The rules above for one Python file of a plugin's component."""
+    rel = path.relative_to(folder)
+    try:
+        tree = ast.parse(path.read_text(encoding='utf-8'), filename=str(path))
+    except (SyntaxError, ValueError) as error:
+        fail(name, f'{rel}: {error}')
+
+    def no(node, why):
+        fail(name, f'{rel}:{node.lineno}: {why} (docs/PUBLISHING.md, "What a plugin\'s Python may do")')
+
+    # Names made from __file__ at the top of the file (HERE = Path(__file__).parent): a path beside the plugin as well.
+    beside = {'__file__'}
+
+    def beside_file(expr):
+        return any(isinstance(n, ast.Name) and n.id in beside for n in ast.walk(expr))
+
+    for statement in tree.body:
+        if isinstance(statement, ast.Assign) and beside_file(statement.value):
+            beside.update(t.id for t in statement.targets if isinstance(t, ast.Name))
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            modules = [(alias.name, alias.name) for alias in node.names]
+        elif isinstance(node, ast.ImportFrom):
+            if node.level:
+                continue   # the component's own files
+            modules = [(node.module or '', f'{node.module}.{alias.name}') for alias in node.names]
+        else:
+            modules = []
+        for module, full in modules:
+            if module.split('.')[0] not in PYTHON_MODULES:
+                no(node, f'import {module}: a component imports esphome and the standard library\'s '
+                         f'{", ".join(sorted(PYTHON_MODULES - {"esphome"}))}, nothing else')
+            if any(full == never or full.startswith(never + '.') for never in PYTHON_NEVER):
+                no(node, f'import {full}: that part of ESPHome runs commands, fetches or reaches files of its own')
+        if isinstance(node, ast.Call):
+            func = node.func
+            if isinstance(func, ast.Name) and func.id in PYTHON_CALLS:
+                no(node, f'{func.id}(): a component has no use for it')
+            if isinstance(func, ast.Attribute):
+                if func.attr in PYTHON_WRITES:
+                    no(node, f'.{func.attr}(): a build of a plugin writes no file')
+                if func.attr in PYTHON_READS and not beside_file(func.value):
+                    no(node, f'.{func.attr}(): a plugin reads only files beside itself, through a Path from __file__')
+        elif isinstance(node, ast.Attribute) and node.attr.startswith('__') and node.attr not in PYTHON_DUNDERS:
+            no(node, f'.{node.attr}: a way around these rules')
+        elif isinstance(node, ast.Name) and node.id in {'__builtins__', '__loader__', '__spec__', '__import__', '__dict__'}:
+            no(node, f'{node.id}: a way around these rules')
+        elif isinstance(node, ast.Constant) and isinstance(node.value, str):
+            if any(node.value == place or node.value.startswith(place + '/') for place in PYTHON_PLACES):
+                no(node, f'"{node.value}": a folder of the computer the screen is built on')
+            # getattr(x, "__dict__"), "__import__" and the like: a dunder in a string is the same door as the attribute.
+            if re.fullmatch(r'__\w+__', node.value) and node.value not in PYTHON_DUNDERS:
+                no(node, f'"{node.value}": a way around these rules')
 
 
 # What template/ holds until a maker fills it in (tools/new_plugin.py copies it as it is): a plugin other than the
@@ -474,6 +593,8 @@ def check_folder(folder):
     if folder.parent.name == 'plugins' and not (folder / 'LICENSE').is_file() and not (folder.parent.parent / 'LICENSE').is_file():
         fail(name, 'a LICENSE is required')
     for component in sorted(p for p in components.iterdir() if p.is_dir()):
+        for path in sorted(component.rglob('*.py')):
+            check_python(folder, name, path)
         sources = {path: re.sub(r'//[^\n]*|/\*.*?\*/', '', path.read_text(encoding='utf-8', errors='replace'), flags=re.S)
                    for path in sorted(component.rglob('*')) if path.suffix in ('.h', '.cpp', '.c', '.hpp')}
         screen = any(SCREEN_CODE.search(code) for code in sources.values())

@@ -40,7 +40,18 @@ The check accepts the id of any input here, but the app fills in only options an
 is not a secret is an option of the tile.
 
 A value in the URL is percent-encoded. A placeholder with no value means no ask: the tile gets
-`{"wait": "not_filled"}`.
+`{"wait": "not_filled"}`. Every value goes in as one word (0.12): `true` or `false` for a toggle, a whole number without
+`.0`, a pick as its value, whether the screen's own loop or the editor asks.
+
+A list option (`multiple`, 0.12) goes into a URL in one of two ways:
+
+- `{tickers|,}` joins its values by the separator after the bar (1 to 3 characters), each value percent-encoded, for a
+  service that takes several in one ask: `https://api.example.org/quotes?symbols={tickers|,}` asks for
+  `symbols=AAPL,ASML`. An empty list is no value.
+- `each: tickers` asks once per value (below).
+
+A list in a plain `{tickers}` is refused by the check, and so is a list in `where`, `skip` or a path of `items`.
+`{search}` is what a person types for a choice with `search` (below).
 
 ```yaml
 fetch:
@@ -50,6 +61,38 @@ fetch:
     every: 15m
     map: ...
 ```
+
+## Once per value: `each`
+
+A service that answers for one thing at a time (the releases of one artist, the departures of one stop) and a tile that
+shows several: `each` names a list option, and the app asks once per value, with `{<option>}` in the URL that value.
+
+```yaml
+fetch:
+  - id: releases
+    each: artists                      # an option with multiple, of every tile that uses this fetch
+    url: https://api.deezer.com/artist/{artists}/albums?limit=25
+    every: 6h
+    map:
+      items: "$.data[*]"
+      fields:
+        title: title
+        date: { path: release_date, as: epoch }
+        cover: md5_image
+        artist: { each: label }        # the pick whose ask brought the item: its label
+      sort: -date
+      limit: 16
+```
+
+- Each filled-in URL is a question of its own, as always: two tiles that share an artist share its ask and its answer.
+- The map runs on each answer, with `where` and `skip`; then the items of all answers are one list, in the order of the
+  values, and `sort` and `limit` work on that list: the newest 16 releases of every artist together. A map of one object
+  (fields without `items`) gives one item per value, so a fetch of the weather in one city makes a list of cities.
+- `{ each: value }` and `{ each: label }` as a field are the value whose ask brought the item, and the words of its pick
+  (for a list of texts, the text twice): many answers do not name what was asked for.
+- A value whose ask failed is left out and the list comes with `"stale": true`; one still on its way is left out until
+  its answer is there. The tile gets `"wait"` only when no value has an answer, and `not_filled` while the list is empty.
+- At most as many asks as the list holds (16 at most), each at most every `every`, in turn.
 
 ## The map
 
@@ -131,10 +174,23 @@ map:
 once, at most 48 of them. The editor asks for the list with the tile's other options filled in (the
 stop of the bus tile), so a list can depend on them.
 
+**Found by searching** (0.12). An option with `search: true` asks its fetch with what the person types as `{search}`:
+from two characters on, a moment after the last key. A short question with an empty `{search}` is no ask. The app keeps
+those answers ten minutes, whatever the fetch's `every`.
+
+```yaml
+fetch:
+  - id: artist_search
+    url: https://api.deezer.com/search/artist?q={search}
+    every: 1d
+    map: { items: "$.data[*]", value: id, label: name }
+```
+
 ## Size on the screen
 
-A tile's data travels in one message of at most 4 KB, with the rest of the tile. The app keeps the data under about
-2.6 KB by dropping the last items of a list. Ask only for the fields the tile shows, and set `limit` to what fits on
+A tile's data travels in one message of at most 4 KB, with the rest of the tile and its options. The app keeps the data
+under about 2.6 KB, less beside options that take much of their 1280 bytes (about 2 KB at the most), by dropping the last
+items of a list. Ask only for the fields the tile shows, and set `limit` to what fits on
 the largest size of your tile: the bus plugin asks for six departures.
 
 ## When a service is not JSON, or needs a login

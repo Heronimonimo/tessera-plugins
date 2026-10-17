@@ -1,0 +1,28 @@
+# Flip clock: a face of the screensaver's clock (plugin API 0.14, docs/FIRMWARE_API.md "A screensaver"). The hours and
+# the minutes as two flip cards in the screen's largest digits, the date and the outside temperature under them. The
+# smallest screensaver: no pictures, no taps, and it works on every board, the CYD too. docs/MANIFEST.md, "savers".
+id: flip_clock
+version: 0.1.0
+api: "0.14"
+icon: clock-outline
+maintainer: MaxGramser
+license: MIT
+stage: example
+topics: [time]
+requires:
+  esphome: 2026.6.2
+boards: any
+flash_kb: 4
+
+savers:
+  # A face of the clock step: a person picks it under Face in the Clock's drawer of the Screensaver card. It draws from
+  # what the clock step knows (the temperature, the row of entities), so it has no data or entity of its own.
+  - id: flip
+    name: saver_name
+    icon: clock-outline
+    step: clock
+    # Ten LVGL objects (two cards with their digits and hinges, a dot, the suffix and the line under them).
+    memory: 1000
+    example: saver_example
+    options:
+      - { id: seconds, kind: toggle, label: seconds, hint: seconds_hint, default: true }

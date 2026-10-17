@@ -1,0 +1,11 @@
+# What tools/preview.py shows (docs/PREVIEW.md, "Screensavers"): a photo with the time at the bottom left, and at the
+# top right. The photo comes from the file below, never from the internet.
+savers:
+  - saver: photo
+    name: Bottom left
+    picture: preview/photo.png
+  - saver: photo
+    name: Top right, moving
+    options: { corner: top_right }
+    picture: preview/photo.png
+    motion: true

@@ -112,10 +112,12 @@ BENCH_ACTIONS = '''    - action: render_settings
               auto channel = [](uint8_t v) {{ const float s = v / 255.0f; return s <= 0.03928f ? s / 12.92f : std::pow((s + 0.055f) / 1.055f, 2.4f); }};
               return 0.2126f * channel(c.red) + 0.7152f * channel(c.green) + 0.0722f * channel(c.blue);
             }};
-            auto ground = [](lv_obj_t *o) {{
+            // A screensaver stands on the black glass, or on the step's own picture under a clear glass (`backdrop`),
+            // which the screensaver darkens or which the saver lays a shade over: the ground is the glass's black there.
+            auto ground = [&](lv_obj_t *o) {{
               for (lv_obj_t *p = lv_obj_get_parent(o); p; p = lv_obj_get_parent(p))
                 if (lv_obj_get_style_bg_opa(p, LV_PART_MAIN) >= LV_OPA_80) return lv_obj_get_style_bg_color(p, LV_PART_MAIN);
-              return theme::color(theme::PAGE);
+              return theme::color(saver ? theme::CAMERA_PAGE : theme::PAGE);
             }};
             std::function<void(lv_obj_t *, const lv_area_t &, Count &)> walk = [&](lv_obj_t *o, const lv_area_t &room, Count &n) {{
               if (!o || lv_obj_has_flag(o, LV_OBJ_FLAG_HIDDEN)) return;
@@ -605,7 +607,7 @@ def saver_examples(entry, spec):
     return out
 
 
-def saver_word(entry, kind, options, data):
+def saver_word(entry, kind, options, data, motion=False):
     """The app's word for the screensaver (screen_saver.message) with the plugin's saver in `pf`: a face goes with its
     step's own fields, so a screen that lacks the plugin would show the step's own face; a step of its own is `plugin`."""
     pf = {'p': f'plugin:{entry.id}.{kind["id"]}', 'o': dict(options or {}), 'x': data}
@@ -621,7 +623,8 @@ def saver_word(entry, kind, options, data):
                 't': data.get('title') or '', 'x': extra, 's': data.get('state') or '', 'f': int(data.get('features') or 0),
                 **({'m': 1} if data.get('muted') else {})}
     if step == 'photos':
-        return {**word, 'k': 'photos', 'e': 'saver.photos', 'n': '', 'x': {'pic': data.get('mark') or ''}}
+        # `motion: true` of the example: the photos move slowly (the person's Motion: Slow), under a face of `backdrop`.
+        return {**word, 'k': 'photos', 'e': 'saver.photos', 'n': '', 'x': {'pic': data.get('mark') or '', **({'mv': 1} if motion else {})}}
     return {**word, 'k': 'plugin'}
 
 
@@ -697,6 +700,10 @@ class Bench(run.Run):
         action."""
         if call.service == 'esphome.screen_plugin':
             asyncio.get_running_loop().create_task(self.answer(call.data))
+        elif call.service == 'esphome.screen_camera' and call.data.get('saver') in ('media', 'photos'):
+            # The step's own picture under a face of `backdrop: true` (plugin API 0.14): as the app makes it.
+            asyncio.get_running_loop().create_task(self.answer_backdrop(dict(call.data)))
+            self.last_ask = time.monotonic()
         elif call.service == 'esphome.screen_camera' and core.plugin_tile(str(call.data.get('tiles') or '')):
             job = asyncio.get_running_loop().create_task(self.answer_pictures(dict(call.data)))
             self.picture_jobs = getattr(self, 'picture_jobs', set())
@@ -716,6 +723,31 @@ class Bench(run.Run):
             await asyncio.sleep(0.1)
         if getattr(self, 'last_ask', 0):
             await asyncio.sleep(0.6)
+
+    async def answer_backdrop(self, data):
+        """The step's own picture under a face of `backdrop: true`: the example's `picture` or a drawn cover or photo, made
+        as the app makes the screensaver's (camera_feed.encode_photo, moving a little larger where the word says `mv`;
+        encode_saver for the music), answered as "saver"."""
+        import camera_feed
+        import media_art
+        shown = self.saver_shown or {}
+        kind = data.get('saver')
+        box = camera_feed.capped((self.screen.width, self.screen.height), cap=camera_feed.picture_cap(data))
+        if shown.get('picture'):
+            raw = (self.args.plugin.resolve() / str(shown['picture'])).read_bytes()
+        else:
+            raw = sample_photo(self.screen.width, self.screen.height) if kind == 'photos' else media_art.png(7, 640)
+        if kind == 'photos':
+            moving = camera_feed.motion_box(box, camera_feed.picture_cap(data)) if shown.get('motion') else None
+            body = camera_feed.encode_photo(raw, box, 'fill', moving)
+        else:
+            body = camera_feed.encode_saver(raw, box, 'media', 0)
+        try:
+            view = int(data.get('view', 0))
+        except (TypeError, ValueError):
+            view = 0
+        url = self.pictures.url(f'{self.screen.key}-backdrop-{view}.bmp', body)
+        await self.send({'v': 1, 'op': 'camera', 't': 'saver', 'e': data.get('entity', ''), 'u': url, 'view': view})
 
     async def answer_pictures(self, data):
         """The pictures of a plugin tile's, card's or screensaver's places (a card: plugin API 0.13, a screensaver: 0.14),
@@ -1102,9 +1134,9 @@ class Bench(run.Run):
         await self.call('render_time', epoch=self.now)
         await self.call('render_standby', enter=1)
         await asyncio.sleep(0.4)
-        self.saver_shown = {'step': kind['step'], 'picture': example.get('picture')}
+        self.saver_shown = {'step': kind['step'], 'picture': example.get('picture'), 'motion': bool(example.get('motion'))}
         start = len(self.lines)
-        await self.send(saver_word(self.entry, kind, example.get('options'), data))
+        await self.send(saver_word(self.entry, kind, example.get('options'), data, bool(example.get('motion'))))
         key = f'plugin:{self.entry.id}.{kind["id"]}'
         try:
             await self.until(lambda l: (SAVER_SHOWN.search(l) or [None, None])[1] == key, 8, f'the saver {kind["id"]}', start)

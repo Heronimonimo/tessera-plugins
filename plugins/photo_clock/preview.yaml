@@ -5,6 +5,7 @@ savers:
     name: Bottom left
     picture: preview/photo.png
   - saver: photo
-    name: Top right
+    name: Top right, moving
     options: { corner: top_right }
     picture: preview/photo.png
+    motion: true

@@ -11,10 +11,9 @@ namespace ui = tessera::ui;
 // A face of the screensaver's photos (plugin API 0.14): the photo over the whole glass, and the time small in a corner
 // with the date under it, on a shade that keeps them readable on a bright photo.
 //
-// The photo is the step's own picture: one place with the address "saver:picture", which the app answers with the
-// photo on the glass, cut to the place. Its key carries the photo's mark, so the next photo comes under the same
-// address by itself. The photo fills the glass and stays put; the time and date walk Tessera's slow circle against
-// burn-in (tessera::drift, `moves: true`), so nothing stands on the same pixels for hours and no black edge shows.
+// The photo is the step's own picture under the saver (`backdrop: true`): the screen shows it over the whole glass and
+// moves it when the person chose Motion: Slow, and the next photo comes by itself. The saver draws only the shade with
+// the time, which the screen moves a millimetre every minute against burn-in.
 class PhotoSaver : public tessera::Saver {
  public:
   void show(const tessera::SaverContext &c) override {
@@ -24,12 +23,6 @@ class PhotoSaver : public tessera::Saver {
     const char *corner = c.options["corner"] | "bottom_left";
     right_ = std::strstr(corner, "right") != nullptr;
     top_ = std::strncmp(corner, "top", 3) == 0;
-    if (ui::pictures()) {
-      photo_ = ui::picture(c.parent);
-      lv_obj_set_style_radius(photo_, 0, 0);
-      lv_obj_set_size(photo_, c.width, c.height);
-      lv_obj_set_pos(photo_, 0, 0);
-    }
     // The shade, made after the photo so it lies over it, and the two lines in it.
     shade_ = ui::block(c.parent, theme::CAMERA_PAGE);
     lv_obj_set_style_bg_opa(shade_, LV_OPA_50, 0);
@@ -38,10 +31,6 @@ class PhotoSaver : public tessera::Saver {
     date_ = ui::label(shade_, Font::BODY, theme::INK_SOFT);
   }
 
-  // The photos step's contract: `picture` ("saver:picture"), its `mark`, `index`, `count` and `album`.
-  void on_state(JsonObjectConst data) override {
-    if (photo_) ui::set_picture(photo_, data["picture"] | "", tessera::Fit::COVER);
-  }
 
   // The time and the date, once a minute: their texts, the shade's size and its corner.
   void on_tick(uint32_t epoch) override {
@@ -60,8 +49,7 @@ class PhotoSaver : public tessera::Saver {
     lv_obj_set_pos(time_, right_ ? w - pad - tw : pad, pad);
     lv_obj_set_pos(date_, right_ ? w - pad - dw : pad, pad + th);
     lv_obj_set_size(shade_, w, h);
-    const tessera::Point at = tessera::drift(epoch);
-    lv_obj_set_pos(shade_, (right_ ? width_ - m - w : m) + at.x, (top_ ? m : height_ - m - h) + at.y);
+    lv_obj_set_pos(shade_, right_ ? width_ - m - w : m, top_ ? m : height_ - m - h);
     lv_obj_remove_flag(shade_, LV_OBJ_FLAG_HIDDEN);
   }
 
@@ -69,7 +57,7 @@ class PhotoSaver : public tessera::Saver {
   int width_ = 0, height_ = 0;
   bool right_ = false, top_ = false;
   uint32_t minute_ = 0;
-  lv_obj_t *photo_{}, *shade_{}, *time_{}, *date_{};
+  lv_obj_t *shade_{}, *time_{}, *date_{};
 };
 
 void PhotoClock::setup() {

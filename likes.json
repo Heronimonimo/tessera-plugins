@@ -3,8 +3,10 @@
  "likes": {
   "custom_card": 2,
   "ov_departures": 2,
+  "photo_clock": 1,
   "picture_frame": 1,
   "tap_sound": 1,
-  "waste_collection": 2
+  "waste_collection": 2,
+  "world_clock": 1
  }
 }

@@ -11,6 +11,9 @@
   "name": "Screen camera",
   "summary": "The screen's own camera as a camera in Home Assistant, with a camera in the top bar while it is watched.",
   "bar_watching": "Camera in use",
-  "bar_example": "Live"
+  "bar_example": "Live",
+  "bar_sensing": "Camera senses motion",
+  "setting_sensing": "Light level and motion",
+  "setting_sensing_hint": "The camera measures the room's light and notices movement, on the screen itself: no picture leaves it for this. The camera stays on while this is on."
  }
 }

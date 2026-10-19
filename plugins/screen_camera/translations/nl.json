@@ -11,6 +11,9 @@
   "name": "Schermcamera",
   "summary": "De eigen camera van het scherm als camera in Home Assistant, met een camera in de bovenbalk zolang er iemand kijkt.",
   "bar_watching": "Camera in gebruik",
-  "bar_example": "Live"
+  "bar_example": "Live",
+  "bar_sensing": "Camera ziet beweging",
+  "setting_sensing": "Lichtniveau en beweging",
+  "setting_sensing_hint": "De camera meet het licht in de kamer en merkt beweging op, op het scherm zelf: hiervoor gaat geen beeld van het scherm af. De camera blijft aan zolang dit aan staat."
  }
 }

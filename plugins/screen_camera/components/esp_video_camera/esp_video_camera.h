@@ -190,6 +190,10 @@ class ESPVideoCamera : public camera::Camera {
   bool register_jpeg_frame_consumer(JpegFrameConsumer *consumer);
   bool start_jpeg_frame_consumer(JpegFrameConsumer *consumer);
   void stop_jpeg_frame_consumer(JpegFrameConsumer *consumer);
+  // Tessera: the sensor's exposure time (microseconds) and gain (1 = none) as the ISP pipeline set them last, read
+  // through esp_video's V4L2 controls. Only from a raw frame consumer, which runs on the capture task, the one user
+  // of the capture descriptor. False when the sensor does not report them.
+  bool read_sensor_exposure(float *exposure_us, float *gain);
 
  protected:
   bool init_pipeline_();

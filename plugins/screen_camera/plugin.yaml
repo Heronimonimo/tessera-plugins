@@ -17,5 +17,28 @@ esp_video_camera:
   jpeg_quality: 12
   max_framerate: 5
 
+# The room's light level and motion, worked out on the screen from the camera's frames: no picture leaves the screen for
+# them. Off until a person switches it on, because the camera then keeps running (at the frame rate above); an eye can
+# show in the top bar while it does.
+switch:
+  - platform: template
+    id: screen_camera_sensing
+    name: "Camera light level and motion"
+    icon: mdi:motion-sensor
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    entity_category: config
+    turn_on_action:
+      - lambda: id(screen_camera_plugin).set_sensing(true);
+    turn_off_action:
+      - lambda: id(screen_camera_plugin).set_sensing(false);
+
 screen_camera:
+  id: screen_camera_plugin
   camera: ts_camera
+  illuminance:
+    name: "Light level"
+  motion:
+    name: "Motion"
+    filters:
+      - delayed_off: 10s

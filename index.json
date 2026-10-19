@@ -1,6 +1,6 @@
 {
  "format": 1,
- "generated": "2026-10-19T17:33:44Z",
+ "generated": "2026-10-19T19:43:26Z",
  "plugin_api": "0.14",
  "blocked": [],
  "featured": [
@@ -21,6 +21,11 @@
   "custom_card": {
    "repo": "https://github.com/stofle/tessera-plugin-custom-card",
    "repo_id": 1412296533,
+   "path": "."
+  },
+  "electricity_price": {
+   "repo": "https://github.com/heronimonimo/tessera-electricity-price",
+   "repo_id": 1421748188,
    "path": "."
   },
   "film_stasera": {
@@ -63,6 +68,11 @@
    "repo_id": 1408945265,
    "path": "plugins/photo_clock"
   },
+  "photo_slideshow": {
+   "repo": "https://github.com/djsmile-t/tessera-photo-slideshow",
+   "repo_id": 1422314338,
+   "path": "."
+  },
   "picture_frame": {
    "repo": "https://github.com/maxgramser/tessera-plugins",
    "repo_id": 1408945265,
@@ -72,6 +82,11 @@
    "repo": "https://github.com/maxgramser/tessera-plugins",
    "repo_id": 1408945265,
    "path": "plugins/screen_camera"
+  },
+  "sweden_public_transport": {
+   "repo": "https://github.com/exhalesthlm/tessera-plugin-sweden-public-transport",
+   "repo_id": 1423224231,
+   "path": "."
   },
   "tap_sound": {
    "repo": "https://github.com/maxgramser/tessera-plugins",
@@ -92,6 +107,11 @@
    "repo": "https://github.com/maxgramser/tessera-plugins",
    "repo_id": 1408945265,
    "path": "plugins/waste_collection"
+  },
+  "waze_traveltime": {
+   "repo": "https://github.com/heronimonimo/tessera-waze-traveltime",
+   "repo_id": 1425525382,
+   "path": "."
   },
   "world_clock": {
    "repo": "https://github.com/stofle/tessera-plugin-world-clock",
@@ -2554,6 +2574,309 @@
    "image": "store.png"
   },
   {
+   "id": "electricity_price",
+   "repo": "https://github.com/heronimonimo/tessera-electricity-price",
+   "repo_id": 1421748188,
+   "path": ".",
+   "label": "community",
+   "status": "ok",
+   "release": {
+    "version": "0.6.6",
+    "sha": "7a25cf6d08738be4377ed7b50a4d894d563ab374",
+    "date": "2026-10-19",
+    "tag": "v0.6.6"
+   },
+   "manifest": {
+    "id": "electricity_price",
+    "version": "0.6.6",
+    "api": "0.12",
+    "icon": "flash",
+    "maintainer": "Heronimonimo",
+    "license": "MIT",
+    "stage": "beta",
+    "topics": [
+     "energy"
+    ],
+    "requires": {
+     "esphome": "2026.6.2"
+    },
+    "boards": "any",
+    "flash_kb": 10,
+    "tiles": [
+     {
+      "id": "nordpool",
+      "name": "tile_name_nordpool",
+      "icon": "flash",
+      "sizes": {
+       "min": "1x1",
+       "max": "9x9",
+       "full": true
+      },
+      "memory": 13000,
+      "domains": [
+       "sensor"
+      ],
+      "attributes": [
+       "unit_of_measurement"
+      ],
+      "has_attributes": [
+       "raw_today"
+      ],
+      "fields": {
+       "today": {
+        "path": "raw_today[*].value",
+        "as": "numbers"
+       },
+       "tomorrow": {
+        "path": "raw_tomorrow[*].value",
+        "as": "numbers"
+       }
+      },
+      "example": "tile_example",
+      "preview": {
+       "title": "{name}",
+       "value": "{state} {unit_of_measurement}"
+      },
+      "options": [
+       {
+        "id": "unit",
+        "kind": "choice",
+        "default": "eur",
+        "label": "unit",
+        "hint": "unit_hint",
+        "choices": [
+         {
+          "value": "eur",
+          "label": "unit_eur"
+         },
+         {
+          "value": "cents",
+          "label": "unit_cents"
+         }
+        ]
+       },
+       {
+        "id": "fixed",
+        "kind": "number",
+        "min": 0,
+        "max": 4,
+        "step": 1,
+        "default": 3,
+        "label": "decimals",
+        "hint": "decimals_hint"
+       }
+      ]
+     },
+     {
+      "id": "entsoe",
+      "name": "tile_name_entsoe",
+      "icon": "flash",
+      "sizes": {
+       "min": "1x1",
+       "max": "9x9",
+       "full": true
+      },
+      "memory": 13000,
+      "domains": [
+       "sensor"
+      ],
+      "attributes": [
+       "unit_of_measurement"
+      ],
+      "has_attributes": [
+       "prices_today"
+      ],
+      "fields": {
+       "today": {
+        "path": "prices_today[*].price",
+        "as": "numbers"
+       },
+       "tomorrow": {
+        "path": "prices_tomorrow[*].price",
+        "as": "numbers"
+       }
+      },
+      "example": "tile_example",
+      "preview": {
+       "title": "{name}",
+       "value": "{state} {unit_of_measurement}"
+      },
+      "options": [
+       {
+        "id": "unit",
+        "kind": "choice",
+        "default": "eur",
+        "label": "unit",
+        "hint": "unit_hint",
+        "choices": [
+         {
+          "value": "eur",
+          "label": "unit_eur"
+         },
+         {
+          "value": "cents",
+          "label": "unit_cents"
+         }
+        ]
+       },
+       {
+        "id": "fixed",
+        "kind": "number",
+        "min": 0,
+        "max": 4,
+        "step": 1,
+        "default": 3,
+        "label": "decimals",
+        "hint": "decimals_hint"
+       }
+      ]
+     },
+     {
+      "id": "gespot",
+      "name": "tile_name_gespot",
+      "icon": "flash",
+      "sizes": {
+       "min": "1x1",
+       "max": "9x9",
+       "full": true
+      },
+      "memory": 13000,
+      "domains": [
+       "sensor"
+      ],
+      "attributes": [
+       "unit_of_measurement"
+      ],
+      "has_attributes": [
+       "today_interval_prices"
+      ],
+      "fields": {
+       "today": {
+        "path": "today_interval_prices[*].value",
+        "as": "numbers"
+       },
+       "tomorrow": {
+        "path": "tomorrow_interval_prices[*].value",
+        "as": "numbers"
+       }
+      },
+      "example": "tile_example",
+      "preview": {
+       "title": "{name}",
+       "value": "{state} {unit_of_measurement}"
+      },
+      "options": [
+       {
+        "id": "unit",
+        "kind": "choice",
+        "default": "eur",
+        "label": "unit",
+        "hint": "unit_hint",
+        "choices": [
+         {
+          "value": "eur",
+          "label": "unit_eur"
+         },
+         {
+          "value": "cents",
+          "label": "unit_cents"
+         }
+        ]
+       },
+       {
+        "id": "fixed",
+        "kind": "number",
+        "min": 0,
+        "max": 4,
+        "step": 1,
+        "default": 3,
+        "label": "decimals",
+        "hint": "decimals_hint"
+       }
+      ]
+     }
+    ],
+    "cards": [
+     {
+      "id": "prices",
+      "name": "card_name",
+      "wide": true
+     }
+    ]
+   },
+   "translations": {
+    "en": {
+     "_meta": {
+      "name": "English"
+     },
+     "screen": {
+      "choose": "Choose a price sensor",
+      "unavailable": "No price",
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "now": "Now",
+      "low": "Low {value}",
+      "high": "High {value}",
+      "average": "Average",
+      "no_graph": "No prices for today"
+     },
+     "app": {
+      "name": "Electricity price",
+      "summary": "The electricity price now, with a graph of today and tomorrow, from a Nord Pool, ENTSO-e or GE-Spot sensor.",
+      "tile_name_nordpool": "Electricity price (Nord Pool)",
+      "tile_name_entsoe": "Electricity price (ENTSO-e)",
+      "tile_name_gespot": "Electricity price (GE-Spot)",
+      "tile_example": "The price now and the day's graph",
+      "card_name": "Electricity price",
+      "unit": "Unit",
+      "unit_hint": "Show the price in euros per kWh (0.273) or in cents per kWh (27.3).",
+      "unit_eur": "EUR/kWh",
+      "unit_cents": "ct/kWh",
+      "decimals": "Decimals",
+      "decimals_hint": "How many decimals the price shows. In cents one is enough."
+     }
+    },
+    "nl": {
+     "_meta": {
+      "name": "Nederlands"
+     },
+     "screen": {
+      "choose": "Kies een prijssensor",
+      "unavailable": "Geen prijs",
+      "today": "Vandaag",
+      "tomorrow": "Morgen",
+      "now": "Nu",
+      "low": "Laag {value}",
+      "high": "Hoog {value}",
+      "average": "Gemiddeld",
+      "no_graph": "Geen prijzen voor vandaag"
+     },
+     "app": {
+      "name": "Stroomprijs",
+      "summary": "De stroomprijs nu, met een grafiek van vandaag en morgen, van een Nord Pool-, ENTSO-e- of GE-Spot-sensor.",
+      "tile_name_nordpool": "Stroomprijs (Nord Pool)",
+      "tile_name_entsoe": "Stroomprijs (ENTSO-e)",
+      "tile_name_gespot": "Stroomprijs (GE-Spot)",
+      "tile_example": "De prijs nu en de grafiek van de dag",
+      "card_name": "Stroomprijs",
+      "unit": "Eenheid",
+      "unit_hint": "Toon de prijs in euro per kWh (0,273) of in cent per kWh (27,3).",
+      "unit_eur": "EUR/kWh",
+      "unit_cents": "ct/kWh",
+      "decimals": "Decimalen",
+      "decimals_hint": "Hoeveel decimalen de prijs toont. In centen is er één genoeg."
+     }
+    }
+   },
+   "readme": {
+    "en": "# Electricity price\n\nThe electricity price now as a tile, with the graph of today and tomorrow on bigger tiles and on a card of its own.\nIt reads the price sensor of **Nord Pool** (HACS `nordpool`), **ENTSO-e** (`entsoe`) or **GE-Spot** (`ge_spot`) in Home Assistant. For GE-Spot, use its price sensor in a currency per kWh (not the cents display).\n\nIt runs on every board Tessera supports (`boards: any`), from the CYD to the 10.1-inch screens.\n\n## Set up\n\n1. In Tessera, open **Plugins** and choose **Electricity price**, or choose **Add with a link** and paste\n   `https://github.com/Heronimonimo/tessera-electricity-price`. Tick your screens; each builds once.\n2. In Layout, place the **Electricity price (Nord Pool)**, **Electricity price (ENTSO-e)** or **Electricity price\n   (GE-Spot)** tile from the library's Plugins group, at any size from 1x1 up to the whole page. A tile smaller than\n   2x2 shows the price with the meter bar; from 2x2 up it adds the graph.\n3. In the inspector, choose your price sensor. The list holds only the sensors that fit the tile you placed.\n4. Choose the unit, **EUR/kWh** (`0.273`) or **ct/kWh** (`27.3`), and the number of decimals (in ct/kWh at most one).\n5. Tap a bar of the graph to see its price and time slot for a few seconds, on a bigger tile and on the full screen card. On a tile, tap that bar again, or beside the bars, to open the card: the price now, the lowest and highest still to come, the day's average, and the graph.\n\n## Good to know\n\n- The graph has a bar for every quarter of an hour when the sensor has quarter prices, else for every hour. A tile\n  with more than 100 slots (quarters of today and tomorrow) joins neighbouring quarters into one bar; the card shows\n  them all. Past bars are grey, the bar now is the accent colour, and the bars to come are green, amber or red by their\n  place between the lowest and highest price. Prices below zero hang under the zero line.\n- Tomorrow's bars appear on their own as soon as the sensor has them (the day-ahead prices come in the afternoon).\n- The unit comes from the sensor (`EUR/kWh` shows as `€/kWh`). A sensor that reports per MWh is shown per kWh.\n- On the days the clock changes, the graph has 23 or 25 hours, each where it is on the clock.\n"
+   },
+   "changelog": {
+    "en": "# Changelog\n\n## 0.6.6\n- A sensor that reports per MWh shows its price per kWh, in EUR/kWh and in ct/kWh alike. Before, ct/kWh multiplied a\n  price per MWh by 100.\n- On the days the clock changes (23 or 25 hours), the bar of now, the times under the graph and the time slots of a\n  tapped bar and of the highest and lowest price are right. Before, they were an hour off after the change.\n- When tomorrow's prices come in another resolution than today's (hours beside quarters), the graph shows them in\n  today's, without gaps.\n- \"Choose a price sensor\" and \"No price\" fit on a small tile and on the card, in every language: without a price\n  the message takes the whole row, in a smaller font where needed. Before, it was cut off.\n\n## 0.6.5\n- The tiles also take the whole page (`full: true`): a tile as big as the grid, such as 5x5 on a 5x5 grid, was not offered before.\n- The editor shows the price with its unit.\n\n## 0.6.4\n- The tiles come in every size, from 1x1 up to 9x9 (before, at most 4x3).\n\n## 0.6.3\n- Graph: the bars share the whole width of the plot. Before, each bar had a whole number of pixels, so on a screen where 192 quarters did not divide the width the bars took only part of it.\n\n## 0.6.2\n- Card: the highest and the lowest price only count from now on, tomorrow included once it is known. A time slot of tomorrow says \"Tomorrow\" in front.\n\n## 0.6.1\n- The card is as wide as the glass, like Tessera's own graph.\n\n## 0.6.0\n- Card: the unit behind the average, the highest and the lowest. A tapped bar shows its price under its time slot in the middle, and the price of now stays at the left.\n\n## 0.5.4\n- Store picture (store.png) made on the bench.\n- Fixes found by the first real build: the GE-Spot tile is registered, no `strlcpy`, the Tomorrow label stays inside the card.\n- The name keeps the tile-label font, the price takes what is left.\n\n## 0.5.3\n- The graph shows from 2 wide and 2 high; smaller tiles show the price with the meter bar.\n\n## 0.5.2\n- Tile with a graph: the name at the left and the price of now at the right, like the small tile. A tapped bar shows its time in place of the name.\n\n## 0.5.1\n- Small tile like the meter bar tile: the name at the left, the price with its unit at the right.\n\n## 0.5.0\n- GE-Spot as a source: a third tile reads `today_interval_prices` and `tomorrow_interval_prices` (the `value` of each interval).\n\n## 0.4.1\n- Tapping a bar works on the full screen card too (needs API 0.12). High, low and average use the font of the history card.\n\n## 0.4.0\n- Tap a bar of the graph on a tile to see its price and time slot for a few seconds. Tap it again, or beside the bars, to open the card.\n\n## 0.3.1\n- Card header like the history card: price at the left, average in the middle, highest and lowest at the right with their time slot.\n\n## 0.3.0\n- Choose the unit: EUR/kWh or ct/kWh.\n- Time axis and price axis in the look of Tessera's history graph; the small tile is the meter's bar of cells.\n\n## 0.2.0\n- The graph shows quarter-hour prices when the sensor has them.\n- One tile per integration (Nord Pool, ENTSO-e), so the inspector lists only compatible sensors.\n\n## 0.1.0\n- First version: a tile with the electricity price now, a graph of today and tomorrow on bigger tiles and on a card.\n  Works with the Nord Pool and ENTSO-e sensors.\n"
+   },
+   "image": "store.png"
+  },
+  {
    "id": "film_stasera",
    "repo": "https://github.com/alexcoscia/tessera-film-stasera",
    "repo_id": 1414532919,
@@ -3099,6 +3422,1096 @@
    },
    "changelog": {
     "en": "# Changelog\n\n## 0.7.1 - 2026-10-19\n- A calmer store picture: the demo battery is full, so the red battery mark no longer shows on every tile, and the\n  Monstera is a little thirsty, so the top bar's loupe shows \"Water Monstera\" instead of a lone clock.\n- The README says which screens it was tried on: the Guition 4-inch square, where it works nicely.\n\n## 0.7.0 - 2026-10-17\n- The plant looks like its kind: a monstera with big split leaves, a snake plant with upright blades, a cactus with\n  its arms (and a flower when it does well), a spider plant's arching leaves, a pothos with vines over the rim, a\n  succulent's rosette, an orchid with its flower spike, a never never plant's fanned oval\n  leaves, an umbrella plant's crown of leaflets. A plant of Plant Monitor is drawn by its species; a new option,\n  **Plant drawn**, chooses it for any tile. Every other plant keeps the leafy look. Each kind droops, shivers and\n  celebrates like the leafy one.\n\n## 0.6.2 - 2026-10-14\n- The battery mark and the watering helper work with an entity id longer than 32 characters (most battery sensors\n  have one): the app shortens the names in its answers, and the tile looked for the whole id.\n\n## 0.6.1 - 2026-10-14\n- Fewer redraws: a wide tile no longer draws its \"3 days ago\" again every second, nor an open card its marker. Lighter\n  on an ESP32-S3, whose panel and drawing share the same PSRAM.\n\n## 0.6.0 - 2026-10-14\n- A new option, **Sensor battery**: the plant sensor's battery level. At 25 % or less a small red battery shows at the\n  plant's top left corner, on every tile size, until the battery is changed.\n\n## 0.5.0 - 2026-10-14\n- A wide tile (2x1, 2x2) shows the days since the last watering at its top right, with a water drop: \"3 days ago\".\n  Nothing shows there before the first watering. The 2x2 tile's \"Watered ...\" line gave way to it.\n\n## 0.4.0 - 2026-10-14\n- The plant's name stands first on the top line of a wide tile (2x1, 2x2), its mood after it. It is the tile's name\n  from the editor, or the plant's own name in Home Assistant while the tile keeps its default name.\n\n## 0.3.1 - 2026-10-14\n- A plant without a light sensor shows three readings instead of an empty light cell.\n\n## 0.3.0 - 2026-10-14\n- The sensor and range options are gone: choose the plant of Plant Monitor as the tile's entity, and its sensors and\n  good ranges come from the plant. Other entities use ranges that suit a leafy houseplant.\n- Sensors typed into the old options are no longer read.\n\n## 0.2.0 - 2026-10-14\n- A plant of Plant Monitor brings its own sensors and good ranges: no sensors or ranges to fill in.\n- The Plant tile can take a whole page (2x3 on the 4-inch square).\n\n## 0.1.0 - 2026-10-13\n- First version: a plant tile that shows how your houseplant feels, from 1x1 to a page of its own.\n- Soil moisture, temperature, air humidity and light, each green, amber or red against a range you set.\n- Tap the plant or **Watered** when you water it; tap a reading for its range, what to do and its last 24 hours.\n- Demo data until you choose a sensor, or with the setting **Plant demo data**.\n- Plants without a watering helper each keep their own watering date on the screen.\n- A Plant Monitor that sends temperatures in °F shows them right.\n- Needs Tessera's dev firmware (plugin API 0.10) until its next release.\n"
+   },
+   "image": "store.png"
+  },
+  {
+   "id": "photo_slideshow",
+   "repo": "https://github.com/djsmile-t/tessera-photo-slideshow",
+   "repo_id": 1422314338,
+   "path": ".",
+   "label": "community",
+   "status": "ok",
+   "release": {
+    "version": "0.5.0",
+    "sha": "36fed2b877ceb6d7f32138fda9e18ac3a1d3671c",
+    "date": "2026-10-18",
+    "tag": "v0.5.0"
+   },
+   "manifest": {
+    "id": "photo_slideshow",
+    "version": "0.5.0",
+    "api": "0.14",
+    "icon": "image",
+    "maintainer": "DJSmile-T",
+    "license": "MIT",
+    "stage": "beta",
+    "topics": [
+     "photos"
+    ],
+    "requires": {
+     "esphome": "2026.6.2"
+    },
+    "boards": "any",
+    "flash_kb": 6,
+    "permissions": {
+     "home_assistant_actions": [
+      "input_button.press"
+     ]
+    },
+    "tiles": [
+     {
+      "id": "slideshow",
+      "name": "tile_name",
+      "icon": "image",
+      "sizes": {
+       "min": "1x1",
+       "max": "9x9"
+      },
+      "memory": 1300,
+      "pictures": 1,
+      "domains": [
+       "sensor"
+      ],
+      "attributes": [
+       "caption",
+       "next_button",
+       "photo_name",
+       "place",
+       "photo_date"
+      ],
+      "has_attributes": [
+       "next_button"
+      ],
+      "example": "tile_example",
+      "preview": {
+       "title": "{caption}"
+      },
+      "options": [
+       {
+        "id": "fit",
+        "kind": "choice",
+        "label": "fit",
+        "hint": "fit_hint",
+        "default": "cover",
+        "choices": [
+         {
+          "value": "cover",
+          "label": "fit_cover"
+         },
+         {
+          "value": "contain",
+          "label": "fit_contain"
+         }
+        ]
+       },
+       {
+        "id": "caption",
+        "kind": "toggle",
+        "label": "caption",
+        "hint": "caption_hint",
+        "default": true
+       },
+       {
+        "id": "name",
+        "kind": "toggle",
+        "label": "photo_name",
+        "hint": "photo_name_hint",
+        "default": false
+       },
+       {
+        "id": "place",
+        "kind": "toggle",
+        "label": "place",
+        "hint": "place_hint",
+        "default": true
+       },
+       {
+        "id": "date",
+        "kind": "toggle",
+        "label": "photo_date",
+        "hint": "photo_date_hint",
+        "default": false
+       },
+       {
+        "id": "time",
+        "kind": "toggle",
+        "label": "clock",
+        "hint": "clock_hint",
+        "default": false
+       },
+       {
+        "id": "corner",
+        "kind": "choice",
+        "label": "corner",
+        "hint": "corner_hint",
+        "default": "bottom_left",
+        "choices": [
+         {
+          "value": "bottom_left",
+          "label": "bottom_left"
+         },
+         {
+          "value": "bottom_right",
+          "label": "bottom_right"
+         },
+         {
+          "value": "top_left",
+          "label": "top_left"
+         },
+         {
+          "value": "top_right",
+          "label": "top_right"
+         }
+        ]
+       },
+       {
+        "id": "time_corner",
+        "kind": "choice",
+        "label": "time_corner",
+        "hint": "time_corner_hint",
+        "default": "with_details",
+        "choices": [
+         {
+          "value": "with_details",
+          "label": "with_details"
+         },
+         {
+          "value": "top_left",
+          "label": "top_left"
+         },
+         {
+          "value": "top_right",
+          "label": "top_right"
+         },
+         {
+          "value": "bottom_left",
+          "label": "bottom_left"
+         },
+         {
+          "value": "bottom_right",
+          "label": "bottom_right"
+         }
+        ]
+       },
+       {
+        "id": "transition",
+        "kind": "choice",
+        "label": "transition",
+        "hint": "transition_hint",
+        "default": "left",
+        "choices": [
+         {
+          "value": "left",
+          "label": "transition_left"
+         },
+         {
+          "value": "right",
+          "label": "transition_right"
+         },
+         {
+          "value": "none",
+          "label": "transition_none"
+         }
+        ]
+       },
+       {
+        "id": "interval",
+        "kind": "number",
+        "label": "interval",
+        "hint": "interval_hint",
+        "default": 0,
+        "min": 0,
+        "max": 3600,
+        "step": 5,
+        "unit": "s"
+       }
+      ]
+     }
+    ],
+    "savers": [
+     {
+      "id": "caption",
+      "name": "saver_name",
+      "icon": "image",
+      "step": "photos",
+      "memory": 800,
+      "backdrop": true,
+      "example": "saver_example",
+      "options": [
+       {
+        "id": "corner",
+        "kind": "choice",
+        "label": "corner",
+        "hint": "corner_hint",
+        "default": "bottom_left",
+        "choices": [
+         {
+          "value": "bottom_left",
+          "label": "bottom_left"
+         },
+         {
+          "value": "bottom_right",
+          "label": "bottom_right"
+         },
+         {
+          "value": "top_left",
+          "label": "top_left"
+         },
+         {
+          "value": "top_right",
+          "label": "top_right"
+         }
+        ]
+       },
+       {
+        "id": "time_corner",
+        "kind": "choice",
+        "label": "time_corner",
+        "hint": "time_corner_hint",
+        "default": "with_details",
+        "choices": [
+         {
+          "value": "with_details",
+          "label": "with_details"
+         },
+         {
+          "value": "top_left",
+          "label": "top_left"
+         },
+         {
+          "value": "top_right",
+          "label": "top_right"
+         },
+         {
+          "value": "bottom_left",
+          "label": "bottom_left"
+         },
+         {
+          "value": "bottom_right",
+          "label": "bottom_right"
+         }
+        ]
+       },
+       {
+        "id": "title",
+        "kind": "text",
+        "label": "saver_title",
+        "hint": "saver_title_hint"
+       },
+       {
+        "id": "numbers",
+        "kind": "toggle",
+        "label": "numbers",
+        "hint": "numbers_hint",
+        "default": true
+       },
+       {
+        "id": "time",
+        "kind": "toggle",
+        "label": "saver_time",
+        "hint": "saver_time_hint",
+        "default": false
+       }
+      ]
+     },
+     {
+      "id": "slideshow",
+      "name": "saver_own_name",
+      "icon": "image",
+      "step": "own",
+      "memory": 1300,
+      "pictures": 1,
+      "domains": [
+       "sensor"
+      ],
+      "attributes": [
+       "caption",
+       "next_button",
+       "photo_name",
+       "place",
+       "photo_date"
+      ],
+      "when": "always",
+      "example": "saver_own_example",
+      "options": [
+       {
+        "id": "fit",
+        "kind": "choice",
+        "label": "fit",
+        "hint": "fit_hint",
+        "default": "cover",
+        "choices": [
+         {
+          "value": "cover",
+          "label": "fit_cover"
+         },
+         {
+          "value": "contain",
+          "label": "fit_contain"
+         }
+        ]
+       },
+       {
+        "id": "caption",
+        "kind": "toggle",
+        "label": "caption",
+        "hint": "caption_hint",
+        "default": true
+       },
+       {
+        "id": "name",
+        "kind": "toggle",
+        "label": "photo_name",
+        "hint": "photo_name_hint",
+        "default": false
+       },
+       {
+        "id": "place",
+        "kind": "toggle",
+        "label": "place",
+        "hint": "place_hint",
+        "default": true
+       },
+       {
+        "id": "date",
+        "kind": "toggle",
+        "label": "photo_date",
+        "hint": "photo_date_hint",
+        "default": false
+       },
+       {
+        "id": "time",
+        "kind": "toggle",
+        "label": "clock",
+        "hint": "clock_hint",
+        "default": true
+       },
+       {
+        "id": "corner",
+        "kind": "choice",
+        "label": "corner",
+        "hint": "corner_hint",
+        "default": "bottom_left",
+        "choices": [
+         {
+          "value": "bottom_left",
+          "label": "bottom_left"
+         },
+         {
+          "value": "bottom_right",
+          "label": "bottom_right"
+         },
+         {
+          "value": "top_left",
+          "label": "top_left"
+         },
+         {
+          "value": "top_right",
+          "label": "top_right"
+         }
+        ]
+       },
+       {
+        "id": "time_corner",
+        "kind": "choice",
+        "label": "time_corner",
+        "hint": "time_corner_hint",
+        "default": "with_details",
+        "choices": [
+         {
+          "value": "with_details",
+          "label": "with_details"
+         },
+         {
+          "value": "top_left",
+          "label": "top_left"
+         },
+         {
+          "value": "top_right",
+          "label": "top_right"
+         },
+         {
+          "value": "bottom_left",
+          "label": "bottom_left"
+         },
+         {
+          "value": "bottom_right",
+          "label": "bottom_right"
+         }
+        ]
+       },
+       {
+        "id": "interval",
+        "kind": "number",
+        "label": "interval",
+        "hint": "interval_hint",
+        "default": 0,
+        "min": 0,
+        "max": 3600,
+        "step": 5,
+        "unit": "s"
+       }
+      ]
+     }
+    ]
+   },
+   "translations": {
+    "en": {
+     "_meta": {
+      "name": "English"
+     },
+     "screen": {
+      "choose": "Choose the slideshow sensor",
+      "no_photo": "No photo yet",
+      "no_pictures": "This screen shows no photos"
+     },
+     "app": {
+      "name": "Photo slideshow",
+      "summary": "Your own photos large on the screen, a new one every few minutes; tap for the next.",
+      "tile_name": "Slideshow",
+      "tile_example": "Holiday photos, one after another",
+      "fit": "Fit",
+      "fit_hint": "Cover fills the tile and cuts away what is over; contain shows the whole photo.",
+      "fit_cover": "Cover",
+      "fit_contain": "Contain",
+      "caption": "Album and numbers",
+      "caption_hint": "The album and which photo of how many, such as Holiday · 12/148.",
+      "interval": "Seconds between photos",
+      "interval_hint": "0: Home Assistant sets the pace (its slideshow interval). Otherwise this screen asks for the next photo after so many seconds, at least 5; with several screens on one sensor, every screen gets the new photo.",
+      "saver_name": "Photo slideshow caption (Photos)",
+      "saver_example": "The album and which photo of how many, over the photo",
+      "corner": "Corner",
+      "corner_hint": "Where the caption stands on the glass.",
+      "bottom_left": "Bottom left",
+      "bottom_right": "Bottom right",
+      "top_left": "Top left",
+      "top_right": "Top right",
+      "saver_title": "Caption",
+      "saver_title_hint": "Words of your own, such as Holiday 2026. Leave it empty for the name of the album or folder.",
+      "numbers": "Photo numbers",
+      "numbers_hint": "Which photo of how many, such as 12/148.",
+      "saver_time": "Time",
+      "saver_time_hint": "The time above the caption.",
+      "photo_name": "Photo name",
+      "photo_name_hint": "The photo's own name: its file name, or its original name in Immich.",
+      "place": "Place",
+      "place_hint": "Where the photo was taken, such as Granada, Spain. From Immich; photos without a place show none.",
+      "photo_date": "Date taken",
+      "photo_date_hint": "The day the photo was taken. From Immich.",
+      "clock": "Time",
+      "clock_hint": "The time of day above the details.",
+      "saver_own_name": "Photo slideshow",
+      "saver_own_example": "The slideshow’s photo with its place, name and the time",
+      "transition": "Transition",
+      "transition_hint": "How the next photo comes: the old one slides away to the left or to the right, or the new one is there at once.",
+      "transition_left": "Slide to the left",
+      "transition_right": "Slide to the right",
+      "transition_none": "None",
+      "time_corner": "Time stands",
+      "time_corner_hint": "With the details, above them, or in a corner of its own.",
+      "with_details": "With the details"
+     }
+    },
+    "nl": {
+     "_meta": {
+      "name": "Nederlands"
+     },
+     "screen": {
+      "choose": "Kies de diavoorstelling-sensor",
+      "no_photo": "Nog geen foto",
+      "no_pictures": "Dit scherm toont geen foto's"
+     },
+     "app": {
+      "name": "Fotodiavoorstelling",
+      "summary": "Je eigen foto's groot op het scherm, om de paar minuten een nieuwe; tik voor de volgende.",
+      "tile_name": "Diavoorstelling",
+      "tile_example": "Vakantiefoto's, de een na de ander",
+      "fit": "Passen",
+      "fit_hint": "Vullen vult de tegel en snijdt af wat over is; passend toont de hele foto.",
+      "fit_cover": "Vullen",
+      "fit_contain": "Passend",
+      "caption": "Album en nummers",
+      "caption_hint": "Het album en welke foto van hoeveel, zoals Vakantie · 12/148.",
+      "interval": "Seconden tussen foto's",
+      "interval_hint": "0: Home Assistant bepaalt het tempo (de wisseltijd van de diavoorstelling). Anders vraagt dit scherm na zoveel seconden om de volgende foto, minstens 5; hangen er meer schermen aan één sensor, dan krijgen ze allemaal de nieuwe foto.",
+      "saver_name": "Onderschrift fotodiavoorstelling (Photos)",
+      "saver_example": "Het album en welke foto van hoeveel, over de foto",
+      "corner": "Hoek",
+      "corner_hint": "Waar het onderschrift op het glas staat.",
+      "bottom_left": "Linksonder",
+      "bottom_right": "Rechtsonder",
+      "top_left": "Linksboven",
+      "top_right": "Rechtsboven",
+      "saver_title": "Onderschrift",
+      "saver_title_hint": "Eigen woorden, zoals Vakantie 2026. Leeg laten voor de naam van het album of de map.",
+      "numbers": "Fotonummers",
+      "numbers_hint": "Welke foto van hoeveel, zoals 12/148.",
+      "saver_time": "Tijd",
+      "saver_time_hint": "De tijd boven het onderschrift.",
+      "photo_name": "Naam van de foto",
+      "photo_name_hint": "De eigen naam van de foto: de bestandsnaam, of de oorspronkelijke naam in Immich.",
+      "place": "Plaats",
+      "place_hint": "Waar de foto is gemaakt, zoals Granada, Spanje. Uit Immich; foto’s zonder plaats tonen er geen.",
+      "photo_date": "Opnamedatum",
+      "photo_date_hint": "De dag waarop de foto is gemaakt. Uit Immich.",
+      "clock": "Tijd",
+      "clock_hint": "De tijd boven de details.",
+      "saver_own_name": "Fotodiavoorstelling",
+      "saver_own_example": "De foto van de diavoorstelling met plaats, naam en de tijd",
+      "transition": "Overgang",
+      "transition_hint": "Hoe de volgende foto komt: de oude schuift weg naar links of naar rechts, of de nieuwe staat er meteen.",
+      "transition_left": "Schuiven naar links",
+      "transition_right": "Schuiven naar rechts",
+      "transition_none": "Geen",
+      "time_corner": "Plek van de tijd",
+      "time_corner_hint": "Bij de details, erboven, of in een eigen hoek.",
+      "with_details": "Bij de details"
+     }
+    }
+   },
+   "readme": {
+    "en": "# Photo slideshow\n\n![Photo slideshow on Tessera screens](store.png)\n\nYour own photos (a holiday, the kids, the dog) on a Tessera screen. Home Assistant picks a photo every few\nminutes; the tile shows it, slides it away when the next one comes, and a tap on the tile asks for the next photo at\nonce. The caption at the bottom says the album and which photo of how many (\"Holiday · 12/148\").\n\nThe photos come from a folder in Home Assistant, or from an album in [Immich](https://immich.app) that Home Assistant\ncopies into that folder, so the slideshow keeps going without internet. In standby, Tessera's own Photos screensaver\n(Tessera 0.4.89) shows the same folder, with this plugin's caption over it.\n\n[Nederlands](README.nl.md)\n\n## How it works\n\n```\n/config/www/slideshow/*.jpg ──► sensor.slideshow (Folder: the list of files)\n                                  │\n                                  ▼\n             sensor.slideshow_photo (a template sensor: picks one every few minutes)\n                                  │  state: /api/image_proxy/image.slideshow_photo?v=<photo>\n                                  ▼\n             image.slideshow_photo (an image entity: Home Assistant serves the photo)\n                                  │\n                                  ▼\n             Tessera's app fetches it and sends it to the screen ──► the Slideshow tile\n```\n\nThe photo goes through an image entity because Tessera's app runs as an add-on: it reaches Home Assistant through the\nSupervisor, which passes `/api/...` on but not the `www` folder (`/local/...`).\n\n## Set up\n\n1. Make the folder `/config/www/slideshow` (with the Samba or File editor add-on) and put photos in it: JPG or PNG,\n   each under 4 MB. Or fill it from Immich: see \"Photos from Immich\" below.\n2. Copy [`homeassistant/photo_slideshow.yaml`](homeassistant/photo_slideshow.yaml) to `/config/packages/`. In it,\n   change `http://homeassistant.local:8123` to the address of your Home Assistant as your browser reaches it.\n3. Add to `configuration.yaml`:\n   ```yaml\n   homeassistant:\n     packages: !include_dir_named packages\n     allowlist_external_dirs:\n       - /config/www/slideshow\n     media_dirs:\n       local: /media                  # Home Assistant's own media folder, which media_dirs would otherwise replace\n       slideshow: /config/www/slideshow\n   ```\n   `media_dirs` offers the folder as **My media → slideshow** too, for Tessera's Photos screensaver (below). Check the\n   configuration (Developer tools → YAML) and restart Home Assistant.\n4. Within a minute `sensor.slideshow_photo` has a state such as `/api/image_proxy/image.slideshow_photo?v=IMG_0412`,\n   and `image.slideshow_photo` shows that photo.\n5. Add this plugin to a screen in Tessera: Plugins → **Add with a link**, with this repository's address. The screen\n   builds once.\n6. In Layout, place the **Slideshow** tile from the library's Plugins group, as large as you like, and choose\n   `sensor.slideshow_photo` as its entity. The editor shows the caption only; the photo shows on the screen itself.\n7. In the inspector: **Fit** (cover fills the tile, contain shows the whole photo), what stands over the photo, each on\n   or off (**Album and numbers**, **Photo name**, **Place**, **Date taken**, **Time**) and the **Corner** it stands in,\n   the **Transition** (slide to the left, to the right, or none), and **Seconds between photos** (0 leaves the pace to Home Assistant; otherwise the screen asks for the\n   next photo every so many seconds, at least 5). The place and the date taken come from Immich (below); a photo of a\n   folder without Immich has its file name as its name, and no place or date.\n8. For a tap to give the next photo, allow the screen to perform Home Assistant actions: Settings → Devices &\n   services → ESPHome → the screen → Configure.\n\nThe order is `input_select.slideshow_order`: shuffled, by name, or by the date taken (from Immich). Without seconds on\nthe tile, the photo changes every `input_number.slideshow_interval` minutes; set that to 0 when the\ntile keeps the pace, so Home Assistant changes the photo only when a screen asks. The album in the caption is\n`input_text.slideshow_album`. Both are in Home Assistant: change them without building the screen. With several\nscreens on one sensor, every screen shows the same photo, and each screen that keeps a pace moves them all on.\n\n## Photos from Immich\n\n[`homeassistant/immich_sync.yaml`](homeassistant/immich_sync.yaml) lets Home Assistant copy one Immich album into\n`/config/www/slideshow` every 15 minutes, as Immich's own JPG previews (about 1440 pixels, so HEIC and the 4 MB limit\nno longer matter). Photos already there are not fetched again: in a holiday home or a caravan, the slideshow keeps\ngoing when the internet is away.\n\n1. In Immich, make an API key with only `asset.read` and `asset.view`.\n2. Put `immich_url`, `immich_search_url` and `immich_api_key` in `/config/secrets.yaml` (the comments at the top of the\n   file say how). Mind: that is Home Assistant's own `secrets.yaml`, not the ESPHome add-on's.\n3. Add the **Downloader** integration with the folder `/config/www`.\n4. Copy `immich_sync.yaml` to `/config/packages/` and restart Home Assistant.\n5. Fill in the album's id (the last part of its address in Immich) in `input_text.immich_album`. **Immich fetch now**\n   starts at once; after that it runs every 15 minutes, 40 photos a round.\n\nIt also keeps every photo's original name, the place it was taken (city and country) and the date in\n`sensor.slideshow_meta`, which the slideshow reads for the details over the photo. A photo you take out of the album\nstays in the folder until you delete it there; at most 1000 photos of an album are taken.\n\n## As Tessera's screensaver\n\nTwo ways, both with Tessera 0.4.89 (firmware 0.57.0, plugin API 0.14).\n\n**The slideshow's own step** (every detail): in Tessera, open the screen → Settings → **Screensaver**, turn on **Show in\nstandby** (and Auto standby), choose **Add from plugins → Photo slideshow**, pick `sensor.slideshow_photo` as its\nentity and drag it to the top. In standby it shows the slideshow's photo over the whole glass, with the same details as\nthe tile, each on or off (the time on by default), and **Seconds between photos** of its own.\n\n**Tessera's own Photos step**, with this plugin's caption: for any media folder, with Tessera's own pace, order and\nslow motion. It knows the album and which photo of how many, not a photo's name, place or date.\n\n1. In Tessera, open the screen → Settings → **Screensaver**, and turn on **Show in standby** (and Auto standby).\n2. Open the step **Photos**. Under **Folder**, choose **My media → slideshow** (the `media_dirs` of step 3 above).\n3. Under **Face**, choose **Photo slideshow caption (Photos)**. In its options: the **Corner**, a **Caption** of your own\n   (empty: the folder's name), **Photo numbers** (12/148) and the **Time**.\n4. Choose how long each photo stands, the order and the fit, and drag Photos to the top of the steps.\n\nThe Photos step walks the folder by itself, apart from the tile: it has its own photo and its own pace. Pick the folder,\nnot the Immich album, when the screen is somewhere without internet: the album is read live from Immich. The Waveshare\n4.3, 5 and 7-inch boards never go into standby, so they have no screensaver. Before 0.4.89, the screensaver could show\n`image.slideshow_photo` as a Camera instead.\n\n## Good to know\n\n- **4 MB at most per photo**, JPG or PNG. Photos of a phone are often larger, and iPhones store HEIC: make smaller\n  copies first, for instance with ImageMagick: `magick mogrify -format jpg -resize \"2000x2000>\" -quality 85 *.HEIC`.\n  The Immich sync does this for you.\n- A board without the memory for pictures (the CYD, the Waveshare 3.5-inch, the Hosyond 4-inch) says so instead.\n- The Folder sensor's list of files can be long: keep it out of the history with\n  `recorder: exclude: entities: [sensor.slideshow, sensor.slideshow_meta]` in `configuration.yaml` (the second one\n  holds the details of every photo of the Immich album).\n- The tile stays empty with only its caption: open `image.slideshow_photo` in Home Assistant. Without a photo there,\n  the address in the package (step 2) is not the one Home Assistant reaches itself on.\n\n## Privacy\n\nEverything stays in your home. Tessera's app fetches each photo from Home Assistant itself and sends it to the screen;\nthe screen never reaches the internet. Mind that Home Assistant serves the `www` folder (`/local/`) without a login to\nanyone who can reach your Home Assistant and knows a file's name. The Immich sync talks only to your own Immich, with a\nkey that can read your library but change nothing.\n",
+    "nl": "# Fotodiavoorstelling\n\n![Fotodiavoorstelling op Tessera-schermen](store.png)\n\nJe eigen foto's (een vakantie, de kinderen, de hond) op een Tessera-scherm. Home Assistant kiest om de paar\nminuten een foto; de tegel toont hem, schuift hem weg als de volgende komt, en een tik op de tegel vraagt meteen om de\nvolgende. Het onderschrift onderaan noemt het album en welke foto van hoeveel (\"Vakantie · 12/148\").\n\nDe foto's komen uit een map in Home Assistant, of uit een album in [Immich](https://immich.app) dat Home Assistant naar\ndie map kopieert, zodat de diavoorstelling ook zonder internet doorloopt. In standby toont Tessera's eigen\nPhotos-screensaver (Tessera 0.4.89) dezelfde map, met het onderschrift van deze plugin erover.\n\n[English](README.md)\n\n## Hoe het werkt\n\nHome Assistant kiest de foto met een template-sensor (`sensor.slideshow_photo`) en biedt hem aan als image-entiteit\n(`image.slideshow_photo`). Tessera's app haalt hem daar op en stuurt hem naar het scherm. Via een image-entiteit, omdat\nde app als add-on via de Supervisor met Home Assistant praat, en die geeft `/api/...` door maar de `www`-map\n(`/local/...`) niet.\n\n## Instellen\n\n1. Maak de map `/config/www/slideshow` (met de Samba- of File editor-add-on) en zet er foto's in: JPG of PNG, elk\n   kleiner dan 4 MB. Of vul hem vanuit Immich: zie \"Foto's uit Immich\" hieronder.\n2. Kopieer [`homeassistant/photo_slideshow.yaml`](homeassistant/photo_slideshow.yaml) naar `/config/packages/`. Verander\n   daarin `http://homeassistant.local:8123` in het adres van je Home Assistant zoals je browser hem bereikt.\n3. Zet in `configuration.yaml`:\n   ```yaml\n   homeassistant:\n     packages: !include_dir_named packages\n     allowlist_external_dirs:\n       - /config/www/slideshow\n     media_dirs:\n       local: /media                  # de eigen mediamap van Home Assistant, die media_dirs anders vervangt\n       slideshow: /config/www/slideshow\n   ```\n   Met `media_dirs` staat de map ook in **Mijn media → slideshow**, voor Tessera's Photos-screensaver (hieronder).\n   Controleer de configuratie (Ontwikkelaarshulpmiddelen → YAML) en herstart Home Assistant.\n4. Binnen een minuut staat `sensor.slideshow_photo` op iets als `/api/image_proxy/image.slideshow_photo?v=IMG_0412`,\n   en toont `image.slideshow_photo` die foto.\n5. Voeg de plugin in Tessera toe aan een scherm: Plugins → **Add with a link**, met het adres van deze repository. Het\n   scherm bouwt één keer.\n6. Zet in Layout de tegel **Diavoorstelling** uit de groep Plugins neer, zo groot als je wilt, en kies\n   `sensor.slideshow_photo` als entiteit. De editor toont alleen het onderschrift; de foto zie je op het scherm zelf.\n7. In de inspector: **Passen** (vullen of passend), wat er over de foto staat, elk aan of uit (**Album en nummers**,\n   **Naam van de foto**, **Plaats**, **Opnamedatum**, **Tijd**) en de **Hoek** waar het staat, de **Overgang**\n   (schuiven naar links, naar rechts, of geen), en\n   **Seconden tussen foto's** (0 laat het tempo aan Home Assistant; anders vraagt het scherm elke zoveel seconden om de\n   volgende foto, minstens 5). Plaats en opnamedatum komen uit Immich (hieronder); een foto uit een map zonder Immich\n   heeft zijn bestandsnaam als naam, en geen plaats of datum.\n8. Wil je dat een tik de volgende foto geeft, laat het scherm dan Home Assistant-acties uitvoeren: Instellingen →\n   Apparaten & diensten → ESPHome → het scherm → Configureren.\n\nDe volgorde is `input_select.slideshow_order`: willekeurig, op naam, of op opnamedatum (uit Immich). Zonder seconden op\nde tegel wisselt de foto elke `input_number.slideshow_interval` minuten; zet die op 0 als de tegel\nhet tempo bepaalt, dan wisselt Home Assistant alleen als een scherm erom vraagt. Het album in het onderschrift is\n`input_text.slideshow_album`. Beide staan in Home Assistant: aanpassen zonder het scherm te bouwen. Hangen er meer\nschermen aan één sensor, dan tonen ze allemaal dezelfde foto, en elk scherm met een eigen tempo zet ze allemaal door.\n\n## Foto's uit Immich\n\n[`homeassistant/immich_sync.yaml`](homeassistant/immich_sync.yaml) laat Home Assistant elk kwartier één Immich-album\nnaar `/config/www/slideshow` kopiëren, als Immich' eigen JPG-voorbeelden (ongeveer 1440 pixels, dus HEIC en de grens van\n4 MB doen er niet meer toe). Foto's die er al zijn worden niet opnieuw gehaald: in een vakantiehuis of caravan loopt de\ndiavoorstelling door als het internet wegvalt.\n\n1. Maak in Immich een API-sleutel met alleen `asset.read` en `asset.view`.\n2. Zet `immich_url`, `immich_search_url` en `immich_api_key` in `/config/secrets.yaml` (bovenaan het bestand staat hoe).\n   Let op: dat is de `secrets.yaml` van Home Assistant zelf, niet die van de ESPHome-add-on.\n3. Voeg de integratie **Downloader** toe met als map `/config/www`.\n4. Kopieer `immich_sync.yaml` naar `/config/packages/` en herstart Home Assistant.\n5. Vul het ID van het album (het laatste stuk van het adres in Immich) in bij `input_text.immich_album`. **Immich fetch\n   now** begint meteen; daarna elk kwartier, 40 foto's per ronde.\n\nOok bewaart hij van elke foto de oorspronkelijke naam, de plaats (stad en land) en de opnamedatum in\n`sensor.slideshow_meta`, waar de diavoorstelling de details over de foto uit leest. Een foto die je uit het album haalt,\nblijft in de map staan tot je hem daar weghaalt; van een album worden er maximaal 1000 genomen.\n\n## Als Tessera's screensaver\n\nTwee manieren, allebei met Tessera 0.4.89 (firmware 0.57.0, plugin-API 0.14).\n\n**De eigen stap van de diavoorstelling** (alle details): open in Tessera het scherm → Settings → **Screensaver**, zet\n**Show in standby** aan (en Auto standby), kies **Add from plugins → Fotodiavoorstelling**, kies `sensor.slideshow_photo`\nals entiteit en sleep hem bovenaan. In standby toont hij de foto van de diavoorstelling over het hele glas, met dezelfde\ndetails als de tegel, elk aan of uit (de tijd standaard aan), en een eigen **Seconden tussen foto's**.\n\n**Tessera's eigen Photos-stap**, met het onderschrift van deze plugin: voor elke mediamap, met Tessera's eigen tempo,\nvolgorde en langzaam bewegen. Die kent het album en welke foto van hoeveel, niet de naam, plaats of datum van een foto.\n\n1. Open in Tessera het scherm → Settings → **Screensaver** en zet **Show in standby** aan (en Auto standby).\n2. Open de stap **Photos**. Kies bij **Folder** **Mijn media → slideshow** (de `media_dirs` van stap 3 hierboven).\n3. Kies bij **Face** **Onderschrift fotodiavoorstelling (Photos)**. In de opties: de **Hoek**, een eigen **Onderschrift** (leeg:\n   de naam van de map), **Fotonummers** (12/148) en de **Tijd**.\n4. Kies hoe lang elke foto blijft staan, de volgorde en het passen, en sleep Photos bovenaan.\n\nDe Photos-stap loopt de map zelf door, los van de tegel: met een eigen foto en een eigen tempo. Kies de map, niet het\nImmich-album, als het scherm ergens zonder internet staat: het album wordt live uit Immich gelezen. De Waveshare-schermen\nvan 4,3, 5 en 7 inch gaan nooit in standby en hebben dus geen screensaver. Vóór 0.4.89 kon de screensaver\n`image.slideshow_photo` als Camera tonen.\n\n## Goed om te weten\n\n- **Maximaal 4 MB per foto**, JPG of PNG. Telefoonfoto's zijn vaak groter en iPhones bewaren HEIC: maak eerst kleinere\n  kopieën, bijvoorbeeld met ImageMagick: `magick mogrify -format jpg -resize \"2000x2000>\" -quality 85 *.HEIC`. De\n  Immich-sync doet dit voor je.\n- Een scherm zonder geheugen voor afbeeldingen (de CYD, de Waveshare 3,5 inch, de Hosyond 4 inch) zegt dat in plaats\n  van een foto te tonen.\n- De bestandslijst van de Folder-sensor kan lang worden: houd hem uit de geschiedenis met\n  `recorder: exclude: entities: [sensor.slideshow, sensor.slideshow_meta]` in `configuration.yaml` (de tweede bevat\n  de details van alle foto's van het Immich-album).\n- Blijft de tegel leeg met alleen het onderschrift: open `image.slideshow_photo` in Home Assistant. Staat daar geen\n  foto, dan is het adres in de package (stap 2) niet het adres waarop Home Assistant zichzelf bereikt.\n\n## Privacy\n\nAlles blijft thuis. Tessera's app haalt elke foto bij Home Assistant zelf op en stuurt hem naar het scherm; het scherm\nkomt nooit op internet. Let op: Home Assistant serveert de `www`-map (`/local/`) zonder inlog aan iedereen die je Home\nAssistant kan bereiken en een bestandsnaam kent. De Immich-sync praat alleen met je eigen Immich, met een sleutel die je\nbibliotheek kan lezen maar niets kan wijzigen.\n"
+   },
+   "changelog": {
+    "en": "# Changelog\n\n## 0.5.0\n- **Transition** on the tile: the old photo slides away to the left (as before) or to the right, or the next one is\n  there at once. It takes the place of the Slide toggle; a tile with Slide off gets None.\n- **Where the time stands**, on the tile, in the screensaver step and on the Photos face: with the details, or in a\n  corner of its own (Time stands).\n- **Order of the slideshow** in Home Assistant (`input_select.slideshow_order`): shuffled, by name, or by the date\n  taken (from Immich). Take the new homeassistant/photo_slideshow.yaml along. The caption's numbers follow the order.\n- Known: the screensaver step of its own shows no photo with Tessera 0.4.89 (the app does not tell the screen the\n  step's entity, so it refuses the step's picture); its details do show. Until Tessera fixes it, use Tessera's own\n  Photos step with this plugin's caption face.\n\n## 0.4.0\n- **Choose what stands over the photo**, on the tile and in the screensaver, each on or off: the album and numbers\n  (Holiday · 12/148), the photo's name, the place it was taken (Granada, Spain), the date it was taken, and the time.\n  And the corner the details stand in.\n- **A screensaver step of its own: Photo slideshow.** The slideshow's own photo over the whole glass in standby, with\n  the same details as the tile, and seconds between photos of its own. Add it under Screensaver → Add from plugins.\n  Tessera's Photos step and its caption face stay too, for any media folder.\n- The name, place and date come from Immich: take the new homeassistant/immich_sync.yaml and photo_slideshow.yaml\n  along. Photos from a folder without Immich show their file name.\n\n## 0.3.0\n- Needs Tessera 0.4.89 (firmware 0.57.0, plugin API 0.14).\n- **A face for Tessera's own Photos screensaver.** Tessera now shows the photos of a media folder in standby by\n  itself. Pick **Photo slideshow caption** under Face in the drawer of Photos, and the screensaver shows the same\n  caption as the tile over its photo: the album (or words of your own) and which photo of how many, in a corner you\n  choose, with the time if you like.\n- The Home Assistant package offers the slideshow folder as a media folder too (`media_dirs`), so the Photos step can\n  show the same photos without internet. The image entity is no longer needed for the screensaver.\n\n## 0.2.0\n- **Seconds between photos** on the tile: the screen asks for the next photo itself, every so many seconds (at least\n  5). 0 keeps the pace of Home Assistant's slideshow interval, as before.\n- The Home Assistant package takes an interval of 0 minutes: then Home Assistant changes the photo only when a screen\n  or a tap asks. Take the new homeassistant/photo_slideshow.yaml along to use it.\n\n## 0.1.1\n- Photos now come through an image entity of Home Assistant (/api/image_proxy/): the Tessera add-on could not fetch\n  /local/ through the Supervisor, so the tile stayed empty. Take the new homeassistant/photo_slideshow.yaml along.\n\n## 0.1.0\n- First version: your own photos from Home Assistant on a tile, a new one every few minutes, a tap for the next. Set\n  up the Home Assistant package of the README first.\n"
+   },
+   "image": "store.png"
+  },
+  {
+   "id": "sweden_public_transport",
+   "repo": "https://github.com/exhalesthlm/tessera-plugin-sweden-public-transport",
+   "repo_id": 1423224231,
+   "path": ".",
+   "label": "community",
+   "status": "ok",
+   "release": {
+    "version": "0.2.1",
+    "sha": "ab267309851cd488d7605d71f7b48265375f0871",
+    "date": "2026-10-18",
+    "tag": "v0.2.1"
+   },
+   "manifest": {
+    "id": "sweden_public_transport",
+    "version": "0.2.1",
+    "api": "0.12",
+    "icon": "bus",
+    "maintainer": "ExhaleSthlm",
+    "license": "MIT",
+    "stage": "beta",
+    "topics": [
+     "travel"
+    ],
+    "requires": {
+     "esphome": "2026.6.2"
+    },
+    "boards": "any",
+    "flash_kb": 16,
+    "permissions": {
+     "network": [
+      "realtime-api.trafiklab.se"
+     ]
+    },
+    "attributes": [
+     "cloud",
+     "ai-developed"
+    ],
+    "privacy": "https://github.com/ExhaleSthlm/tessera-plugin-sweden-public-transport#privacy",
+    "inputs": [
+     {
+      "id": "api_key",
+      "kind": "secret",
+      "scope": "all",
+      "label": "api_key",
+      "hint": "api_key_hint"
+     }
+    ],
+    "tiles": [
+     {
+      "id": "next",
+      "name": "tile_name",
+      "icon": "bus",
+      "sizes": {
+       "min": "1x1",
+       "max": "3x2"
+      },
+      "memory": 3200,
+      "data": "departures",
+      "example": "tile_example",
+      "preview": {
+       "badge": "{line}",
+       "title": "{to}",
+       "countdown": "at"
+      },
+      "options": [
+       {
+        "id": "stop",
+        "kind": "choice",
+        "label": "stop",
+        "hint": "stop_hint",
+        "options_from": "stops",
+        "search": true
+       },
+       {
+        "id": "selected_lines",
+        "kind": "choice",
+        "label": "selected_lines",
+        "hint": "selected_lines_hint",
+        "options_from": "lines",
+        "multiple": 8
+       },
+       {
+        "id": "mode",
+        "kind": "choice",
+        "label": "mode",
+        "default": "",
+        "choices": [
+         {
+          "value": "METRO",
+          "label": "metro"
+         },
+         {
+          "value": "BUS",
+          "label": "bus"
+         },
+         {
+          "value": "TRAIN",
+          "label": "train"
+         },
+         {
+          "value": "TRAM",
+          "label": "tram"
+         },
+         {
+          "value": "BOAT",
+          "label": "ferry"
+         }
+        ]
+       },
+       {
+        "id": "direction",
+        "kind": "text",
+        "label": "direction",
+        "hint": "direction_hint"
+       },
+       {
+        "id": "walk",
+        "kind": "number",
+        "min": 0,
+        "max": 30,
+        "step": 1,
+        "unit": "min",
+        "default": 0,
+        "label": "walk",
+        "hint": "walk_hint"
+       },
+       {
+        "id": "late",
+        "kind": "toggle",
+        "default": true,
+        "label": "late",
+        "hint": "late_hint"
+       }
+      ]
+     }
+    ],
+    "fetch": [
+     {
+      "id": "departures",
+      "each": "selected_lines",
+      "url": "https://realtime-api.trafiklab.se/v1/departures/{stop}?key={api_key}",
+      "every": "60s",
+      "map": {
+       "items": "$.departures[*]",
+       "fields": {
+        "line": "route.designation",
+        "to": "route.direction",
+        "at": {
+         "path": "realtime",
+         "as": "epoch",
+         "tz": "Europe/Stockholm"
+        },
+        "plan": {
+         "path": "scheduled",
+         "as": "epoch",
+         "tz": "Europe/Stockholm"
+        },
+        "rt": {
+         "path": "is_realtime",
+         "as": "number"
+        },
+        "cancel": {
+         "path": "canceled",
+         "as": "number"
+        },
+        "mode": "route.transport_mode"
+       },
+       "where": {
+        "line": "{selected_lines}",
+        "to": "{direction}",
+        "mode": "{mode}"
+       },
+       "skip": {
+        "cancel": [
+         1
+        ]
+       },
+       "sort": "at",
+       "limit": 12
+      }
+     },
+     {
+      "id": "stops",
+      "url": "https://realtime-api.trafiklab.se/v1/stops/name/{search}?key={api_key}",
+      "every": "1d",
+      "map": {
+       "items": "$.stop_groups[*]",
+       "value": "id",
+       "label": [
+        "name",
+        "id"
+       ]
+      }
+     },
+     {
+      "id": "lines",
+      "url": "https://realtime-api.trafiklab.se/v1/departures/{stop}?key={api_key}",
+      "every": "60s",
+      "map": {
+       "items": "$.departures[*]",
+       "value": "route.designation",
+       "label": "route.designation"
+      }
+     }
+    ]
+   },
+   "translations": {
+    "en": {
+     "_meta": {
+      "name": "English"
+     },
+     "screen": {
+      "now": "now",
+      "minutes": "{n} min",
+      "then": "then {list}",
+      "none": "No departures",
+      "waiting": "Loading",
+      "choose_stop": "Set stop",
+      "failed": "Unavailable",
+      "old": "Old data",
+      "late": "+{n}",
+      "attribution": "Trafiklab.se",
+      "scheduled": "TT",
+      "choose_lines": "Choose lines"
+     },
+     "app": {
+      "name": "Public transport (SE)",
+      "summary": "Swedish departures with destinations, realtime updates and walking time, powered by Trafiklab.",
+      "tile_name": "Departures",
+      "tile_example": "Next departure",
+      "stop": "Stop",
+      "stop_hint": "Type at least two characters and select a stop. Remove the selection with × to change it.",
+      "walk": "Walk to the stop",
+      "walk_hint": "Skip departures leaving before you can walk there. The countdown still shows departure time.",
+      "late": "Show delays",
+      "late_hint": "A departure that runs a minute or more late gets \"+2\" behind where it goes.",
+      "api_key": "Trafiklab API key",
+      "api_key_hint": "A key for Trafiklab Realtime APIs. Kept in Tessera, never on the screen.",
+      "mode": "Transport mode",
+      "metro": "Metro",
+      "bus": "Bus",
+      "train": "Train",
+      "tram": "Tram",
+      "ferry": "Ferry",
+      "direction": "Destination filter",
+      "direction_hint": "Exact destination text; leave empty for both directions.",
+      "selected_lines": "Lines",
+      "selected_lines_hint": "Choose 1–8 lines; remove with ×. Empty selection shows Choose lines. Only lines departing in the next hour are listed. Reselect after changing stops."
+     }
+    },
+    "sv": {
+     "_meta": {
+      "name": "Svenska"
+     },
+     "screen": {
+      "now": "nu",
+      "minutes": "{n} min",
+      "then": "sedan {list}",
+      "none": "Inga avgångar",
+      "waiting": "Hämtar",
+      "choose_stop": "Välj hållplats",
+      "failed": "Saknar tider",
+      "old": "Gamla tider",
+      "late": "+{n}",
+      "attribution": "Trafiklab.se",
+      "scheduled": "TT",
+      "choose_lines": "Välj linjer"
+     },
+     "app": {
+      "name": "Public transport (SE)",
+      "summary": "Svenska avgångar med destination, realtid och gångtid, med data från Trafiklab.",
+      "tile_name": "Avgångar",
+      "tile_example": "Nästa avgång",
+      "stop": "Hållplats",
+      "stop_hint": "Sök med minst två tecken och välj hållplats. Ta bort valet med × för att byta.",
+      "mode": "Trafikslag",
+      "metro": "Tunnelbana",
+      "bus": "Buss",
+      "train": "Tåg",
+      "tram": "Spårvagn",
+      "ferry": "Färja",
+      "direction": "Destinationsfilter",
+      "direction_hint": "Exakt destinationstext. Lämna tomt för båda riktningarna.",
+      "walk": "Gångtid till hållplatsen",
+      "walk_hint": "Avgångar som du inte hinner till hoppas över. Nedräkningen visar fortfarande avgångstiden.",
+      "late": "Visa försening",
+      "late_hint": "Försenade avgångar markeras med exempelvis +2 minuter.",
+      "api_key": "Trafiklab API-nyckel",
+      "api_key_hint": "Nyckel för Trafiklab Realtime APIs. Sparas i Tessera, aldrig på skärmen.",
+      "selected_lines": "Linjer",
+      "selected_lines_hint": "Välj 1–8 linjer. Ta bort med ×. Tomt val visar Välj linjer. Endast linjer med avgångar kommande timmen listas. Välj om efter hållplatsbyte."
+     }
+    }
+   },
+   "readme": {
+    "en": "# Public transport (SE) for Tessera\n\n![Public transport (SE) showing Swedish departures on Tessera screens](store.png)\n\n[Svenska](README.sv.md) · [Changelog](CHANGELOG.md) · [Validation](VALIDATION.md)\n\nSwedish public transport departures on Tessera ESP32 screens, using Trafiklab Timetables.\nInstall once and add multiple tiles, each with its own stop, one to eight selected lines, transport mode and optional destination.\nThese instructions describe plugin **0.2.1**. Swedish and English translations are included. This beta requires Tessera plugin API 0.12 (Tessera 0.4.89 / firmware 0.57.0 or later compatible versions).\n\n## Set up\n\n1. Register an account at https://trafiklab.se.\n2. Create a key for **Trafiklab Realtime APIs** at https://developer.trafiklab.se/. A ResRobot key is a different product.\n3. In Tessera, open Plugins, choose **Add with a link**, and enter https://github.com/ExhaleSthlm/tessera-plugin-sweden-public-transport.\n4. Add the plugin to the intended screen, then build and install its firmware. Adding the plugin to the list alone does not install its code on the screen.\n5. Enter the API key in the plugin's secret **Trafiklab API key** input. Never put it in YAML or Git.\n6. Add a **Departures** tile in Layout. Open **Stop**, type at least two characters, and select a result. Its name stays visible after searching.\n7. Under **Lines**, add one to eight lines from that stop. Remove a selection with ×. Select the transport mode and, optionally, an exact destination.\n8. Save and send the layout. Wide tiles show a departure list, including the Guition 1×3 grid; narrow tiles emphasize the next departure.\n\nThe stop picker uses [Trafiklab Stop Lookup](https://www.trafiklab.se/api/our-apis/trafiklab-realtime-apis/stop-lookup/). It searches after a short pause while typing; Tessera caches searched choices for ten minutes. At most 48 results are offered, so use a specific name.\nLine choices include each line once across both directions, using departures in the next 60 minutes; a line without departures in that window may be absent. Choices include all modes at the stop; the separate mode filter controls displayed departures. Destination text must be an exact, case-sensitive match.\n\nAt least one line is required. Removing all line selections shows **Choose lines** and stops that tile from requesting scheduled departure updates after saving the layout. Other tiles using the same stop can still keep its shared fetch active. An open editor can still request line choices. After changing stops, remove the old line selections and choose lines for the new stop; Tessera does not reset dependent selections automatically.\n\n| Tile | Stop ID | Mode | Lines | Destination |\n| --- | --- | --- | --- | --- |\n| Blåsut metro | `740021703` | Metro | `18` | empty |\n| Dalens sjukhus buses | `740065542` | Bus | `163`, `816` | empty |\n\nThe IDs above are for reference; the search picker stores them for you. Both examples show both directions. Blåsut's stop group also includes buses, so select Metro explicitly.\n\n## Upgrading from 0.1.x or 0.2.0\n\nUpdate Tessera to 0.4.89 or a later compatible version first, then update this plugin to 0.2.1 in Tessera’s Plugins view. When upgrading from 0.1.x, select the stop again in the new searchable picker. When upgrading from either 0.1.x or 0.2.0, select the lines again in the new **Lines** control; the previous two scalar line fields cannot be converted automatically by the plugin. Save/send the layout and rebuild/install the screen firmware. Existing walking time, mode, destination and delay settings keep their option IDs.\n\n## Reading the tile\n\n- Destination identifies the direction. The next departure counts down; larger tiles list more departures.\n- `+2` means two minutes late. `TT` means timetable only, without a realtime prediction.\n- Walking time hides departures you cannot reach. The countdown still shows time until departure, not time to leave home.\n- Canceled departures are omitted. Empty results say “No departures”; this covers the API's next 60 minutes only.\n- “Old data” means the last successful response is being shown after a fetch failure. The source credit alternates this warning and the data attribution.\n- The compact source credit shows Trafiklab.se in the smallest theme text size. It sits below the departures, keeping all departure times aligned. Row spacing tightens where needed to fit three departures plus the credit on Guition 1×3. The editor's simplified preview does not reproduce every screen annotation.\n\n## Requests and limits\n\nTessera fetches every 60 seconds for each distinct stop URL and shares its response between tiles of this plugin.\nTwo stops continuously active use an estimated 89,280 departure requests in 31 days, before editor lookups and retries. Searched stop choices are cached for ten minutes by Tessera. Line choices use the same departure URL and 60-second cache as the tile; opening them can fetch data when that cache is cold. As checked on 2026-10-18, [Realtime Bronze](https://www.trafiklab.se/api/our-apis/trafiklab-realtime-apis/#api-key-levels) allows 100,000 requests/month and 25/minute, which accommodates these two stops with some margin. More stops or other users of the same key need their own budget. This is an estimate, not an enforced account-wide cap.\n\nThe interval is currently a manifest constant. Tessera 0.4.89 has no plugin setting for runtime fetch intervals, polling schedules, or computed editor fields. See [ROADMAP.md](ROADMAP.md) for these requested enhancements.\nEach selected line filters the shared response before the results are merged, sorted and limited. The plugin sends at most the next 12 filtered departures, bounded further by Tessera's message budget; very frequent services or long walking times can exhaust this window before the next refresh.\nThe response must fit Tessera's 64 KiB fetch limit. Busy hubs may exceed it; filtering happens after download and cannot reduce the HTTP response size.\nThe two example stops returned approximately 17 KB and 9 KB during initial verification, not a guarantee for every time of day.\n\nTrafiklab returns local timestamps without UTC offsets. They are interpreted in Europe/Stockholm. During the repeated hour when daylight saving ends, an offset-free time can be ambiguous.\nRealtime availability varies by operator. Missing realtime is labeled TT, not represented as a live prediction.\n\n## Privacy\n\nThe Tessera app in Home Assistant sends stop-name search text, selected stop IDs and the API key over HTTPS to `realtime-api.trafiklab.se`. The key is sent as a query parameter using Tessera’s secret substitution. Line, mode and destination filters are applied in Tessera after the response is downloaded.\nTrafiklab sees those values and your public IP address. The key is a Tessera secret input and is never sent to the display or stored in this repository.\nThe plugin does not read Home Assistant entities or call Home Assistant actions.\n\n## Data and license\n\nData from [Trafiklab.se](https://www.trafiklab.se/api/our-apis/trafiklab-realtime-apis/timetables/), under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The plugin filters and reformats the data into countdowns.\nTrafiklab requires source attribution on screens and website widgets displaying this data; see the [Timetables attribution requirement](https://www.trafiklab.se/api/our-apis/trafiklab-realtime-apis/timetables/#license). This is why the tile retains a visible “Trafiklab.se” credit. The exact placement is our layout choice, not a requirement: the compact credit sits below the departure rows. Keep attribution when adapting the display. This README links the data source and license and explains the transformation above.\n\nPlugin code is MIT licensed. The tile adapts Max Gramser's MIT-licensed `ov_departures`; its copyright and license are preserved in NOTICE.\n\n## Development\n\nUse Python 3.13, a C++ compiler and SDL2 (see the upstream preview setup instructions). From this plugin's repository, create fresh sibling checkouts matching CI and follow [AGENTS.md](AGENTS.md):\n\n```sh\ngit clone https://github.com/MaxGramser/tessera-plugins ../tessera-plugins\ngit -C ../tessera-plugins checkout a625674da86a6f2ba7577626407c26224ca9378c\ngit clone https://github.com/MaxGramser/homeassistant_espscreen ../homeassistant_espscreen\ngit -C ../homeassistant_espscreen checkout 9f6ab3c68d420f454fb905466696063b1d789049\n\nexport TESSERA_TREE=\"$(cd ../homeassistant_espscreen && pwd)\"\nexport TESSERA_MANIFEST=\"$TESSERA_TREE/screen_manager/app/plugin_manifest.py\"\nexport TESSERA_BOARDS=\"$TESSERA_TREE/screen_manager/app/boards.json\"\npython3 ../tessera-plugins/tools/preview.py --setup\nexport TESSERA_PYTHON=\"../tessera-plugins/tools/.cache/preview-venv/bin/python\"\n\"$TESSERA_PYTHON\" ../tessera-plugins/tools/check.py .\n\"$TESSERA_PYTHON\" -m unittest discover -s tests -v\npython3 ../tessera-plugins/tools/preview.py . --strict --grid 1x3\n\"$TESSERA_PYTHON\" ../tessera-plugins/tools/store_image.py . --from .preview\n```\n\nIf you already have these checkouts, use separate clean checkouts rather than replacing local work. The preview setup installs the tested ESPHome toolchain and test dependencies in its virtual environment. The core commit is the `screens-v0.4.89` release; the plugin requires API 0.12, while that core provides API 0.14.\nNo API key is needed for the deterministic tests and previews. Never commit credentials or raw authenticated request URLs.\nPhysical hardware acceptance is separate from simulator checks; see [VALIDATION.md](VALIDATION.md).\n\n## GitHub Actions\n\nThe `Plugin CI` workflow runs on pushes, pull requests and manually from the Actions tab:\n\n- Validates the API 0.12 manifest with Tessera 0.4.89’s API 0.14 validator and runs the deterministic mapper tests.\n- Compiles the plugin C++ into the Guition host simulator and runs strict layout checks, including the 1×3 grid.\n- Uploads preview images, logs and the report as the `guition-preview` artifact for seven days, including on a failed preview when files are available.\n\nNo Trafiklab API key or Home Assistant credentials are needed; tests use fixtures and make no Trafiklab calls.\nThe workflow has read-only repository permissions and does not publish releases or install firmware.\nTessera and its plugin tools are pinned to the commits recorded in the workflow; update them deliberately when changing the supported API.\nA simulator build runs on Linux and is not an ESP32 firmware cross-build. Continue building the real Guition firmware in Tessera and testing it on the device.\nCheck the result for the relevant commit under [GitHub Actions](https://github.com/ExhaleSthlm/tessera-plugin-sweden-public-transport/actions); local validation is not evidence of a successful hosted run.\n",
+    "sv": "# Public transport (SE) för Tessera\n\n![Public transport (SE) med svenska avgångar på Tessera-skärmar](store.png)\n\n[English](README.md) · [Ändringslogg](CHANGELOG.md) · [Testresultat](VALIDATION.md)\n\nAvgångar från Trafiklab Timetables på din ESP32-skärm. Installera pluginen en gång och lägg till flera rutor med egna hållplatser och filter.\nAnvisningarna gäller pluginversion **0.2.1**. Kräver plugin-API 0.12: Tessera 0.4.89 och skärmfirmware 0.57.0 eller senare kompatibel version.\n\n## Installation\n\n1. Registrera ett konto på https://trafiklab.se.\n2. Skaffa en API-nyckel för **Trafiklab Realtime APIs** på https://developer.trafiklab.se/. En ResRobot-nyckel gäller en annan produkt.\n3. Öppna Plugins i Tessera och lägg till länken https://github.com/ExhaleSthlm/tessera-plugin-sweden-public-transport.\n4. Lägg till pluginen på skärmen, bygg och installera firmware. Att enbart lägga till pluginen i listan installerar inte dess kod på skärmen.\n5. Ange API-nyckeln i pluginens hemliga inställning. Den ska inte ligga i Git eller YAML.\n6. Lägg till två **Avgångar**-rutor. Öppna **Hållplats**, skriv minst två tecken och välj en träff direkt i sökningen. Namnet sparas med valet.\n7. Under **Linjer**, lägg till 1–8 linjer från hållplatsen. Ta bort en vald linje med ×. Välj trafikslag enligt tabellen.\n8. Spara och skicka layouten. Bredare rutor visar en lista, även Guition med 1×3-raster.\n\n| Inställning | Blåsut tunnelbana | Dalens sjukhus buss |\n| --- | --- | --- |\n| Hållplats-ID | `740021703` | `740065542` |\n| Trafikslag | Tunnelbana | Buss |\n| Linjer | `18` | `163`, `816` |\n| Destinationsfilter | Tomt | Tomt |\n\nHållplats-ID:n i tabellen är referenser; sökväljaren sparar dem åt dig.\n\nMinst en linje måste väljas. Tar du bort alla visas **Välj linjer**, och rutan slutar begära schemalagda avgångsuppdateringar när layouten sparats. Andra rutor kan fortfarande hålla hämtningen för samma hållplats aktiv. En öppen editor kan fortfarande hämta linjealternativ. Linjerna delar samma avgångs-URL och 60-sekunderscache som hållplatsens övriga rutor.\n\nVarje linje visas en gång i väljaren, oavsett riktning. Alternativen bygger på kommande 60 minuters avgångar och kan därför sakna linjer som inte går då. Alla trafikslag på hållplatsen ingår i linjevalen; trafikslagsfiltret styr avgångarna på skärmen. Vid byte av hållplats behöver du ta bort gamla linjeval och välja nya själv.\n\nTomt destinationsfilter visar båda riktningarna. Destinationen visas på varje rad. Blåsuts hållplatsområde innehåller även bussar, så välj Tunnelbana där.\n\n## Uppgradering från 0.1.x eller 0.2.0\n\nUppdatera först Tessera till 0.4.89 eller en senare kompatibel version och uppdatera sedan denna plugin till 0.2.1 i Tesseras pluginvy. Från 0.1.x behöver du välja hållplats igen i den nya sökväljaren. Från både 0.1.x och 0.2.0 behöver du välja linjer igen under **Linjer**; pluginen kan inte automatiskt konvertera de gamla två linjefälten. Spara/skicka layouten och bygg om/installera skärmens firmware. Gångtid, trafikslag, destinationsfilter och förseningsinställning behåller sina fält-ID:n.\n\n## På skärmen\n\n- `+2` betyder två minuters försening.\n- `TT` betyder tidtabellstid utan realtidsprognos.\n- Gångtiden filtrerar bort avgångar du inte hinner till; nedräkningen visar tiden till avgång, inte tiden tills du behöver gå.\n- Inställda avgångar visas inte. ”Inga avgångar” betyder att inga avgångar matchar valen och gångtiden i API:ets fönster på kommande 60 minuter.\n- Källhänvisningen Trafiklab.se använder temats minsta textstorlek och ligger separat under avgångarna, så att alla tider ligger på samma lodräta linje.\n- Vid hämtningsfel visas tidigare data med varningen ”Gamla tider”, växelvis med källhänvisningen Trafiklab.se.\n\nVarje hållplats hämtas var 60:e sekund och delar svar mellan rutorna. Två hållplatser dygnet runt motsvarar cirka 89 280 avgångsanrop på 31 dagar, plus sökningar, omstarter och eventuella återförsök. Sökningen startar efter en kort skrivpaus och Tessera cachar sökträffar i tio minuter. [Realtime Brons](https://www.trafiklab.se/api/our-apis/trafiklab-realtime-apis/#api-key-levels) har enligt kontroll 2026-10-18 gränserna 100 000 anrop/månad och 25/minut; standarden ryms inom den kvoten för två hållplatser. Fler hållplatser eller andra appar med samma nyckel behöver räknas med.\n\nIntervallet är tills vidare fast i manifestet. Inställbart intervall, dygnsschema och beräknad förbrukning i editorn kräver stöd utanför pluginens nuvarande manifest. Se [ROADMAP.md](ROADMAP.md).\n\nPluginen är en beta. Se [engelska README](README.md#requests-and-limits) för tekniska begränsningar och [VALIDATION.md](VALIDATION.md) för genomförda tester.\n\n## Integritet\n\nTessera i Home Assistant skickar sökord, hållplats-ID och API-nyckel via HTTPS till Trafiklab. Nyckeln skickas som en query-parameter med Tesseras hantering av hemliga värden. Trafiklab ser även din publika IP-adress. Nyckeln skickas inte till skärmen och sparas inte i detta repo. Linje-, trafikslags- och destinationsfilter tillämpas i Tessera efter hämtning. Pluginen läser inga Home Assistant-entiteter och anropar inga HA-tjänster.\n\n## Varför visas Trafiklab.se?\n\nTrafiklab kräver källhänvisning på skärmar och webbwidgets som visar deras data. Därför behåller pluginen texten **Trafiklab.se** på skärmen. Se [Trafiklabs villkor för Timetables](https://www.trafiklab.se/api/our-apis/trafiklab-realtime-apis/timetables/#license). Data omfattas av [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); pluginen filtrerar och omformaterar uppgifterna till avgångar med nedräkning.\n\nKravet innebär inte att en hel rad måste reserveras för texten. Texten använder temats minsta textstorlek och ligger separat under avgångarna, så att alla tider ligger på samma lodräta linje. Behåll källhänvisningen om du anpassar layouten. Pluginens egen kod har MIT-licens; datans licens är separat.\n\n## Automatiska kontroller med GitHub Actions\n\nArbetsflödet **Plugin CI** körs vid push och pull request och kan startas manuellt under **Actions**:\n\n- Validerar pluginens API 0.12-manifest med validatorn i Tessera 0.4.89 (API 0.14) och kör testerna med exempeldata.\n- Kompilerar C++-koden för Guition-simulatorn och kontrollerar layouten, inklusive rastret 1×3.\n- Sparar bilder, loggar och rapport i **guition-preview**, som kan laddas ned från körningen i sju dagar.\n\nIngen API-nyckel behövs och inga Trafiklab-anrop görs. Arbetsflödet publicerar eller installerar ingenting. Simulatorbygget ersätter inte ett riktigt ESP32-bygge i Tessera eller test på din skärm. Kontrollera resultatet för aktuell commit under [GitHub Actions](https://github.com/ExhaleSthlm/tessera-plugin-sweden-public-transport/actions); lokala tester bekräftar inte att en GitHub-körning lyckats.\n"
+   },
+   "changelog": {
+    "en": "# Changelog\n\n## 0.2.1\n- Replace the two line dropdowns with one removable selection of up to eight lines.\n- At least one line is required; removing all selections shows Choose lines and stops departure polling for that tile.\n- Filter each selected line before merging, sorting and limiting departures; responses share the same stop cache.\n- Upgrade: select lines again (18 for Blåsut, 163 and 816 for Dalens sjukhus), save the layout, and rebuild/install firmware. Reselect the stop too when upgrading from 0.1.x.\n\n## 0.2.0\n- Requires Tessera 0.4.89 and firmware 0.57.0 (plugin API 0.12).\n- Search for and select a stop in one control; the selected name stays visible.\n- Upgrade from 0.1.x: reselect the stop in existing tiles, then rebuild and install firmware. The old scalar stop value cannot be converted automatically by the plugin. The two line fields remain unchanged in 0.2.0; their replacement follows in 0.2.1.\n\n## 0.1.3\n- Keep departure times aligned with a separate source credit below compact rows.\n- Upgrade GitHub Actions to Node.js 24 versions.\n- Rebuild and install the screen firmware for the layout update.\n\n## 0.1.2\n- Rename the plugin to Public transport (SE) in the plugin picker.\n- Tessera 0.4.88 cannot clear a dynamic choice: create a new tile to return to all lines after selecting a filter.\n- Select both line filters from dropdowns populated by the selected stop.\n- Choices include lines in the next hour, deduplicated across directions. Existing saved line numbers are preserved; reselect them when changing stops.\n\n## 0.1.1\n- Compact data attribution shares the last departure row on wide tiles, freeing vertical space.\n- Wide tiles also show departure lists in a one-column grid (including Guition 1x3).\n- Rebuild and install the screen firmware to apply the layout change.\n\n## 0.1.0\n- First beta: Swedish departures from Trafiklab Timetables.\n- Independent stop, two line filters, transport mode and destination per tile.\n- Swedish and English texts, walking time, delays and timetable-only indication.\n- Built-in stop name search and selection, with daily lookup caching.\n- One-minute updates; approximately 89,280 departure calls per 31 days for two stops.\n"
+   },
+   "image": "store.png"
+  },
+  {
+   "id": "waze_traveltime",
+   "repo": "https://github.com/heronimonimo/tessera-waze-traveltime",
+   "repo_id": 1425525382,
+   "path": ".",
+   "label": "community",
+   "status": "ok",
+   "release": {
+    "version": "0.1.0",
+    "sha": "f424f3924ce63f49b76808cfe072fb2b07e3576e",
+    "date": "2026-10-19",
+    "tag": "v0.1.0"
+   },
+   "manifest": {
+    "id": "waze_traveltime",
+    "version": "0.1.0",
+    "api": "0.10",
+    "icon": "car",
+    "maintainer": "Heronimonimo",
+    "license": "MIT",
+    "stage": "beta",
+    "topics": [
+     "travel"
+    ],
+    "requires": {
+     "esphome": "2026.6.2"
+    },
+    "boards": "any",
+    "flash_kb": 16,
+    "permissions": {
+     "ha_commands": [
+      "history/history_during_period",
+      "call_service:waze_travel_time.get_travel_times"
+     ]
+    },
+    "answers": [
+     {
+      "command": "history/history_during_period",
+      "fields": {
+       "minutes": {
+        "path": "[*][*].s",
+        "as": "numbers"
+       },
+       "at": {
+        "path": "[*][*].lu",
+        "as": "numbers"
+       }
+      }
+     }
+    ],
+    "tiles": [
+     {
+      "id": "travel",
+      "name": "tile_name",
+      "icon": "car",
+      "sizes": {
+       "min": "1x1",
+       "max": "4x4"
+      },
+      "memory": 1700,
+      "domains": [
+       "sensor"
+      ],
+      "attributes": [
+       "route",
+       "distance",
+       "origin",
+       "destination"
+      ],
+      "has_attributes": [
+       "route",
+       "origin",
+       "destination"
+      ],
+      "example": "tile_example",
+      "preview": {
+       "title": "{name}",
+       "value": "{state} min"
+      },
+      "options": [
+       {
+        "id": "usual",
+        "kind": "number",
+        "min": 0,
+        "max": 240,
+        "step": 1,
+        "unit": "min",
+        "default": 0,
+        "label": "opt_usual",
+        "hint": "opt_usual_hint"
+       },
+       {
+        "id": "hours",
+        "kind": "number",
+        "min": 0,
+        "max": 8,
+        "step": 1,
+        "unit": "h",
+        "default": 3,
+        "label": "opt_hours",
+        "hint": "opt_hours_hint"
+       },
+       {
+        "id": "region",
+        "kind": "choice",
+        "default": "eu",
+        "label": "opt_region",
+        "hint": "opt_region_hint",
+        "choices": [
+         {
+          "value": "eu",
+          "label": "region_eu"
+         },
+         {
+          "value": "us",
+          "label": "region_us"
+         },
+         {
+          "value": "na",
+          "label": "region_na"
+         },
+         {
+          "value": "il",
+          "label": "region_il"
+         },
+         {
+          "value": "au",
+          "label": "region_au"
+         }
+        ]
+       }
+      ]
+     }
+    ],
+    "cards": [
+     {
+      "id": "routes",
+      "name": "card_name",
+      "wide": true
+     }
+    ]
+   },
+   "translations": {
+    "en": {
+     "_meta": {
+      "name": "English"
+     },
+     "screen": {
+      "min": "min",
+      "via": "via {route}",
+      "arrive": "arrive {time}",
+      "km": "{n} km",
+      "usual": "usual",
+      "late": "+{n}",
+      "early": "-{n}",
+      "now": "now",
+      "choose": "Choose a Waze sensor",
+      "no_time": "No travel time",
+      "waiting": "Asking Waze…",
+      "failed": "Waze did not answer",
+      "no_routes": "No routes found",
+      "fastest": "fastest",
+      "slower": "+{n} min"
+     },
+     "app": {
+      "name": "Waze travel time",
+      "summary": "Your travel time from Waze: the fastest route now, the delay, and how traffic went the last hours.",
+      "tile_name": "Travel time",
+      "tile_example": "23 min via A12, +8 against usual",
+      "opt_usual": "Usual travel time",
+      "opt_usual_hint": "Your time without traffic, for the delay and the dashed line. 0 shows no delay.",
+      "opt_hours": "Hours on the line",
+      "opt_hours_hint": "How far back the line under the time goes. 0 shows no line.",
+      "opt_region": "Waze region",
+      "opt_region_hint": "The region of your Waze Travel Time integration, for the routes on the card.",
+      "region_eu": "Europe",
+      "region_us": "United States",
+      "region_na": "North America",
+      "region_il": "Israel",
+      "region_au": "Australia",
+      "card_name": "Routes"
+     }
+    },
+    "nl": {
+     "_meta": {
+      "name": "Nederlands"
+     },
+     "screen": {
+      "min": "min",
+      "via": "via {route}",
+      "arrive": "aankomst {time}",
+      "km": "{n} km",
+      "usual": "normaal",
+      "late": "+{n}",
+      "early": "-{n}",
+      "now": "nu",
+      "choose": "Kies een Waze-sensor",
+      "no_time": "Geen reistijd",
+      "waiting": "Waze wordt gevraagd…",
+      "failed": "Waze gaf geen antwoord",
+      "no_routes": "Geen routes gevonden",
+      "fastest": "snelst",
+      "slower": "+{n} min"
+     },
+     "app": {
+      "name": "Waze-reistijd",
+      "summary": "Je reistijd van Waze: de snelste route nu, de vertraging en hoe het verkeer de laatste uren ging.",
+      "tile_name": "Reistijd",
+      "tile_example": "23 min via A12, +8 op normaal",
+      "opt_usual": "Normale reistijd",
+      "opt_usual_hint": "Je tijd zonder verkeer, voor de vertraging en de stippellijn. 0 toont geen vertraging.",
+      "opt_hours": "Uren op de lijn",
+      "opt_hours_hint": "Hoe ver de lijn onder de tijd teruggaat. 0 toont geen lijn.",
+      "opt_region": "Waze-regio",
+      "opt_region_hint": "De regio van je Waze Travel Time-integratie, voor de routes op de kaart.",
+      "region_eu": "Europa",
+      "region_us": "Verenigde Staten",
+      "region_na": "Noord-Amerika",
+      "region_il": "Israël",
+      "region_au": "Australië",
+      "card_name": "Routes"
+     }
+    }
+   },
+   "readme": {
+    "en": "# Waze travel time\n\nYour travel time from Waze on a Tessera screen: how long the trip takes now, how far that is off your usual time, the\nroute Waze picks and when you arrive, with a line of how the travel time went over the last hours. A tap opens a card\nwith every route Waze offers right now, fastest first.\n\nIt reads a sensor of Home Assistant's own [Waze Travel Time](https://www.home-assistant.io/integrations/waze_travel_time)\nintegration. No key, no account and no web service of its own: Home Assistant asks Waze, the plugin asks Home Assistant.\n\n## Set up\n\n1. In Home Assistant, add the **Waze Travel Time** integration (Settings, Devices and services, Add integration) with\n   your two places, for example `zone.home` and your work address. It makes a sensor such as\n   `sensor.home_to_work`. Keep the **Recorder** on for it (it is by default): the line on the tile comes from its\n   history.\n2. In Tessera, open **Plugins**, choose **Waze travel time** and tick your screens. Each screen builds once with the\n   plugin.\n3. Put the tile **Travel time** on a page and choose the Waze sensor in its inspector.\n4. In the inspector, set:\n   - **Usual travel time**: your time without traffic, in minutes. The tile then shows the delay (\"+8\") in green,\n     amber or red, and the line gets a dashed line at that time. Leave it at 0 for no delay.\n   - **Hours on the line**: how far back the line goes, 1 to 8 hours (0 for no line).\n   - **Waze region**: the same region as your Waze Travel Time integration, for the routes on the card.\n\n## On the screen\n\n- **1x1**: the minutes, the delay top right, and when you arrive.\n- **2x1**: the same, with the route (\"via A12\").\n- **2 rows or more**: the line of the last hours under it, from green to red with the delay, and the usual time dashed.\n- **Tap**: the card with every route Waze offers now, each with its time, a bar, its distance and how much slower it is\n  than the fastest.\n\n## Good to know\n\n- The line comes from the sensor's history in Home Assistant (`history/history_during_period`), asked once when the\n  tile is made; every new travel time after that is added on the screen. The sensor updates every 5 minutes by\n  default, so the line moves in steps of about 5 minutes.\n- The card asks Waze through Home Assistant's `waze_travel_time.get_travel_times` action each time it opens, with live\n  traffic. It uses the sensor's own start and end, but not the sensor's other options (avoid tolls, filters).\n- Waze Travel Time is an unofficial client of Waze's live map: when Waze changes something, the integration (and so\n  this plugin) may stop until Home Assistant fixes it.\n- Works on every board, the CYD included: it shows no pictures.\n- Tried on Tessera's preview bench (the CYD, the Guition 4-inch, the Waveshare 4.3-inch standing up and the Guition\n  10.1-inch, light and dark), not yet on a real screen. Found something wrong? Open an issue.\n\n## How it works\n\n- `tessera-plugin.yaml`: a tile of a sensor with the attributes `route`, `distance`, `origin` and `destination`, a card,\n  and the two Home Assistant commands it may ask, with the history mapped to two lists of numbers.\n- `components/waze_traveltime/`: the tile (the line is drawn on the screen from the samples), the card, and the plugin\n  that hands each answer to the tile or card that asked.\n"
+   },
+   "changelog": {
+    "en": "# Changelog\n\n## 0.1.0\n- First version: a tile of a Waze Travel Time sensor with the travel time, the delay against your usual time, the\n  route, when you arrive and a line of the last hours from the sensor's history.\n- A card with every route Waze offers right now, fastest first.\n"
    },
    "image": "store.png"
   },

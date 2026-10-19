@@ -87,7 +87,7 @@ fetch:
       label: [LinePublicNumber, DestinationName50]
 ```
 
-It names `api: "0.7"` and builds on today's core, which offers plugin API 0.14: no minor after 0.7 changed a name
+It names `api: "0.7"` and builds on today's core, which offers plugin API 0.15: no minor after 0.7 changed a name
 ([FIRMWARE_API.md](FIRMWARE_API.md), "Versions"). The fetch is plain `http` because OVapi offers nothing else and the
 fetch carries no secret.
 
@@ -109,7 +109,7 @@ fetch carries no secret.
 |---|---|---|
 | `id` | yes | The plugin's id. Unique in the index, the same as its folder and its component, and never changed. |
 | `version` | yes | Three numbers, `1.0.0`. Raise it for every change that reaches screens, and give it a `## 1.0.0` heading with its lines at the top of `CHANGELOG.md` ([MAKING_A_PLUGIN.md](MAKING_A_PLUGIN.md#the-changelog)). |
-| `api` | yes | The plugin API it was written for, as major and minor in quotes: `"0.8"`; the plugin API 0.14 is the one the core offers now (on Tessera's dev branch; the release has an older one until the next). Without quotes YAML reads a number, which the check refuses. It builds on a core with the same major and at least that minor, unless a minor after its own up to the core's changed a name (0.4 did); `tools/check.py` refuses an `api` newer than the core it checks against, and one from before such a minor ([FIRMWARE_API.md](FIRMWARE_API.md), "Versions"). |
+| `api` | yes | The plugin API it was written for, as major and minor in quotes: `"0.8"`; the plugin API 0.15 is the one the core offers now (on Tessera's dev branch; the release has an older one until the next). Without quotes YAML reads a number, which the check refuses. It builds on a core with the same major and at least that minor, unless a minor after its own up to the core's changed a name (0.4 did); `tools/check.py` refuses an `api` newer than the core it checks against, and one from before such a minor ([FIRMWARE_API.md](FIRMWARE_API.md), "Versions"). |
 | `icon` | yes | <a id="icon"></a>A Material Design Icons name from Tessera's icon set (`screen_manager/app/tile_icons.py` in the Tessera repository, such as `bus`, `train`, `calendar`, `thermometer`, `lightbulb`). The screen's icon font holds only that set. Tiles and top bar items take it when they name no icon of their own. |
 | `maintainer` | yes | The GitHub name of whoever looks after the plugin, 1 to 39 characters. `tools/check.py` refuses the template's `your-github-name` in any folder but `template/`. |
 | `license` | yes | An SPDX name that goes with AGPL-3.0: `MIT`, `Apache-2.0`, `BSD-2-Clause`, `BSD-3-Clause`, `ISC`, `MPL-2.0`, `LGPL-2.1-or-later`, `LGPL-3.0-or-later`, `GPL-3.0-or-later`, `GPL-3.0-only`, `AGPL-3.0-or-later`, `AGPL-3.0-only`, `Unlicense`, `0BSD`, `CC0-1.0`. |
@@ -239,6 +239,10 @@ A `text`, `gpio` or `entity` input reaches the screen's build as a substitution 
 `plugin.yaml`. A `secret` never does. Give each a default in `plugin.yaml` (`defaults: { PIN: GPIO22 }`) so a build
 without the value still works.
 
+An `entity` input is built into the screen: the same entity for every tile of the plugin on that screen, and another
+one is a new build. An entity a person chooses per tile, which the app sends and follows without a build, is a tile's
+option of kind `entity` (0.15, below).
+
 A fetch may name an input as a placeholder, but the app fills in only secrets there (a secret with `scope: screen` is
 the one filled in for the tile's screen). A value a fetch needs that is not a secret is a tile's option.
 
@@ -287,7 +291,7 @@ An option:
 
 | Field | What |
 |---|---|
-| `id`, `kind`, `label` | Required. `kind` is `text`, `choice`, `number` or `toggle`; `label` is a text key. |
+| `id`, `kind`, `label` | Required. `kind` is `text`, `choice`, `number`, `toggle` or (0.15) `entity`; `label` is a text key. |
 | `hint` | Text key under the option. |
 | `default` | The value when nothing is chosen. It must fit the option: `true` or `false` for a toggle, a number from `min` to `max` for a number, a text of at most 64 characters for a text or a choice, and for a choice with `choices` one of their values (or `""`). |
 | `choices` | For `choice`: `[{ value: "a", label: key }]`, at most 48, each with both: `value` a text of 1 to 64 characters, `label` a text key. |
@@ -295,6 +299,7 @@ An option:
 | `multiple` | For `text` and `choice` (0.12): the option keeps a list of up to this many values, 2 to 16, in the order the person put them (they drag them into another). A text list keeps texts; a choice keeps picks (below). Its default is `[]`; a text list may name a list of texts. A fetch uses a list through `each` or `{name\|,}` ([FETCH.md](FETCH.md)). |
 | `search` | For `choice` with `options_from` (0.12): `true` finds the choices by what the person types. The editor sends it, from two characters on, as `{search}` of that fetch: `url: https://api.deezer.com/search/artist?q={search}`. Without `multiple` the option keeps one pick. No option of the tile may be called `search`. |
 | `min`, `max`, `step`, `unit` | For `number`: the range (both required, `min` less than `max`), the step (more than 0, default 1), and a unit of up to 8 characters. |
+| `domains`, `attributes` | For `entity` (0.15): the domains whose entities the person may choose, 1 to 8 (`[sensor]`), and the attributes the tile reads of the chosen one, as a tile's own `attributes`. Only in a tile's options, and only with `api: "0.15"` or later. |
 
 A field that belongs to another kind is an error (`min` on a text option, `choices` on a number). A text option's value
 is at most 64 characters. The tile gets every option in `context.options` of `create()`, with the defaults filled in.
@@ -306,6 +311,18 @@ person saw in the list. A list from a fetch may be gone or other next week, so t
 plugin's own `choices` the label is the choice's text in the editor's language. Each value and label is at most 64
 characters, and a list holds each value once. All options of a tile together are at most 1280 bytes of JSON: they travel
 to the screen with the tile's data in one message, and the editor refuses a value that would not fit.
+
+An option of kind `entity` (0.15) keeps the id of the entity chosen, `"sensor.grid_power"`, or `""`. The inspector offers
+the entities of its `domains` in a searchable list. The app sends the chosen one with the tile's data under `entities`
+and the option's id, with its state, its name, the named attributes and `updated`, and sends the tile again when it
+changes ([FIRMWARE_API.md](FIRMWARE_API.md), "What `on_state` gets"). Another choice needs no build. A tile of several
+sources (an energy dashboard: the grid, the solar panels, the battery) has one such option for each:
+
+```yaml
+options:
+  - { id: grid, kind: entity, domains: [sensor], attributes: [unit_of_measurement], label: grid }
+  - { id: solar, kind: entity, domains: [sensor], attributes: [unit_of_measurement], label: solar }
+```
 
 ```yaml
 options:
@@ -609,6 +626,7 @@ These are the fields whose minor the core records:
 | 0.12 | An option's `multiple` and `search`, a fetch's `each`, `{name\|,}` and `{search}` in a URL, a field `{ each: value }` |
 | 0.13 | A card's `pictures` |
 | 0.14 | `savers`, with every field of a saver |
+| 0.15 | An option of kind `entity` in a tile's `options`, with `domains` and `attributes` |
 
 What each minor brought to the C++ is in [FIRMWARE_API.md](FIRMWARE_API.md), "Versions".
 

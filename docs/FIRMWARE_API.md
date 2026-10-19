@@ -1,4 +1,4 @@
-# The firmware API (plugin API 0.14)
+# The firmware API (plugin API 0.15)
 
 A plugin's code runs on the screen as an ESPHome component. It talks to Tessera's core through one header:
 
@@ -9,8 +9,8 @@ A plugin's code runs on the screen as an ESPHome component. It talks to Tessera'
 The header lives in the Tessera repository at `components/smart_display/plugin_api.h`; it is the reference, and this
 page explains it. Everything is in namespace `tessera`.
 
-A manifest names the plugin API it was written for: `api: "0.8"`, or `"0.9"` up to `"0.14"` for the parts those
-brought; the plugin API 0.14 is the one the core offers now (on Tessera's dev branch; the release has an older one until
+A manifest names the plugin API it was written for: `api: "0.8"`, or `"0.9"` up to `"0.15"` for the parts those
+brought; the plugin API 0.15 is the one the core offers now (on Tessera's dev branch; the release has an older one until
 the next). Which cores a plugin builds on is under "Versions" at the end of this page.
 
 A plugin adds to the screen in a few kinds of parts: tiles on a page, cards over the page, tap actions for Tessera's own
@@ -167,6 +167,20 @@ do. Lists that do not fit together are shortened, all to the same length, from t
 attribute whose name ends in `_at`, `_time` or `date` and holds a moment comes as seconds since 1970, so the tile says it
 in the screen's words (`tessera::date_text`, `days_from_today`). `"wait": "wrong_entity"` means the entity chosen in the
 editor is of another domain than the manifest names.
+
+A tile with options of kind `entity` (0.15, [MANIFEST.md](MANIFEST.md), "Tiles") also gets each entity the person
+chose for one, under `entities` and the option's id, and is sent again whenever one of them changes:
+
+```json
+{ "entities": {
+    "grid":  { "state": "120", "name": "Grid", "attributes": { "unit_of_measurement": "W" }, "updated": 1792389600 },
+    "solar": { "state": "850", "name": "Solar", "attributes": { "unit_of_measurement": "W" }, "updated": 1792389540 } } }
+```
+
+Each is bounded as the tile's own entity is, with `updated`: when Home Assistant last heard from it, in seconds since
+1970, so a tile of several sources can say how old its values are. They share what the tile's own entity and data leave
+of the 2.6 KB, so one with long attributes comes as `{"wait": "too_large"}` alone. An option nobody filled in, or one
+of another domain, is not there: say what to choose until it is.
 
 A tile without `data` and without `domains` gets `{}`, and so does a tile with `domains` before a person has chosen
 its entity in the editor: say what to do (a word such as "Choose a sensor") until `state` is there. `state` is always
@@ -749,7 +763,7 @@ screensavers (0.14). A plugin can bring a camera (0.8): the feature `camera`, an
 
 ## Versions
 
-A manifest names the plugin API it was written for: `api: "0.8"` up to `"0.14"`; the plugin API 0.14 is the one the core offers now (on Tessera's dev branch; the release has an older one until the next). When a
+A manifest names the plugin API it was written for: `api: "0.8"` up to `"0.15"`; the plugin API 0.15 is the one the core offers now (on Tessera's dev branch; the release has an older one until the next). When a
 screen is built, `smart_display.register_plugin()` compares it with the core's and stops the build with one sentence
 when it does not fit. A plugin fits a core when all three hold:
 
@@ -762,11 +776,12 @@ when it does not fit. A plugin fits a core when all three hold:
 **While the major is 0** a minor may still change a name or a signature as the API settles. The core lists those
 minors in `PLUGIN_API_BREAKS`, in `screen_manager/app/plugin_manifest.py` and in `components/smart_display/__init__.py`
 (a test keeps the two equal). Today the list holds one: 0.4, where `Plugin::on_tick` became `on_interval`. So with a
-core of 0.14:
+core of 0.15:
 
 | The manifest says | Builds? | Why |
 |---|---|---|
-| `api: "0.14"` | Yes | The core's own. |
+| `api: "0.15"` | Yes | The core's own. |
+| `api: "0.14"` | Yes | Same major, an older minor, and no break after 0.14. |
 | `api: "0.13"` | Yes | Same major, an older minor, and no break after 0.13. |
 | `api: "0.12"` | Yes | Same major, an older minor, and no break after 0.12. |
 | `api: "0.11"` | Yes | Same major, an older minor, and no break after 0.11. |
@@ -801,6 +816,7 @@ brought:
 | 0.12 | A card's `on_tap()`, with `tessera::tap_point()` in the card's own pixels. Values of JSON: an option that keeps several values (`multiple`: texts, or picks `{value, label}`), a choice found by searching (`search`), a fetch once per value of a list (`each`, `{ each: label }`) or with the list joined (`{name\|,}`), and `tessera::action(service, entity, fields)` with fields of any JSON type. |
 | 0.13 | Pictures on a card over the page: `ui::picture`, `ui::set_picture` and `ui::slide_pictures` in a card's calls, and the manifest's `pictures` of a card. |
 | 0.14 | Screensavers: `Saver`, `SaverContext`, `SaverStep`, `Plugin::add_saver`, a face of the clock, the music or the photos or a step of its own, and the manifest's `savers`; `ui::takes_taps`, a part of a saver a finger taps in standby; the address `saver:picture`, the step's own picture; `tessera::wish()` and `Wish`, a value a finger changed. `tools/check.py` refuses these parts in a plugin of an older `api`. |
+| 0.15 | Nothing new in the C++: a tile's options of kind `entity` (the manifest) bring the chosen entities to `on_state` under `entities` ("What `on_state` gets"). `tools/check.py` refuses such an option in a plugin of an older `api`. |
 
 A minor of the app's or the manifest's side only still counts: a plugin that uses what it brought needs an app that
 knows it ([MANIFEST.md](MANIFEST.md), "Which minor brought a field").

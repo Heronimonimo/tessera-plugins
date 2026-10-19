@@ -9,7 +9,9 @@ the screen's top bar, so whoever stands in front of it knows.
 
 ## What you need
 
-- A screen whose board has a camera that Tessera knows how to power and reach: the reTerminal D1001 or the M5Stack Tab5.
+- A screen whose board has a camera that Tessera knows how to power and reach: the reTerminal D1001, the M5Stack Tab5,
+  or a Guition ESP32-P4 screen in its camera version ("C" in the model name): the JC8012P4A1 (also its V2 and V3),
+  the JC1060P470 V2 and the JC4880P443. The Guition ones are new and tried on the JC8012P4A1 V3 only.
 - Nothing else in Home Assistant: the camera comes with the screen's device in the ESPHome integration.
 
 ## Set up
@@ -30,4 +32,7 @@ disable the camera entity in Home Assistant; to stop it for good, remove the plu
 
 The camera is ESPHome's camera with id `ts_camera` (the feature `camera`), so another plugin can build on it. The
 camera driver is `esp_video_camera` (github.com/n-IA-hane/esphome-esp-video-camera, from ESPHome pull request
-esphome/esphome#16944), copied unchanged into `components/esp_video_camera` under the ESPHome License, with its NOTICE.
+esphome/esphome#16944), in `components/esp_video_camera` under the ESPHome License, with its NOTICE. Tessera adds the
+OmniVision OV02C10 to it, which Espressif's camera library has no driver for: a sensor driver beside it
+(`ov02c10_sensor.c`) and its image tuning (`build_stubs/ov02c10_ipa`, one for rev3 chips and one for older ones); the
+NOTICE says where they come from.

@@ -1,5 +1,9 @@
 #include "esp_video_camera.h"
 
+// Tessera: the OV02C10 driver (ov02c10_sensor.c) is only reached through its linker-section detect entry, which a
+// static archive drops with the object unless something references it.
+extern "C" void ov02c10_sensor_link_anchor(void);
+
 #ifdef USE_ESP_IDF
 
 #include "i2c_helper.h"
@@ -247,6 +251,7 @@ void ESPVideoCameraImageReader::return_image() {
 // ESPVideoCamera: setup and pipeline initialization
 // ===========================================================================
 void ESPVideoCamera::setup() {
+  ov02c10_sensor_link_anchor();  // Tessera: keep the OV02C10 detect entry
   if (!this->init_pipeline_()) {
     this->mark_failed();
     return;

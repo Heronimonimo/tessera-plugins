@@ -59,3 +59,46 @@ configuration file taken from the original pull request.
 
 This folder is the component as published at github.com/n-IA-hane/esphome-esp-video-camera, release v2026.9.2
 (commit 6d247d7), copied without changes. The plugin's own code is in `components/screen_camera/`.
+
+## The OV02C10 in Tessera's copy
+
+For the Guition ESP32-P4 screens this copy adds an OV02C10 sensor driver and its image tuning, written and first
+tried on a Guition JC8012P4A1 V3 by Jeroen Peters (@Heronimonimo) in a stand-alone plugin that this replaces:
+
+  * `ov02c10_sensor.c`, `ov02c10.h`, `ov02c10_compat.h`, `ov02c10_regs.h`, `ov02c10_settings.h` and
+    `ov02c10_types.h`: copied from https://github.com/sullb/esphome-p4-csi-camera (MIT License, below) on
+    2026-10-18. That project identifies the register tables as based on the Linux OV02C10 driver; the driver
+    follows the structure of Espressif's esp_cam_sensor drivers (Apache-2.0, see their SPDX headers). Changed on
+    2026-10-19, as its header says: exposure, gain and orientation on the sensor's own registers (as
+    drivers/media/i2c/ov02c10.c in Linux sets them), OV5640 registers removed, the chip id checked.
+  * `build_stubs/ov02c10_ipa/ov02c10_p4_eco5.json` and `ov02c10_p4_eco4.json`: image tuning derived from
+    Espressif's `sc2336_default_p4_eco4.json` (esp_cam_sensor, Apache-2.0), with the black level and gamma of its
+    rev3 tunings in the eco5 file; `CMakeLists.txt` and `project_include.cmake` beside them are new.
+  * `esp_video_camera.cpp` calls `ov02c10_sensor_link_anchor()` and `__init__.py` adds the tuning; both places
+    are marked "Tessera" or "OV02C10".
+
+The plugin as a whole is distributed under GPL-3.0-only; the notices of the sources stay with their files.
+
+### MIT License of sullb/esphome-p4-csi-camera
+
+MIT License
+
+Copyright (c) 2026 sullb
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

@@ -59,3 +59,9 @@ configuration file taken from the original pull request.
 
 This folder is the component as published at github.com/n-IA-hane/esphome-esp-video-camera, release v2026.9.2
 (commit 6d247d7), copied without changes. The plugin's own code is in `components/screen_camera/`.
+
+## Changed in Tessera's copy
+
+`__init__.py` takes `jpeg_quality` as esp_video does (1 to 100, higher is better, default 80) instead of 1 to 63
+(default 10), and `esp_video_camera.h`'s default follows: the value goes straight to
+V4L2_CID_JPEG_COMPRESSION_QUALITY (2026-10-19).

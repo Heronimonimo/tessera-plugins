@@ -247,7 +247,7 @@ class ESPVideoCamera : public camera::Camera {
   bool is_hw_jpeg_{false};
   bool is_raw_csi_{false};
   std::string resolution_{"auto"};
-  int jpeg_quality_{10};
+  int jpeg_quality_{80};
   uint16_t rotation_degrees_{0};
   std::atomic<float> max_framerate_{10.0f};
   std::atomic<uint32_t> min_interval_ms_{100};

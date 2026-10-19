@@ -114,7 +114,9 @@ CONFIG_SCHEMA = cv.All(
             cv.Required(CONF_I2C_ID): cv.use_id(i2c.I2CBus),
             cv.Optional(CONF_DEVICE, default="jpeg"): _validate_device,
             cv.Optional(CONF_RESOLUTION, default="auto"): _validate_resolution,
-            cv.Optional(CONF_JPEG_QUALITY, default=10): cv.int_range(min=1, max=63),
+            # esp_video's JPEG quality: 1 to 100, higher is better (its encoder's default is 80),
+            # not the ESP32 camera driver's 0 to 63 where lower is better.
+            cv.Optional(CONF_JPEG_QUALITY, default=80): cv.int_range(min=1, max=100),
             cv.Optional(CONF_MAX_FRAMERATE, default=10): cv.float_range(
                 min=0.1, max=60.0
             ),

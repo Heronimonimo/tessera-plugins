@@ -3,17 +3,16 @@
   "name": "English"
  },
  "screen": {
-  "name": "Screen camera",
-  "live": "Live",
-  "picture": "Camera"
+  "name": "Screen camera"
  },
  "app": {
   "name": "Screen camera",
-  "summary": "The screen's own camera as a camera in Home Assistant, with a camera in the top bar while it is watched.",
-  "bar_watching": "Camera in use",
-  "bar_example": "Live",
-  "bar_sensing": "Camera senses motion",
+  "summary": "The screen's own camera as a camera in Home Assistant, and the room's light level and motion from it.",
   "setting_sensing": "Light level and motion",
-  "setting_sensing_hint": "The camera measures the room's light and notices movement, on the screen itself: no picture leaves it for this. The camera stays on while this is on."
+  "setting_sensing_hint": "The camera measures the room's light and notices movement, on the screen itself: no picture leaves it for this. The camera stays on while this is on.",
+  "setting_wake": "Motion wakes the screen",
+  "setting_wake_hint": "With light level and motion on, someone moving in front of the screen wakes it, as a touch does.",
+  "setting_time_out": "Motion time-out",
+  "setting_time_out_hint": "How long Motion stays on after the last movement: a few seconds for someone walking past, minutes to tell an empty room."
  }
 }

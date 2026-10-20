@@ -7,8 +7,13 @@
   JC4880P443 in hun cameraversie), op een Tessera waarvan het bord hem noemt. Geprobeerd op de JC8012P4A1 V3.
 - Nieuw, uit tot je het aanzet: **Light level** (lux, een schatting) en **Motion** bij het apparaat van het scherm in
   Home Assistant, bepaald door de camera op het scherm zelf: hiervoor gaat geen beeld van het scherm af. Zet
-  **Lichtniveau en beweging** aan bij de instellingen van de plugin; de camera blijft dan draaien. Optioneel item voor
-  de bovenbalk **Camera ziet beweging**: een oog zolang hij dat doet. Uitgezet is het lichtniveau onbekend.
+  **Lichtniveau en beweging** aan bij de instellingen van de plugin; de camera blijft dan draaien. Uitgezet is het
+  lichtniveau onbekend.
+- **Beweging wekt het scherm** (eerst uit) en **Beweging blijft aan** (5 seconden tot 10 minuten, eerst 10) zijn ook
+  instellingen.
+- De eigen stip van Tessera in de rechterbovenhoek van het scherm staat er nu zolang de camera in gebruik is, ook bij
+  het meten van licht en beweging; de bovenbalk-items **Camera in gebruik** en **Camera ziet beweging** van de plugin
+  zijn weg. Werkt met Tessera met plugin-API 0.17.
 
 ## 0.2.0 - 2026-10-10
 - Ook op een bord dat zijn camera vanaf een pin van klok voorziet, zoals de M5Stack Tab5.

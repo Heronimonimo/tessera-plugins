@@ -4,8 +4,9 @@ Bekijk de eigen camera van het scherm in Home Assistant. Het scherm wordt daar e
 op een dashboard, een stream als je hem opent, en alles wat Home Assistant met een camera doet (een momentopname in een
 automatisering, een opname).
 
-Het beeld wordt op het scherm zelf in hardware gemaakt, alleen zolang Home Assistant erom vraagt. Zolang dat zo is,
-staat er een camera in de bovenbalk van het scherm, zodat wie ervoor staat het weet.
+Het beeld wordt op het scherm zelf in hardware gemaakt, alleen zolang Home Assistant erom vraagt. Zolang de camera in
+gebruik is, toont Tessera een stip in de rechterbovenhoek van het scherm, zodat wie ervoor staat het weet; geen
+instelling haalt hem weg.
 
 ## Wat je nodig hebt
 
@@ -19,9 +20,7 @@ staat er een camera in de bovenbalk van het scherm, zodat wie ervoor staat het w
 1. Open in Tessera **Plugins**, kies **Schermcamera** en vink je schermen aan. Elk scherm wordt een keer gebouwd.
 2. Open in Home Assistant het apparaat van het scherm (Instellingen, Apparaten): de camera staat er als **Camera**.
    Zet hem op een dashboard met een kaart die camerabeeld toont (Picture entity of Picture glance).
-3. Optioneel: zet **Camera in gebruik** in de bovenbalk van een pagina (Bovenbalk, Toevoegen, Uit plugins). Hij staat
-   er zolang er beelden het scherm verlaten: "Live" bij een stream, "Camera" bij af en toe een beeld.
-4. Optioneel: zet **Lichtniveau en beweging** aan bij de instellingen van de plugin (het tabblad Plugins van het scherm
+3. Optioneel: zet **Lichtniveau en beweging** aan bij de instellingen van de plugin (het tabblad Plugins van het scherm
    in Tessera, of **Camera light level and motion** bij het apparaat in Home Assistant). Dan volgen **Light level** en
    **Motion** de kamer.
 
@@ -33,12 +32,13 @@ Uit tot je het aanzet. Zolang het aan staat blijft de camera draaien en bepaalt 
   sensor. Hij klopt in verhouding (twee keer zoveel licht is ongeveer twee keer zoveel lux), niet precies: kies de
   drempels van je automatiseringen door te kijken wat hij in jouw kamer meet. Hij wordt elke tien seconden bijgewerkt, en
   meteen als er een lamp aan- of uitgaat.
-- **Motion**, uit het beeld dat een paar keer per seconde in een grof raster wordt vergeleken; minstens tien seconden aan
-  als een deel ervan verandert. Een lamp die aan- of uitgaat (het grootste deel van het beeld tegelijk lichter of
+- **Motion**, uit het beeld dat een paar keer per seconde in een grof raster wordt vergeleken; aan als een deel ervan
+  verandert, en daarna nog **Beweging blijft aan** lang (eerst tien seconden, van vijf seconden tot tien minuten). Een lamp die aan- of uitgaat (het grootste deel van het beeld tegelijk lichter of
   donkerder) is geen beweging: drie seconden daarna, terwijl de camera zich aanpast, wordt beweging niet beoordeeld.
 
-Hiervoor wordt geen beeld gemaakt of verstuurd: alleen de twee waarden verlaten het scherm. **Camera ziet beweging** in
-de bovenbalk toont een oog zolang het draait.
+Hiervoor wordt geen beeld gemaakt of verstuurd: alleen de twee waarden verlaten het scherm. De stip in de
+rechterbovenhoek staat er zolang het draait. Met **Beweging wekt het scherm** aan (eerst uit) wekt iemand die voor het
+scherm beweegt het scherm, zoals een aanraking.
 
 ## Privacy
 

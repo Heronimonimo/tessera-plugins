@@ -1,8 +1,8 @@
-"""Screen camera: the camera in the top bar while Home Assistant takes pictures of the screen's own camera.
+"""Screen camera: the room's light level and motion from the screen's own camera, worked out on the screen.
 
-The camera itself is esp_video_camera beside this folder (plugin.yaml); this component listens to it, as ESPHome's API
-does, and says on the screen when pictures leave it. register_plugin() takes the id, version and the screen's texts
-from the manifest and translations/ beside this folder.
+The camera itself is esp_video_camera beside this folder (plugin.yaml); the core shows its dot while Home Assistant
+takes pictures of it, and while this component senses (tessera::capturing). register_plugin() takes the id, version and
+the screen's texts from the manifest and translations/ beside this folder.
 """
 import esphome.codegen as cg
 import esphome.config_validation as cv

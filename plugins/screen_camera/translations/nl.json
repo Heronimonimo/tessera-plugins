@@ -3,17 +3,16 @@
   "name": "Nederlands"
  },
  "screen": {
-  "name": "Schermcamera",
-  "live": "Live",
-  "picture": "Camera"
+  "name": "Schermcamera"
  },
  "app": {
   "name": "Schermcamera",
-  "summary": "De eigen camera van het scherm als camera in Home Assistant, met een camera in de bovenbalk zolang er iemand kijkt.",
-  "bar_watching": "Camera in gebruik",
-  "bar_example": "Live",
-  "bar_sensing": "Camera ziet beweging",
+  "summary": "De eigen camera van het scherm als camera in Home Assistant, en daaruit het lichtniveau en beweging in de kamer.",
   "setting_sensing": "Lichtniveau en beweging",
-  "setting_sensing_hint": "De camera meet het licht in de kamer en merkt beweging op, op het scherm zelf: hiervoor gaat geen beeld van het scherm af. De camera blijft aan zolang dit aan staat."
+  "setting_sensing_hint": "De camera meet het licht in de kamer en merkt beweging op, op het scherm zelf: hiervoor gaat geen beeld van het scherm af. De camera blijft aan zolang dit aan staat.",
+  "setting_wake": "Beweging wekt het scherm",
+  "setting_wake_hint": "Met lichtniveau en beweging aan wekt iemand die voor het scherm beweegt het scherm, zoals een aanraking.",
+  "setting_time_out": "Beweging blijft aan",
+  "setting_time_out_hint": "Hoe lang Beweging aan blijft na de laatste beweging: een paar seconden voor iemand die langsloopt, minuten om een lege kamer te zien."
  }
 }

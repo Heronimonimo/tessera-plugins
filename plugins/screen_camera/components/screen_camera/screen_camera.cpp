@@ -9,16 +9,9 @@
 
 namespace esphome::screen_camera {
 
-// Tessera's camera icon.
-static constexpr uint32_t ICON_CAMERA = 0xF07AE;   // cctv
-// A picture keeps the item in the top bar this long: Home Assistant's dashboards ask for a new one every ten seconds.
-static constexpr uint32_t PICTURE_SHOWN_MS = 12000;
-// A stream is live while its pictures come; at five a second, a gap this long means it ended.
-static constexpr uint32_t STREAM_QUIET_MS = 3000;
 static const char *const TAG = "screen_camera";
-
-// The eye in the top bar while sensing runs.
-static constexpr uint32_t ICON_EYE = 0xF0208;   // eye
+// Motion wakes the screen at most this often while it goes on (docs/PLUGINS.md, "Waking the screen").
+static constexpr uint32_t WAKE_EVERY_MS = 2000;
 // Sensing reads a frame at most this often; the camera delivers a few a second (plugin.yaml's max_framerate).
 static constexpr uint32_t SAMPLE_MS = 400;
 // A cell counts as changed when it moved more than this (0..255, after the frame's own shift in brightness is taken
@@ -47,27 +40,6 @@ static constexpr float LUX_SCALE = 48.5f;
 static constexpr float INVERSE_GAMMA = 1.8f;
 
 void ScreenCamera::setup() {
-  if (camera_ != nullptr) camera_->add_listener(this);
-  add_bar_item("watching", [this]() {
-    tessera::BarItem item;
-    if (watching()) {
-      item.shown = true;
-      item.icon = ICON_CAMERA;
-      // A stream lights the camera up in red, as a camera that records; a picture now and then keeps the bar's grey.
-      item.tone = live() ? tessera::Tone::ALERT : tessera::Tone::NORMAL;
-      item.text = text(live() ? "live" : "picture");
-    }
-    return item;
-  });
-  add_bar_item("sensing", [this]() {
-    tessera::BarItem item;
-    if (sensing_on_) {
-      item.shown = true;
-      item.icon = ICON_EYE;
-      item.tone = tessera::Tone::NORMAL;
-    }
-    return item;
-  });
   set_up_ = true;
   apply_sensing_();
 }
@@ -100,6 +72,8 @@ void ScreenCamera::apply_sensing_() {
     ESP_LOGI(TAG, "Sensing stopped");
   }
   sensing_on_ = on;
+  // The camera runs on the screen itself now, for what never leaves it: the core's dot shows while it does.
+  tessera::capturing(this, tessera::Capture::CAMERA, on);
 #ifdef USE_SENSOR
   // Off: the light level reads unknown in Home Assistant, not the last value it had.
   if (!on && illuminance_ != nullptr) {
@@ -109,7 +83,6 @@ void ScreenCamera::apply_sensing_() {
   }
 #endif
   publish_sensing_();
-  tessera::refresh();
 }
 
 void ScreenCamera::consume_raw_video_frame(const esp_video_camera::RawVideoFrame &frame) {
@@ -210,6 +183,14 @@ void ScreenCamera::publish_sensing_() {
     }
   }
 #endif
+  // Motion wakes the screen (the setting), for each new sample with motion, at most every WAKE_EVERY_MS.
+  const uint32_t motion_at = last_motion_ms_.load();
+  if (wake_on_motion_ && sensing_on_ && motion_at != 0 && motion_at != woken_for_ && now - motion_at < MOTION_ON_MS &&
+      (last_wake_ms_ == 0 || now - last_wake_ms_ >= WAKE_EVERY_MS)) {
+    woken_for_ = motion_at;
+    last_wake_ms_ = now;
+    tessera::wake(this);
+  }
 #ifdef USE_SENSOR
   if (illuminance_ != nullptr && sensing_on_) {
     const uint32_t lux_x10 = lux_x10_.load();
@@ -227,49 +208,6 @@ void ScreenCamera::publish_sensing_() {
 #endif
 }
 
-bool ScreenCamera::watching() const {
-  return last_picture_ != 0 && millis() - last_picture_ < PICTURE_SHOWN_MS;
-}
-
-bool ScreenCamera::live() const {
-  return streaming_ && millis() - last_stream_ < STREAM_QUIET_MS;
-}
-
-void ScreenCamera::on_camera_image(const std::shared_ptr<camera::CameraImage> &image) {
-  last_picture_ = millis();
-  if (last_picture_ == 0) last_picture_ = 1;
-  last_stream_ = last_picture_;
-  if (!shown_) {
-    shown_ = true;
-    tessera::refresh();
-  }
-}
-
-void ScreenCamera::on_stream_start() {
-  if (!streaming_) ESP_LOGD(TAG, "Stream started");
-  streaming_ = true;
-  last_stream_ = millis();
-}
-
-void ScreenCamera::on_stream_stop() {
-  if (streaming_) ESP_LOGD(TAG, "Stream stopped");
-  streaming_ = false;
-  tessera::refresh();
-}
-
-void ScreenCamera::on_interval(uint32_t now_ms) {
-  // The item goes as soon as the last picture is old, not at the bar's next look; a stream that went quiet is no
-  // longer live.
-  if (shown_ && !watching()) {
-    shown_ = false;
-    tessera::refresh();
-  }
-  if (streaming_ && !live()) {
-    ESP_LOGD(TAG, "Stream went quiet");
-    streaming_ = false;
-    tessera::refresh();
-  }
-  publish_sensing_();
-}
+void ScreenCamera::on_interval(uint32_t now_ms) { publish_sensing_(); }
 
 }  // namespace esphome::screen_camera

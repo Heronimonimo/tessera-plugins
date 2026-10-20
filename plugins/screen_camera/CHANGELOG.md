@@ -7,8 +7,12 @@
   JC4880P443 in their camera version), on a Tessera whose board names it. Tried on the JC8012P4A1 V3.
 - New, off until you switch it on: **Light level** (lux, an estimate) and **Motion** on the screen's device in Home
   Assistant, worked out from the camera on the screen itself: no picture leaves the screen for them. Switch on
-  **Light level and motion** in the plugin's settings; the camera then keeps running. Optional top bar item
-  **Camera senses motion**: an eye while it does. Switched off, the light level reads unknown.
+  **Light level and motion** in the plugin's settings; the camera then keeps running. Switched off, the light level
+  reads unknown. **Motion wakes the screen** (off to start with) and **Motion time-out** (5 seconds to 10 minutes,
+  10 to start with) are settings too.
+- Tessera's own dot in the top right corner of the screen now shows while the camera is in use, also while it senses
+  light and motion; the plugin's top bar items **Camera in use** and **Camera senses motion** are gone. Needs Tessera
+  with plugin API 0.17.
 
 ## 0.2.0 - 2026-10-10
 - Also on a board that clocks its camera from a pin, such as the M5Stack Tab5.

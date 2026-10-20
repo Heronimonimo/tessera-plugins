@@ -4,8 +4,8 @@ See the screen's own camera in Home Assistant. The screen becomes a camera of it
 dashboard, a stream when you open it, and anything Home Assistant does with a camera (a snapshot in an automation, a
 recording).
 
-The picture is made on the screen in hardware, only while Home Assistant asks for one. While it does, a camera shows in
-the screen's top bar, so whoever stands in front of it knows.
+The picture is made on the screen in hardware, only while Home Assistant asks for one. While the camera is in use,
+Tessera shows a dot in the top right corner of the screen, so whoever stands in front of it knows; no setting hides it.
 
 ## What you need
 
@@ -19,9 +19,7 @@ the screen's top bar, so whoever stands in front of it knows.
 1. In Tessera, open **Plugins**, choose **Screen camera** and tick your screens. Each screen builds once with it.
 2. In Home Assistant, open the screen's device (Settings, Devices): its camera is there as **Camera**. Put it on a
    dashboard with a Picture entity or a Picture glance card.
-3. Optional: add **Camera in use** to a page's top bar (Top bar, Add, From plugins). It shows while pictures leave the
-   screen: "Live" for a stream, "Camera" for a picture now and then.
-4. Optional: switch on **Light level and motion** in the plugin's settings (the screen's Plugins tab in Tessera, or
+3. Optional: switch on **Light level and motion** in the plugin's settings (the screen's Plugins tab in Tessera, or
    **Camera light level and motion** on the device in Home Assistant). Then **Light level** and **Motion** follow the
    room.
 
@@ -32,12 +30,13 @@ Off until you switch it on. While it is on, the camera keeps running and the scr
 - **Light level**, an estimate in lux from the picture's brightness, the exposure time and the sensor's gain. It is right
   in proportion (twice the light reads about twice the lux), not exact: pick the thresholds of your automations by
   looking at what it reads in your room. It updates every ten seconds, and at once when a light goes on or off.
-- **Motion**, from the picture compared in a coarse grid a few times a second; on for at least ten seconds when part of
-  it changes. A light switched on or off (most of the picture brighter or darker at once) is not motion: for three
+- **Motion**, from the picture compared in a coarse grid a few times a second; on when part of it changes, and for
+  **Motion time-out** after (ten seconds to start with, five seconds to ten minutes). A light switched on or off (most of the picture brighter or darker at once) is not motion: for three
   seconds after it, while the camera adjusts, motion is not judged.
 
-No picture is encoded or sent for them: only the two values leave the screen. **Camera senses motion** in the top bar
-shows an eye while it runs.
+No picture is encoded or sent for them: only the two values leave the screen. The dot in the top right corner shows
+while it runs. With **Motion wakes the screen** on (off to start with), someone moving in front of the screen wakes
+it, as a touch does.
 
 ## Privacy
 

@@ -1,5 +1,5 @@
 # What a screen gets when it takes this plugin: its camera sensor as ESPHome's camera, which Home Assistant shows as a
-# camera of the screen's device, and the camera in the top bar while Home Assistant takes pictures. The sensor is the
+# camera of the screen's device; Tessera's core shows its dot on the glass while the camera is in use. The sensor is the
 # board's (the feature camera_sensor): the board file powers it, names its I2C bus in CAMERA_I2C and the pin that clocks
 # it in CAMERA_XCLK_PIN (-1 for a sensor with its own clock), so nothing here owns a pin.
 
@@ -21,8 +21,8 @@ esp_video_camera:
 ov02c10:
 
 # The room's light level and motion, worked out on the screen from the camera's frames: no picture leaves the screen for
-# them. Off until a person switches it on, because the camera then keeps running (at the frame rate above); an eye can
-# show in the top bar while it does.
+# them. Off until a person switches it on, because the camera then keeps running (at the frame rate above); the core's dot
+# shows while it does. Motion can wake the screen, a setting of its own, off as well.
 switch:
   - platform: template
     id: screen_camera_sensing
@@ -35,6 +35,32 @@ switch:
       - lambda: id(screen_camera_plugin).set_sensing(true);
     turn_off_action:
       - lambda: id(screen_camera_plugin).set_sensing(false);
+  - platform: template
+    id: screen_camera_wake
+    name: "Camera motion wakes the screen"
+    icon: mdi:motion-sensor
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    entity_category: config
+    turn_on_action:
+      - lambda: id(screen_camera_plugin).set_wake_on_motion(true);
+    turn_off_action:
+      - lambda: id(screen_camera_plugin).set_wake_on_motion(false);
+
+# How long Motion stays on after the last movement: seconds for "someone walked past", minutes for "the room is empty".
+number:
+  - platform: template
+    id: screen_camera_motion_time_out
+    name: "Camera motion time-out"
+    icon: mdi:timer-outline
+    optimistic: true
+    restore_value: true
+    initial_value: 10
+    min_value: 5
+    max_value: 600
+    step: 5
+    unit_of_measurement: s
+    entity_category: config
 
 screen_camera:
   id: screen_camera_plugin
@@ -44,4 +70,4 @@ screen_camera:
   motion:
     name: "Motion"
     filters:
-      - delayed_off: 10s
+      - delayed_off: !lambda 'return id(screen_camera_motion_time_out).state * 1000;'

@@ -1,4 +1,4 @@
-# The firmware API (plugin API 0.17)
+# The firmware API (plugin API 0.18)
 
 A plugin's code runs on the screen as an ESPHome component. It talks to Tessera's core through one header:
 
@@ -9,13 +9,13 @@ A plugin's code runs on the screen as an ESPHome component. It talks to Tessera'
 The header lives in the Tessera repository at `components/smart_display/plugin_api.h`; it is the reference, and this
 page explains it. Everything is in namespace `tessera`.
 
-A manifest names the plugin API it was written for: `api: "0.8"`, or `"0.9"` up to `"0.17"` for the parts those
-brought; the plugin API 0.17 is the one the core offers now (on Tessera's dev branch; the release has an older one until
+A manifest names the plugin API it was written for: `api: "0.8"`, or `"0.9"` up to `"0.18"` for the parts those
+brought; the plugin API 0.18 is the one the core offers now (on Tessera's dev branch; the release has an older one until
 the next). Which cores a plugin builds on is under "Versions" at the end of this page.
 
 A plugin adds to the screen in a few kinds of parts: tiles on a page, cards over the page, tap actions for Tessera's own
-tiles, items in the top bar, rows on the settings page, and (0.14) screensavers, which the screen shows over the whole
-glass in standby. Each has its section below.
+tiles, items in the top bar, rows on the settings page, (0.14) screensavers, which the screen shows over the whole
+glass in standby, and (0.18) a popup over the screen for a moment that wants the eye now. Each has its section below.
 
 ## The component: `__init__.py`
 
@@ -613,6 +613,60 @@ minute, no pictures, every board), [`plugins/vinyl_deck/`](../plugins/vinyl_deck
 [`plugins/photo_clock/`](../plugins/photo_clock) (a face of the photos: the photo over the whole glass, the time in a
 corner).
 
+## A popup (0.18)
+
+A popup is the card an alert of Home Assistant shows, in the middle of the glass over the dimmed screen, with what your
+plugin draws in it: for a moment that wants the eye now, such as a voice assistant that listens, thinks and answers, a
+timer that went off or a question to answer. One shows at a time, of any plugin, over the page, a card, the settings
+and the screensaver, under an alert. Its top right corner holds a close key, the round key of every card's top bar;
+keep the first row of your parts `context.corner` from the right.
+
+```cpp
+class Asked : public tessera::Popup {
+ public:
+  void open(const tessera::PopupContext &c) override {
+    title_ = tessera::ui::label(c.parent, tessera::Font::HEADLINE, theme::INK);
+    lv_obj_set_width(title_, c.width);
+    tessera::ui::set_text(title_, "Tea is ready");
+  }
+  void on_tap() override { tessera::close_popup(plugin); }
+  static tessera::Plugin *plugin;
+ private:
+  lv_obj_t *title_{};
+};
+// From one of the plugin's own calls:
+tessera::show_popup(this, []() { return new Asked(); });
+```
+
+| Part | What it does |
+|---|---|
+| `show_popup(plugin, make, width)` | Shows the popup `make` returns, in place of the one shown now; the core deletes it. `PopupWidth::ALERT` (the default) is as wide as an alert's card on this glass, `PopupWidth::WIDE` the glass less its edge (a list, a row of keys). It lights a dark screen as `wake()` does: a popup is something to see. |
+| `close_popup(plugin)`, `popup_shown(plugin)` | Closes your popup (no `on_dismiss`), and says whether one of yours shows. |
+| `open(context)` | Make every part in `context.parent`. `context.width` is the room's width, `context.height` the most it may grow to on this glass, `context.corner` how far the first row keeps from the right for the close key. |
+| `on_interval(now_ms)`, `on_tick(epoch)`, `on_theme()` | Every 250 ms (words that come one by one), once a second, and when the look changes. |
+| `on_tap()` | A tap on the card, through the touch filter; `tap_point()` in the room's pixels. |
+| `on_dismiss()` | It goes by itself: its close key, a tap beside the card, the screen going dark, an update, an alert, another plugin's popup. The last call before it is deleted. |
+| `ui::animate(part, Motion, period_ms, delay_ms)`, `ui::still(part)` | A part that pulses (`Motion::PULSE`, its opacity), spins (`SPIN`, around its middle) or ripples (`RIPPLE`, growing by half while it fades), again and again, until `still` or until it is deleted. A delay makes parts move one after another. |
+
+Rules of a popup:
+
+- **Lay it out from the top; the card follows.** The card is as high as what is in its room, up to `context.height`,
+  and stays in the middle: hide a part that has nothing to say (a hidden part takes no room) instead of leaving a gap.
+  What lies below `context.height` is cut off, so show the first or the last lines of a long text yourself. It never
+  scrolls.
+- **Sizes as everywhere**: `ui::px`, `ui::mm`, the screen's fonts and line heights, theme roles. The same popup is
+  right on the CYD, a 4-inch square and a 10-inch tablet, lying down or standing up.
+- **Motion only in a popup**, whose moment is short. A tile, a card and a screensaver stand still: the screen draws a
+  moving part again in every frame. Keep a part that moves small, and still it when its moment is over.
+- **Shown by what a person did, or with a setting.** A popup lights the screen. A plugin that shows one without a
+  person asking (a timer, a doorbell of its own) has a setting for it, as a plugin that wakes the screen does.
+- **A popup may close itself** in any of its own calls; it leaves the glass at once and is deleted once that call
+  returned. Code of the plugin that keeps a pointer to its popup forgets it in `on_dismiss` and before `close_popup`.
+
+The voice assistant (`plugins/voice_assist`, `voice_popup.h`) is the example: a disc in the colour of where a question
+is, rings that ripple while it listens, an arc that turns and dots that pulse while Assist thinks, and under them what
+was heard and the answer as it is spoken, its last lines when it is long.
+
 ## Memory
 
 A screen has two kinds of memory. Inside the chip there are a few tens of kilobytes, shared with Wi-Fi and the network
@@ -789,7 +843,7 @@ camera without it.
 
 ## Versions
 
-A manifest names the plugin API it was written for: `api: "0.8"` up to `"0.17"`; the plugin API 0.17 is the one the core offers now (on Tessera's dev branch; the release has an older one until the next). When a
+A manifest names the plugin API it was written for: `api: "0.8"` up to `"0.18"`; the plugin API 0.18 is the one the core offers now (on Tessera's dev branch; the release has an older one until the next). When a
 screen is built, `smart_display.register_plugin()` compares it with the core's and stops the build with one sentence
 when it does not fit. A plugin fits a core when all three hold:
 
@@ -802,11 +856,12 @@ when it does not fit. A plugin fits a core when all three hold:
 **While the major is 0** a minor may still change a name or a signature as the API settles. The core lists those
 minors in `PLUGIN_API_BREAKS`, in `screen_manager/app/plugin_manifest.py` and in `components/smart_display/__init__.py`
 (a test keeps the two equal). Today the list holds one: 0.4, where `Plugin::on_tick` became `on_interval`. So with a
-core of 0.17:
+core of 0.18:
 
 | The manifest says | Builds? | Why |
 |---|---|---|
-| `api: "0.17"` | Yes | The core's own. |
+| `api: "0.18"` | Yes | The core's own. |
+| `api: "0.17"` | Yes | Same major, an older minor, and no break after 0.17. |
 | `api: "0.16"` | Yes | Same major, an older minor, and no break after 0.16. |
 | `api: "0.15"` | Yes | Same major, an older minor, and no break after 0.15. |
 | `api: "0.14"` | Yes | Same major, an older minor, and no break after 0.14. |
@@ -847,6 +902,7 @@ brought:
 | 0.15 | Nothing new in the C++: a tile's options of kind `entity` (the manifest) bring the chosen entities to `on_state` under `entities` ("What `on_state` gets"). `tools/check.py` refuses such an option in a plugin of an older `api`. |
 | 0.16 | `tessera::wake(plugin)`: the screen wakes as Home Assistant's Wake button does, for a plugin that senses someone come (an option of its own, off by default; at most once a second or two, from the screen's loop). |
 | 0.17 | Pictures in one system: `ui::picture(parent, Placeholder::NONE)`, a place without its block; `on_picture(place, PictureState)` on a tile, a card and a saver; the addresses `cover:`, `camera:` and `entity:` of the tile's own entity, and `step:` for the step's own picture (`saver:picture` still read); `ui::live`, a tile's place that streams its camera; and `tessera::capturing()` with the camera's dot. |
+| 0.18 | Popups: `Popup`, `PopupContext`, `PopupWidth`, `tessera::show_popup`, `close_popup` and `popup_shown`; `ui::animate` with `Motion` and `ui::still`, a part that pulses, spins or ripples. `tools/check.py` refuses these parts in a plugin of an older `api`. |
 
 A minor of the app's or the manifest's side only still counts: a plugin that uses what it brought needs an app that
 knows it ([MANIFEST.md](MANIFEST.md), "Which minor brought a field").

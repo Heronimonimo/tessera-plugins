@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.0 - 2026-10-20
+- A popup over the screen while it listens, thinks and answers, also when the screen was dark or asleep: rings that ripple while it listens, an arc that turns while it thinks, what it heard and the answer word by word as it is spoken. It stays 30 seconds after the answer, with a close key. A new setting, Show popup, turns it off.
+- The thinking sound stops as soon as a long answer starts to play, instead of going on over its first words.
+- Needs Tessera with plugin API 0.18.
+
 ## 0.2.3 - 2026-10-10
 - A new wake sound.
 

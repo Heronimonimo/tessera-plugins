@@ -16,7 +16,7 @@ plugin is done.
    carries out the plugin's `fetch` (JSON from a web service) with its own code.
 4. A tile of a plugin is `plugin:<plugin id>.<tile id>` in a screen's layout. The core gives it a card's drawing area
    while its page is on the glass, hands it the data the app sent (`on_state`), and ticks it once a second (`on_tick`).
-5. The plugin API is 0.17 on Tessera's dev branch; the release, Tessera 0.4.89 (firmware 0.57.0), has 0.14 until the
+5. The plugin API is 0.18 on Tessera's dev branch; the release, Tessera 0.4.89 (firmware 0.57.0), has 0.14 until the
    next one. A manifest names the lowest minor whose
    parts it uses: `api: "0.8"`, `"0.9"` for `Font::DIGITS`, `ui::covers`, `Tone::GOOD`, `ui::set_fill` and
    `ui::tone_color`, `"0.10"` for pictures on a tile, `ui::text` and `tap_point()`, `"0.11"` for `on_press` and
@@ -25,9 +25,10 @@ plugin is done.
    (`savers`, `add_saver`, `ui::takes_taps`, `tessera::wish`), `"0.15"` for a tile's options of kind `entity` (entities
    the person chooses per tile, sent under `entities`), `"0.16"` for `tessera::wake`, and `"0.17"` for pictures in one
    system (`Placeholder::NONE`, `on_picture`, the addresses `cover:`, `camera:`, `entity:` and `step:`, and
-   `tessera::capturing` for a plugin that uses the screen's own camera). A plugin builds on a core with the
+   `tessera::capturing` for a plugin that uses the screen's own camera), and `"0.18"` for a popup (`show_popup`, `Popup`,
+   `ui::animate`). A plugin builds on a core with the
    same major and at least its minor, unless a minor after its own changed a name: while the major is 0 that may
-   happen, and the core lists those minors (only 0.4 so far). So a plugin of 0.7 builds on a core of 0.17, one of 0.3
+   happen, and the core lists those minors (only 0.4 so far). So a plugin of 0.7 builds on a core of 0.18, one of 0.3
    does not (`docs/FIRMWARE_API.md`, "Versions"). A tile's entity of a domain Tessera draws no tile for (`plant`,
    `todo`) reaches `TileContext::entity` and `tessera::action` only with the firmware after 0.56.0, on Tessera's dev
    branch until its next release (`docs/FIRMWARE_API.md`, "A tile of an entity").

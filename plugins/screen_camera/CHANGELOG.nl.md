@@ -1,5 +1,12 @@
 # Wijzigingen
 
+## 0.3.1 - 2026-10-20
+- **Beweging wekt het scherm** (eerst uit) en **Beweging blijft aan** (5 seconden tot 10 minuten, eerst 10) zijn ook
+  instellingen.
+- De eigen stip van Tessera in de rechterbovenhoek van het scherm staat er nu zolang de camera in gebruik is, ook bij
+  het meten van licht en beweging; de bovenbalk-items **Camera in gebruik** en **Camera ziet beweging** van de plugin
+  zijn weg. Werkt met Tessera met plugin-API 0.17.
+
 ## 0.3.0 - 2026-10-20
 - Scherpere beelden: ze werden veel te sterk gecomprimeerd (JPEG-kwaliteit 12 van 100, nu 80). Elk beeld is groter,
   ongeveer 150 tot 300 KB.
@@ -9,11 +16,6 @@
   Home Assistant, bepaald door de camera op het scherm zelf: hiervoor gaat geen beeld van het scherm af. Zet
   **Lichtniveau en beweging** aan bij de instellingen van de plugin; de camera blijft dan draaien. Uitgezet is het
   lichtniveau onbekend.
-- **Beweging wekt het scherm** (eerst uit) en **Beweging blijft aan** (5 seconden tot 10 minuten, eerst 10) zijn ook
-  instellingen.
-- De eigen stip van Tessera in de rechterbovenhoek van het scherm staat er nu zolang de camera in gebruik is, ook bij
-  het meten van licht en beweging; de bovenbalk-items **Camera in gebruik** en **Camera ziet beweging** van de plugin
-  zijn weg. Werkt met Tessera met plugin-API 0.17.
 
 ## 0.2.0 - 2026-10-10
 - Ook op een bord dat zijn camera vanaf een pin van klok voorziet, zoals de M5Stack Tab5.

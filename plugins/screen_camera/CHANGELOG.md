@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.2 - 2026-10-20
+- Truer colours on the M5Stack Tab5 and the reTerminal D1001: black is black again. Their camera sent black as a dark
+  grey that the screen's chip could not take off, so dark parts of the picture looked pink and the whole picture
+  looked faded. The plugin now sets the sensor's own black level.
+
 ## 0.3.1 - 2026-10-20
 - **Motion wakes the screen** (off to start with) and **Motion time-out** (5 seconds to 10 minutes, 10 to start
   with) are settings now.

@@ -20,6 +20,11 @@ esp_video_camera:
 # The OmniVision OV02C10 of the Guition ESP32-P4 screens, which esp_cam_sensor has no driver for (components/ov02c10).
 ov02c10:
 
+# The SmartSens SC202CS (SC2356) of the M5Stack Tab5 and the reTerminal D1001: its black level, which their ESP32-P4's
+# image processor cannot take off (components/sc202cs). It leaves a sensor of another id alone.
+sc202cs:
+  i2c_id: ${CAMERA_I2C}
+
 # The room's light level and motion, worked out on the screen from the camera's frames: no picture leaves the screen for
 # them. Off until a person switches it on, because the camera then keeps running (at the frame rate above); the core's dot
 # shows while it does. Motion can wake the screen, a setting of its own, off as well.

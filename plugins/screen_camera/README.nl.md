@@ -53,4 +53,7 @@ camerastuurprogramma is `esp_video_camera` (github.com/n-IA-hane/esphome-esp-vid
 esphome/esphome#16944), ongewijzigd overgenomen in `components/esp_video_camera` onder de ESPHome-licentie, met zijn
 NOTICE. De OmniVision OV02C10 van de Guition-schermen, waarvoor Espressifs camerabibliotheek geen stuurprogramma heeft,
 is een eigen component ernaast, `components/ov02c10`: de sensordriver en zijn beeldafstemming (een voor rev3-chips, een
-voor oudere), met een NOTICE die zegt waar ze vandaan komen.
+voor oudere), met een NOTICE die zegt waar ze vandaan komen. De SmartSens SC202CS (SC2356) van de Tab5 en de reTerminal
+heeft ook een kleine eigen component, `components/sc202cs`: Espressifs driver start hem met een zwartniveau van 16 van
+255 dat de ISP eraf moet halen, wat een ESP32-P4 van voor rev3 niet kan, dus verlaagt de component het eigen
+zwartniveau van de sensor nadat de camera hem heeft gestart.

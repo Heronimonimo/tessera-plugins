@@ -1,6 +1,6 @@
 {
  "format": 1,
- "generated": "2026-10-20T07:34:30Z",
+ "generated": "2026-10-20T10:19:18Z",
  "plugin_api": "0.17",
  "blocked": [],
  "featured": [
@@ -1667,7 +1667,7 @@
    "status": "ok",
    "release": {
     "version": "0.2.0",
-    "sha": "ae25258d1a8d96ae9d6a521ee313179532a7ea08",
+    "sha": "3b4aeeec25033f64c4f1a2b44b21e1d6098e4cb3",
     "date": "2026-10-20"
    },
    "manifest": {
@@ -1710,6 +1710,7 @@
       "pictures": 1,
       "domains": [
        "person",
+       "camera",
        "image",
        "media_player"
       ],
@@ -1747,6 +1748,13 @@
         "label": "caption",
         "hint": "caption_hint",
         "default": true
+       },
+       {
+        "id": "live",
+        "kind": "toggle",
+        "label": "live",
+        "hint": "live_hint",
+        "default": true
        }
       ]
      }
@@ -1762,7 +1770,7 @@
      },
      "app": {
       "name": "Picture frame",
-      "summary": "A picture on a tile: a person's photo, an image entity, what plays, or any picture at an address.",
+      "summary": "A picture on a tile: a person's photo, a camera, an image entity, what plays, or any picture at an address.",
       "tile_name": "Picture",
       "tile_example": "A photo in a frame",
       "url": "Address",
@@ -1772,7 +1780,9 @@
       "fit_cover": "Cover",
       "fit_contain": "Contain",
       "caption": "Name over the picture",
-      "caption_hint": "The tile's name in the corner of the picture."
+      "caption_hint": "The tile's name in the corner of the picture.",
+      "live": "Live camera",
+      "live_hint": "A camera moves on screens that stream (the ESP32-P4 boards) and shows its pictures elsewhere. The name is not drawn over a live camera."
      }
     }
    },
@@ -1780,7 +1790,7 @@
     "en": "# Picture frame\n\nA tile that shows one picture: a person's photo from Home Assistant, an image entity, the cover of what a player\nplays, or any picture at an address you give it (a film poster from The Movie Database, a photo from Unsplash). The\npicture fills the tile, or shows whole, with the tile's name in its corner.\n\nIt is the smallest plugin with pictures on a tile, there to show how pictures reach a plugin's tile\n([docs/FIRMWARE_API.md](../../docs/FIRMWARE_API.md), \"Pictures on a tile\"): the plugin lays out a place and names an\naddress; Tessera's app fetches the picture and the screen shows it. A plugin never fetches anything itself.\n\n## Set up\n\n1. Add the plugin to a screen in Tessera. The screen builds once.\n2. In Layout, place the **Picture** tile from the library's Plugins group, at any size.\n3. In the inspector, choose an entity whose picture it shows (a person, an image entity, a media player), or fill in\n   the **Address** of a picture on `image.tmdb.org` or `images.unsplash.com`, such as\n   `https://image.tmdb.org/t/p/w342/<poster>.jpg`. An address wins over the entity's picture.\n4. **Fit**: cover fills the tile; contain shows the whole picture on the tile's own colour.\n\n## Good to know\n\n- A board without the memory for pictures (the CYD, the Waveshare 3.5-inch, the Hosyond 4-inch) shows \"No picture\"\n  instead; the other boards show it.\n- The picture comes once and stays while the tile is there; a new address, or a new picture of the entity, replaces it.\n- A picture that does not come (a wrong address, a host that is down) leaves a soft block; the screen asks again\n  later.\n\n## Privacy\n\nFor an address you fill in, Tessera (the app in Home Assistant, not the screen) fetches that picture from\n`image.tmdb.org` or `images.unsplash.com`, which see the address of your Home Assistant and the picture's address,\nnothing else. An entity's own picture stays within Home Assistant. The screen never reaches the internet.\n"
    },
    "changelog": {
-    "en": "# Changelog\n\n## 0.2.0\n- What a media player plays now shows on the tile: the picture comes through Home Assistant's own proxy for the\n  player, as the screen's media card has it (before, a player's picture address was refused). An image entity and a\n  person show their own picture the same way (plugin API 0.17). Where a picture does not come, \"No picture\" stands in\n  the middle of the tile. Needs a screen with plugin API 0.17.\n\n## 0.1.0\n- First version: a tile that shows one picture, an entity's own or one at an address, cover or contain, with the\n  tile's name over it. Needs a screen with plugin API 0.10.\n"
+    "en": "# Changelog\n\n## 0.2.0\n- What a media player plays now shows on the tile: the picture comes through Home Assistant's own proxy for the\n  player, as the screen's media card has it (before, a player's picture address was refused). An image entity and a\n  person show their own picture the same way (plugin API 0.17). Where a picture does not come, \"No picture\" stands in\n  the middle of the tile. Needs a screen with plugin API 0.17.\n- A camera too: its picture on any screen with pictures, and live on the screens that stream (the ESP32-P4 boards),\n  with the option Live camera (on by default). The name is not drawn over a live camera.\n\n## 0.1.0\n- First version: a tile that shows one picture, an entity's own or one at an address, cover or contain, with the\n  tile's name over it. Needs a screen with plugin API 0.10.\n"
    }
   },
   {

@@ -1,8 +1,32 @@
 {
  "format": 1,
  "plugins": {
+  "cinema": {
+   "likes": 1,
+   "rating": null,
+   "ratings": 0,
+   "homes": 0
+  },
   "custom_card": {
    "likes": 2,
+   "rating": null,
+   "ratings": 0,
+   "homes": 0
+  },
+  "electricity_price": {
+   "likes": 1,
+   "rating": null,
+   "ratings": 0,
+   "homes": 0
+  },
+  "microplant": {
+   "likes": 1,
+   "rating": null,
+   "ratings": 0,
+   "homes": 0
+  },
+  "new_music": {
+   "likes": 1,
    "rating": null,
    "ratings": 0,
    "homes": 0
@@ -32,6 +56,12 @@
    "homes": 0
   },
   "vinyl_deck": {
+   "likes": 1,
+   "rating": null,
+   "ratings": 0,
+   "homes": 0
+  },
+  "voice_assist": {
    "likes": 1,
    "rating": null,
    "ratings": 0,

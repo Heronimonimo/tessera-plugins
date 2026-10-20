@@ -21,10 +21,28 @@ the screen's top bar, so whoever stands in front of it knows.
    dashboard with a Picture entity or a Picture glance card.
 3. Optional: add **Camera in use** to a page's top bar (Top bar, Add, From plugins). It shows while pictures leave the
    screen: "Live" for a stream, "Camera" for a picture now and then.
+4. Optional: switch on **Light level and motion** in the plugin's settings (the screen's Plugins tab in Tessera, or
+   **Camera light level and motion** on the device in Home Assistant). Then **Light level** and **Motion** follow the
+   room.
+
+## Light level and motion
+
+Off until you switch it on. While it is on, the camera keeps running and the screen works out two things from it:
+
+- **Light level**, an estimate in lux from the picture's brightness, the exposure time and the sensor's gain. It is right
+  in proportion (twice the light reads about twice the lux), not exact: pick the thresholds of your automations by
+  looking at what it reads in your room. It updates every ten seconds, and at once when a light goes on or off.
+- **Motion**, from the picture compared in a coarse grid a few times a second; on for at least ten seconds when part of
+  it changes. A light switched on or off (most of the picture brighter or darker at once) is not motion: for three
+  seconds after it, while the camera adjusts, motion is not judged.
+
+No picture is encoded or sent for them: only the two values leave the screen. **Camera senses motion** in the top bar
+shows an eye while it runs.
 
 ## Privacy
 
 Nothing leaves the screen until Home Assistant asks for a picture, and every picture goes only to your Home Assistant.
+With light level and motion on, the camera looks all the time, but what it sees stays on the screen.
 Everyone who can open the screen's device or a dashboard with its camera can see through it. To stop that for a while,
 disable the camera entity in Home Assistant; to stop it for good, remove the plugin from the screen.
 

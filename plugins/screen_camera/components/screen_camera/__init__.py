@@ -6,22 +6,42 @@ from the manifest and translations/ beside this folder.
 """
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.components import smart_display
-from esphome.const import CONF_ID
+from esphome.components import binary_sensor, sensor, smart_display
+from esphome.const import (
+    CONF_ID,
+    DEVICE_CLASS_ILLUMINANCE,
+    DEVICE_CLASS_MOTION,
+    STATE_CLASS_MEASUREMENT,
+    UNIT_LUX,
+)
 
 DEPENDENCIES = ["smart_display", "camera"]
+AUTO_LOAD = ["sensor", "binary_sensor"]
 
 CONF_CAMERA = "camera"
+CONF_ILLUMINANCE = "illuminance"
+CONF_MOTION = "motion"
 
 screen_camera_ns = cg.esphome_ns.namespace("screen_camera")
-# ESPHome's camera base (esphome/components/camera/camera.h), which declares no class of its own in Python.
+# ESPHome's camera base (esphome/components/camera/camera.h), which declares no class of its own in Python, and
+# esp_video_camera's camera beside this folder: sensing takes its frames and its sensor's exposure, which another
+# camera does not have, so a wrong id fails here rather than at run time. ESPHome matches an id's type by name.
 Camera = cg.esphome_ns.namespace("camera").class_("Camera", cg.EntityBase, cg.Component)
+ESPVideoCamera = cg.esphome_ns.namespace("esp_video_camera").class_("ESPVideoCamera", Camera)
 ScreenCamera = screen_camera_ns.class_("ScreenCamera", cg.Component)
 
 CONFIG_SCHEMA = cv.Schema(
     {
         cv.GenerateID(): cv.declare_id(ScreenCamera),
-        cv.Required(CONF_CAMERA): cv.use_id(Camera),
+        cv.Required(CONF_CAMERA): cv.use_id(ESPVideoCamera),
+        # The room's light level and motion, from the camera's frames on the screen (screen_camera.h).
+        cv.Optional(CONF_ILLUMINANCE): sensor.sensor_schema(
+            unit_of_measurement=UNIT_LUX,
+            accuracy_decimals=1,
+            device_class=DEVICE_CLASS_ILLUMINANCE,
+            state_class=STATE_CLASS_MEASUREMENT,
+        ),
+        cv.Optional(CONF_MOTION): binary_sensor.binary_sensor_schema(device_class=DEVICE_CLASS_MOTION),
     }
 ).extend(cv.COMPONENT_SCHEMA)
 
@@ -31,3 +51,7 @@ async def to_code(config):
     await cg.register_component(var, config)
     await smart_display.register_plugin(var, __file__)
     cg.add(var.set_camera(await cg.get_variable(config[CONF_CAMERA])))
+    if CONF_ILLUMINANCE in config:
+        cg.add(var.set_illuminance(await sensor.new_sensor(config[CONF_ILLUMINANCE])))
+    if CONF_MOTION in config:
+        cg.add(var.set_motion(await binary_sensor.new_binary_sensor(config[CONF_MOTION])))

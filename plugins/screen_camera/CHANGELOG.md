@@ -5,6 +5,10 @@
   about 150 to 300 KB.
 - Also the camera of the Guition ESP32-P4 screens (the OmniVision OV02C10 of the JC8012P4A1, JC1060P470 V2 and
   JC4880P443 in their camera version), on a Tessera whose board names it. Tried on the JC8012P4A1 V3.
+- New, off until you switch it on: **Light level** (lux, an estimate) and **Motion** on the screen's device in Home
+  Assistant, worked out from the camera on the screen itself: no picture leaves the screen for them. Switch on
+  **Light level and motion** in the plugin's settings; the camera then keeps running. Optional top bar item
+  **Camera senses motion**: an eye while it does. Switched off, the light level reads unknown.
 
 ## 0.2.0 - 2026-10-10
 - Also on a board that clocks its camera from a pin, such as the M5Stack Tab5.

@@ -5,15 +5,14 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  *
- * OV02C10 driver for esp_cam_sensor. Register tables from github.com/sullb/esphome-p4-csi-camera (MIT), after the
- * OV02C10 work in espressif/esp-video-components pull request #46.
+ * OV02C10 driver for esp_cam_sensor. The register tables and this file's structure are Guition's, as their
+ * esp_cam_sensor copy publishes them under Apache-2.0, through github.com/sullb/esphome-p4-csi-camera (MIT).
  *
- * Changed for Tessera's camera plugins (2026-10-19, Jeroen Peters, @Heronimonimo): exposure and analog gain on the OV02C10's own registers
- * (0x3501, 0x3508, as the Linux driver drivers/media/i2c/ov02c10.c writes them), so esp_video's ISP pipeline runs auto
- * exposure; mirror and flip as the Linux driver sets them, keeping the Bayer order; the OV5640 auto-exposure and banding
- * registers the earlier copy wrote are gone; a sensor with another chip id is no longer taken for an OV02C10.
- * 0.2.2: flip moves the picture up a row where the window has no row to spare below (1288x728).
- * 0.3.1: the true view (0x3820 bit 3 set, as Linux) by default; mirror is the mirror image.
+ * Changed for Tessera's camera plugins (2026-10-19, Jeroen Peters, @Heronimonimo): exposure and analog gain on the
+ * OV02C10's own registers (0x3501, 0x3508), so esp_video's ISP pipeline runs auto exposure; mirror and flip that keep
+ * the Bayer order, with the true view by default; the OV5640 auto-exposure and banding registers the earlier copy
+ * wrote are gone; a sensor with another chip id is no longer taken for an OV02C10. Which register does what was looked
+ * up in Linux's drivers/media/i2c/ov02c10.c; no code or table was taken from it.
  */
 
 #include <inttypes.h>

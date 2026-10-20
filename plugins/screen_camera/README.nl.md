@@ -32,7 +32,7 @@ even te stoppen schakel je de camera-entiteit in Home Assistant uit; voorgoed ha
 
 De camera is ESPHome's camera met id `ts_camera` (de feature `camera`), zodat een andere plugin erop kan bouwen. Het
 camerastuurprogramma is `esp_video_camera` (github.com/n-IA-hane/esphome-esp-video-camera, uit ESPHome pull request
-esphome/esphome#16944), in `components/esp_video_camera` onder de ESPHome-licentie, met zijn NOTICE. Tessera voegt er
-de OmniVision OV02C10 aan toe, waarvoor Espressifs camerabibliotheek geen stuurprogramma heeft: een sensordriver ernaast
-(`ov02c10_sensor.c`) en zijn beeldafstemming (`build_stubs/ov02c10_ipa`, een voor rev3-chips en een voor oudere); de
-NOTICE zegt waar ze vandaan komen.
+esphome/esphome#16944), ongewijzigd overgenomen in `components/esp_video_camera` onder de ESPHome-licentie, met zijn
+NOTICE. De OmniVision OV02C10 van de Guition-schermen, waarvoor Espressifs camerabibliotheek geen stuurprogramma heeft,
+is een eigen component ernaast, `components/ov02c10`: de sensordriver en zijn beeldafstemming (een voor rev3-chips, een
+voor oudere), met een NOTICE die zegt waar ze vandaan komen.

@@ -17,7 +17,6 @@ extern "C" {
 #define OV02C10_REG_SLEEP_MODE       0x0100
 #define OV02C10_REG_MIPI_CTRL00      0x4800
 #define OV02C10_REG_FRAME_OFF_NUMBER 0x4202
-#define OV5640_REG_PAD_OUT          0x300d
 
 
 #ifdef __cplusplus

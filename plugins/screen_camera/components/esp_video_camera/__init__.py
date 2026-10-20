@@ -5,8 +5,7 @@ Publishes the Espressif esp_video (V4L2) stream to Home Assistant as a native
 hardware JPEG encoder, and with USB-UVC cameras.
 
 All Espressif sources are pulled through the IDF component manager as managed
-components. The one exception is the OV02C10 sensor driver and its image tuning
-(ov02c10_sensor.c, build_stubs/ov02c10_ipa), which esp_cam_sensor does not have.
+components. Nothing is vendored.
 """
 
 from pathlib import Path
@@ -228,24 +227,6 @@ async def to_code(config):
         add_idf_sdkconfig_option(
             f"CONFIG_CAMERA_{sensor}_AUTO_DETECT_MIPI_INTERFACE_SENSOR", True
         )
-
-    # The OmniVision OV02C10 of the Guition ESP32-P4 screens (PID 0x5602, SCCB
-    # 0x36). esp_cam_sensor has no driver for it, so ov02c10_sensor.c beside this
-    # file brings one, with its auto-detect entry (its options are fixed in
-    # ov02c10_compat.h, not in Kconfig); it rejects a sensor of another id, so the
-    # other sensors at 0x36 are still found. Nor does esp_cam_sensor bring its
-    # image tuning: an empty IDF component adds it to the files esp_ipa compiles
-    # (its project_include.cmake picks the one for the chip's revision); ESP-IDF
-    # builds every component in the project's components folder.
-    if not config[CONF_DEVICE].startswith("uvc"):
-        ipa = Path(__file__).parent / "build_stubs" / "ov02c10_ipa"
-        for name in (
-            "CMakeLists.txt",
-            "project_include.cmake",
-            "ov02c10_p4_eco4.json",
-            "ov02c10_p4_eco5.json",
-        ):
-            add_extra_build_file(f"components/ov02c10_ipa/{name}", ipa / name)
 
     # SC202CS colour tuning. The SC2356 module is the same SC202CS silicon
     # (PID 0xeb52 @ SCCB 0x36) but ships an IPA JSON with noticeably better

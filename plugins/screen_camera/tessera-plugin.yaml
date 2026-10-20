@@ -16,7 +16,7 @@ requires:
   features: [camera_sensor]
 provides: [camera]
 boards: any
-flash_kb: 300
+flash_kb: 310
 
 bar_items:
   - { id: watching, label: bar_watching, icon: cctv, example: bar_example }

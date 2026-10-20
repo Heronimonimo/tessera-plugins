@@ -32,7 +32,7 @@ disable the camera entity in Home Assistant; to stop it for good, remove the plu
 
 The camera is ESPHome's camera with id `ts_camera` (the feature `camera`), so another plugin can build on it. The
 camera driver is `esp_video_camera` (github.com/n-IA-hane/esphome-esp-video-camera, from ESPHome pull request
-esphome/esphome#16944), in `components/esp_video_camera` under the ESPHome License, with its NOTICE. Tessera adds the
-OmniVision OV02C10 to it, which Espressif's camera library has no driver for: a sensor driver beside it
-(`ov02c10_sensor.c`) and its image tuning (`build_stubs/ov02c10_ipa`, one for rev3 chips and one for older ones); the
-NOTICE says where they come from.
+esphome/esphome#16944), copied unchanged into `components/esp_video_camera` under the ESPHome License, with its NOTICE.
+The OmniVision OV02C10 of the Guition screens, which Espressif's camera library has no driver for, is a component of its
+own beside it, `components/ov02c10`: the sensor driver and its image tuning (one for rev3 chips, one for older ones),
+with a NOTICE that says where they come from.

@@ -642,7 +642,7 @@ tessera::show_popup(this, []() { return new Asked(); });
 |---|---|
 | `show_popup(plugin, make, width)` | Shows the popup `make` returns, in place of the one shown now; the core deletes it. `PopupWidth::ALERT` (the default) is as wide as an alert's card on this glass, `PopupWidth::WIDE` the glass less its edge (a list, a row of keys). It lights a dark screen as `wake()` does: a popup is something to see. |
 | `close_popup(plugin)`, `popup_shown(plugin)` | Closes your popup (no `on_dismiss`), and says whether one of yours shows. |
-| `open(context)` | Make every part in `context.parent`. `context.width` is the room's width, `context.height` the most it may grow to on this glass, `context.corner` how far the first row keeps from the right for the close key. |
+| `open(context)` | Make every part in `context.parent`. `context.width` is the room's width, `context.height` the most it may grow to on this glass, `context.key` the close key's size (give a first part of yours, a disc or an icon in the room's top left corner, that size: it then stands on one line with the key, as far from the card's top and side), `context.corner` how far the first row keeps from the right for the key. |
 | `on_interval(now_ms)`, `on_tick(epoch)`, `on_theme()` | Every 250 ms (words that come one by one), once a second, and when the look changes. |
 | `on_tap()` | A tap on the card, through the touch filter; `tap_point()` in the room's pixels. |
 | `on_dismiss()` | It goes by itself: its close key, a tap beside the card, the screen going dark, an update, an alert, another plugin's popup. The last call before it is deleted. |
@@ -716,6 +716,7 @@ The screen's look is the same on every tile, so a plugin draws with the core's s
 | `ui::picture(parent, Placeholder::NONE)`, `on_picture(place, PictureState)`, `ui::live(place)` (0.17) | A place without its block, what came of a place's picture, and a tile's place that streams its camera, above. |
 | `tessera::capturing(plugin, Capture::CAMERA, on)` (0.17) | The plugin uses the screen's own camera on the screen itself ("The screen's own camera", below). |
 | `ui::takes_taps(part)` (0.14) | A part of a screensaver a finger may tap without waking the screen ("A screensaver", above). |
+| `ui::animate(part, Motion, period_ms, delay_ms)`, `ui::still(part)` (0.18) | A part of a popup that pulses, spins or ripples while something goes on, and stops ("A popup", above). Only in a popup. |
 | `ui::color(Role)` | A colour by its role. |
 | `ui::icon(codepoint)` | An icon of Tessera's set as text, for a label in `Font::ICON` or `ICON_SMALL`. |
 
@@ -766,6 +767,7 @@ number. Before 0.9 a block has no colour by meaning: `TRACK` and `ACCENT`, or th
 | `tessera::action(service, entity, fields)` | The same with a JSON object of fields of any type (0.12, "Actions"). |
 | `tessera::wish(entity, field, value)` | A value a finger changed (0.14): it shows at once and Home Assistant squares it ("A screensaver", "Values a finger changes"). |
 | `tessera::open_card(plugin_id, card, entity, tile, title)`, `close_card()` | Open or close a card. |
+| `tessera::show_popup(plugin, make, width)`, `close_popup(plugin)`, `popup_shown(plugin)` | Show, close or ask after a popup (0.18, "A popup"). |
 | `tessera::tap_point()` | Where the finger of the tile's `on_tap` was (0.10), or of a card's (0.12), in its own pixels; `-1,-1` when unknown. Valid during `on_tap`. |
 | `tessera::send(plugin, request)` | Ask the app (see "Questions to the app"). |
 
@@ -818,8 +820,10 @@ number. Before 0.9 a block has no colour by meaning: `TRACK` and `ACCENT`, or th
 
 ## Not in the API yet
 
-A plugin's own messages beyond Home Assistant commands, and faces of the screensaver's camera step (a plugin has faces
-of the clock, the music and the photos, and steps of its own, 0.14). Pictures are on tiles (0.10), cards (0.13) and
+A plugin's own messages beyond Home Assistant commands, faces of the screensaver's camera step (a plugin has faces
+of the clock, the music and the photos, and steps of its own, 0.14), pictures in a popup, and a popup that scrolls.
+Home Assistant gives an ESPHome screen the words of an Assist answer in one piece at its end, never while an AI writes
+them, so a popup cannot show an answer before it is done. Pictures are on tiles (0.10), cards (0.13) and
 screensavers (0.14). A plugin can bring a camera (0.8): the feature `camera`, an ESPHome `esp_video_camera` with the id
 `ts_camera` that Home Assistant shows as any ESPHome camera, made from a board's camera sensor (the feature
 `camera_sensor`), as [`plugins/screen_camera/`](../plugins/screen_camera) does. Each will raise the minor.

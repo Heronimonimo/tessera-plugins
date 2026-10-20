@@ -13,7 +13,10 @@ A plugin is right for something that not every screen needs and that the screen 
 - a tile that only needs the screen's clock (a countdown, a timer of your own);
 - hardware on the board or on its free pins (a sensor, a relay, a speaker), with settings a person can change;
 - a screensaver: another look for the clock, the music or the photos in standby, or a step of its own (the rain radar
-  while it rains), below in "A screensaver".
+  while it rains), below in "A screensaver";
+- a popup (0.18): a card over the screen for a moment that wants the eye now (a voice assistant that listens and
+  answers, a timer that went off), with a close key and parts that pulse, spin or ripple
+  ([FIRMWARE_API.md](FIRMWARE_API.md), "A popup").
 
 It is the wrong tool for:
 

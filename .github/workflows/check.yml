@@ -1,11 +1,11 @@
 # Every push and pull request: every plugin and the template pass the Tessera app's own manifest check and the rules
 # of tools/check.py. A pull request that lists a plugin in community/ also has it checked at its release, and is made
 # by the owner of the repository it names (docs/PUBLISHING.md, "Your own plugin, in a repository of your own"). The
-# likes alone check nothing.
+# likes and stats alone check nothing.
 name: check
 on:
   push:
-    paths-ignore: ["likes.json"]
+    paths-ignore: ["likes.json", "stats.json"]
   pull_request:
   workflow_dispatch:
 jobs:

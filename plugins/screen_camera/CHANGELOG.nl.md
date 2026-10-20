@@ -1,5 +1,8 @@
 # Wijzigingen
 
+## 0.3.0 - 2026-10-19
+- Ook de camera van de Guition ESP32-P4-schermen (de OmniVision OV02C10 van de JC8012P4A1, JC1060P470 V2 en
+  JC4880P443 in hun cameraversie), op een Tessera waarvan het bord hem noemt. Geprobeerd op de JC8012P4A1 V3.
 ## 0.2.1 - 2026-10-19
 - Scherpere beelden: ze werden veel te sterk gecomprimeerd (JPEG-kwaliteit 12 van 100, nu 80). Elk beeld is groter,
   ongeveer 150 tot 300 KB.

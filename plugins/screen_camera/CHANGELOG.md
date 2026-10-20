@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.3.0 - 2026-10-19
+- Also the camera of the Guition ESP32-P4 screens (the OmniVision OV02C10 of the JC8012P4A1, JC1060P470 V2 and
+  JC4880P443 in their camera version), on a Tessera whose board names it. Tried on the JC8012P4A1 V3.
 ## 0.2.1 - 2026-10-19
 - Sharper pictures: they were compressed far too much (JPEG quality 12 of 100, now 80). Each picture is larger,
   about 150 to 300 KB.

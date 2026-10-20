@@ -1121,6 +1121,55 @@ bool ESPVideoCamera::start_jpeg_frame_consumer(
   return true;
 }
 
+// Tessera: see the header. Exposure is in sensor lines (V4L2_CID_EXPOSURE), each the format's tline_ns long; gain is
+// either a number (relative to its minimum) or an index into a menu of gains (relative to the menu's first).
+bool ESPVideoCamera::read_sensor_exposure(float *exposure_us, float *gain) {
+  if (this->capture_fd_ < 0)
+    return false;
+  struct v4l2_ext_control control {};
+  struct v4l2_ext_controls controls {};
+  controls.count = 1;
+  controls.controls = &control;
+
+  control.id = V4L2_CID_EXPOSURE;
+  controls.ctrl_class = V4L2_CID_CAMERA_CLASS;
+  if (ioctl(this->capture_fd_, VIDIOC_G_EXT_CTRLS, &controls) != 0)
+    return false;
+  const int32_t lines = control.value;
+  esp_cam_sensor_format_t format {};
+  if (ioctl(this->capture_fd_, VIDIOC_G_SENSOR_FMT, &format) != 0 || format.isp_info == nullptr ||
+      format.isp_info->isp_v1_info.tline_ns == 0)
+    return false;
+  *exposure_us = lines * (format.isp_info->isp_v1_info.tline_ns / 1000.0f);
+
+  struct v4l2_query_ext_ctrl query {};
+  query.id = V4L2_CID_GAIN;
+  if (ioctl(this->capture_fd_, VIDIOC_QUERY_EXT_CTRL, &query) != 0) {
+    *gain = 1.0f;  // a sensor without a gain control: exposure alone
+    return true;
+  }
+  control = {};
+  control.id = V4L2_CID_GAIN;
+  controls.ctrl_class = V4L2_CID_USER_CLASS;
+  if (ioctl(this->capture_fd_, VIDIOC_G_EXT_CTRLS, &controls) != 0)
+    return false;
+  if (query.type == V4L2_CTRL_TYPE_INTEGER_MENU) {
+    struct v4l2_querymenu menu {};
+    menu.id = V4L2_CID_GAIN;
+    menu.index = query.minimum;
+    if (ioctl(this->capture_fd_, VIDIOC_QUERYMENU, &menu) != 0 || menu.value <= 0)
+      return false;
+    const float base = static_cast<float>(menu.value);
+    menu.index = control.value;
+    if (ioctl(this->capture_fd_, VIDIOC_QUERYMENU, &menu) != 0)
+      return false;
+    *gain = menu.value / base;
+  } else {
+    *gain = query.minimum > 0 ? static_cast<float>(control.value) / query.minimum : 1.0f;
+  }
+  return *gain > 0;
+}
+
 void ESPVideoCamera::stop_jpeg_frame_consumer(
     JpegFrameConsumer *consumer) {
   if (consumer == nullptr ||

@@ -23,14 +23,17 @@ CONF_ILLUMINANCE = "illuminance"
 CONF_MOTION = "motion"
 
 screen_camera_ns = cg.esphome_ns.namespace("screen_camera")
-# ESPHome's camera base (esphome/components/camera/camera.h), which declares no class of its own in Python.
+# ESPHome's camera base (esphome/components/camera/camera.h), which declares no class of its own in Python, and
+# esp_video_camera's camera beside this folder: sensing takes its frames and its sensor's exposure, which another
+# camera does not have, so a wrong id fails here rather than at run time. ESPHome matches an id's type by name.
 Camera = cg.esphome_ns.namespace("camera").class_("Camera", cg.EntityBase, cg.Component)
+ESPVideoCamera = cg.esphome_ns.namespace("esp_video_camera").class_("ESPVideoCamera", Camera)
 ScreenCamera = screen_camera_ns.class_("ScreenCamera", cg.Component)
 
 CONFIG_SCHEMA = cv.Schema(
     {
         cv.GenerateID(): cv.declare_id(ScreenCamera),
-        cv.Required(CONF_CAMERA): cv.use_id(Camera),
+        cv.Required(CONF_CAMERA): cv.use_id(ESPVideoCamera),
         # The room's light level and motion, from the camera's frames on the screen (screen_camera.h).
         cv.Optional(CONF_ILLUMINANCE): sensor.sensor_schema(
             unit_of_measurement=UNIT_LUX,

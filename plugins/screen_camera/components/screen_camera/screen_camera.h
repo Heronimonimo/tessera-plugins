@@ -33,7 +33,7 @@ class ScreenCamera : public Component,
   float get_setup_priority() const override { return setup_priority::LATE; }
   void on_interval(uint32_t now_ms) override;
 
-  void set_camera(camera::Camera *c) { camera_ = c; }
+  void set_camera(esp_video_camera::ESPVideoCamera *c) { camera_ = c; }
 #ifdef USE_SENSOR
   void set_illuminance(sensor::Sensor *s) { illuminance_ = s; }
 #endif
@@ -61,11 +61,9 @@ class ScreenCamera : public Component,
 
   void apply_sensing_();
   void publish_sensing_();
-  esp_video_camera::ESPVideoCamera *video_() const {
-    return static_cast<esp_video_camera::ESPVideoCamera *>(camera_);
-  }
+  esp_video_camera::ESPVideoCamera *video_() const { return camera_; }
 
-  camera::Camera *camera_{};
+  esp_video_camera::ESPVideoCamera *camera_{};
 #ifdef USE_SENSOR
   sensor::Sensor *illuminance_{};
 #endif

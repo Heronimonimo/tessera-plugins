@@ -100,6 +100,14 @@ void ScreenCamera::apply_sensing_() {
     ESP_LOGI(TAG, "Sensing stopped");
   }
   sensing_on_ = on;
+#ifdef USE_SENSOR
+  // Off: the light level reads unknown in Home Assistant, not the last value it had.
+  if (!on && illuminance_ != nullptr) {
+    illuminance_->publish_state(NAN);
+    published_lux_x10_ = UINT32_MAX;
+    lux_x10_.store(UINT32_MAX);
+  }
+#endif
   publish_sensing_();
   tessera::refresh();
 }

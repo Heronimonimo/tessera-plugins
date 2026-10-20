@@ -9,7 +9,9 @@ staat er een camera in de bovenbalk van het scherm, zodat wie ervoor staat het w
 
 ## Wat je nodig hebt
 
-- Een scherm waarvan het bord een camera heeft die Tessera kan aanzetten en bereiken: de reTerminal D1001 of de M5Stack Tab5.
+- Een scherm waarvan het bord een camera heeft die Tessera kan aanzetten en bereiken: de reTerminal D1001, de M5Stack
+  Tab5, of een Guition ESP32-P4-scherm in de cameraversie ("C" in de modelnaam): de JC8012P4A1 (ook de V2 en V3), de
+  JC1060P470 V2 en de JC4880P443. De Guition-schermen zijn nieuw en alleen op de JC8012P4A1 V3 geprobeerd.
 - Verder niets in Home Assistant: de camera hoort bij het apparaat van het scherm in de ESPHome-integratie.
 
 ## Instellen
@@ -31,4 +33,6 @@ even te stoppen schakel je de camera-entiteit in Home Assistant uit; voorgoed ha
 De camera is ESPHome's camera met id `ts_camera` (de feature `camera`), zodat een andere plugin erop kan bouwen. Het
 camerastuurprogramma is `esp_video_camera` (github.com/n-IA-hane/esphome-esp-video-camera, uit ESPHome pull request
 esphome/esphome#16944), ongewijzigd overgenomen in `components/esp_video_camera` onder de ESPHome-licentie, met zijn
-NOTICE.
+NOTICE. De OmniVision OV02C10 van de Guition-schermen, waarvoor Espressifs camerabibliotheek geen stuurprogramma heeft,
+is een eigen component ernaast, `components/ov02c10`: de sensordriver en zijn beeldafstemming (een voor rev3-chips, een
+voor oudere), met een NOTICE die zegt waar ze vandaan komen.

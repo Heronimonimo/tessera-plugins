@@ -3,7 +3,7 @@
 # camera in the top bar shows while it does. It drives the board's camera sensor (the feature camera_sensor: the
 # board powers it and names its I2C bus), and brings the camera as `ts_camera` for a plugin that builds on it.
 id: screen_camera
-version: 0.2.1
+version: 0.3.0
 api: "0.8"
 icon: cctv
 maintainer: MaxGramser
@@ -16,7 +16,7 @@ requires:
   features: [camera_sensor]
 provides: [camera]
 boards: any
-flash_kb: 300
+flash_kb: 310
 
 bar_items:
   - { id: watching, label: bar_watching, icon: cctv, example: bar_example }

@@ -14,7 +14,7 @@ esp_video_camera:
   xclk_pin: ${CAMERA_XCLK_PIN}
   device: jpeg
   resolution: auto
-  jpeg_quality: 12
+  jpeg_quality: 80                 # 1 to 100, higher is better: a picture of about 150 to 300 KB
   max_framerate: 5
 
 screen_camera:

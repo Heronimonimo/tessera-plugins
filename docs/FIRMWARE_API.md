@@ -1,4 +1,4 @@
-# The firmware API (plugin API 0.15)
+# The firmware API (plugin API 0.17)
 
 A plugin's code runs on the screen as an ESPHome component. It talks to Tessera's core through one header:
 
@@ -9,8 +9,8 @@ A plugin's code runs on the screen as an ESPHome component. It talks to Tessera'
 The header lives in the Tessera repository at `components/smart_display/plugin_api.h`; it is the reference, and this
 page explains it. Everything is in namespace `tessera`.
 
-A manifest names the plugin API it was written for: `api: "0.8"`, or `"0.9"` up to `"0.15"` for the parts those
-brought; the plugin API 0.15 is the one the core offers now (on Tessera's dev branch; the release has an older one until
+A manifest names the plugin API it was written for: `api: "0.8"`, or `"0.9"` up to `"0.17"` for the parts those
+brought; the plugin API 0.17 is the one the core offers now (on Tessera's dev branch; the release has an older one until
 the next). Which cores a plugin builds on is under "Versions" at the end of this page.
 
 A plugin adds to the screen in a few kinds of parts: tiles on a page, cards over the page, tap actions for Tessera's own
@@ -416,6 +416,8 @@ void on_state(JsonObjectConst data) override {
 |---|---|
 | `ui::pictures()` | Whether this screen shows pictures at all. A board without the memory for them (the CYD, the Waveshare 3.5-inch, the Hosyond 4-inch) shows none: lay the tile out without the places then, as you would without a picture. |
 | `ui::picture(parent)` | A place for a picture, sized and placed by you as any object (`lv_obj_set_size`, `lv_obj_set_pos`), in `create()`. A soft block (`theme::TRACK`) until its picture is there. Its corners are a key's; a radius of your own (`lv_obj_set_style_radius`) is taken over by the picture. |
+| `ui::picture(parent, Placeholder::NONE)` (0.17) | The same place without its block: nothing shows until the picture is there. For places that lie over each other (a cover flow), where a block between two pictures shows as a grey bar. |
+| `on_picture(place, PictureState)` (0.17) | On a `Tile`, a `Card` and a `Saver`: what came of a place's picture. `SHOWN`, it is on the place; `NONE`, the app has no picture at that address now (the screen asks again later, each time after a longer while); `FAILED`, the download broke off. Draw a word of your own on `NONE` or `FAILED` where a place without a picture needs one. |
 | `ui::set_picture(place, url, fit)` | The picture a place shows. `Fit::COVER` fills the place and cuts away what is over (a poster in a poster's frame); `Fit::CONTAIN` shows the whole picture within it, on the card's own colour (a logo). The same address again does nothing, so call it on every `on_state`; another address asks the app again; `""` takes the picture away. |
 | `ui::set_picture(place, url, fit, turn, mirror)` | The same, turned in perspective and with a reflection, as the covers of a cover flow. `Turn::LEFT` faces the left (its left edge far: a cover right of the middle one), `Turn::RIGHT` the right; the app draws the whole picture into the place, its near edge the place's height and its far edge 70 % of it. `mirror` puts a reflection under the picture that fades out: the place's lower part holds it, `MIRROR_PERCENT` (30) of the picture's height, so a place for a picture `h` high with its reflection is `h * 130 / 100` high. An older app draws the picture flat. |
 | `ui::slide_pictures(dx, ms)` | Slides every place of the tile `dx` pixels sideways over `ms` (300 by default) and keeps them there until the tile's next picture is here, then they are back in their places with it, in one frame. Call it beside the `set_picture` calls of a change, in a call of the tile (`on_tap`, `on_tick`), so a row of posters that turns shows which way at once. |
@@ -426,7 +428,11 @@ Where a picture may come from, checked by the app for every address:
   hosts only, no redirects, at most 2 MB a picture;
 - for a tile of an entity (`domains`), a picture of Home Assistant's own: the entity's `entity_picture` when it starts
   with `/api/image/serve/`, `/api/image_proxy/` or `/local/` (a person's photo, an image entity), fetched with the
-  app's own token.
+  app's own token;
+- (0.17) what the screen already shows of the tile's own entity, by name instead of an address: `cover:<entity>`, a
+  media player's cover, `camera:<entity>`, a camera's picture (the newest frame of its stream while one runs), and
+  `entity:<entity>`, the entity's own picture. The app answers them exactly as it answers Tessera's own tiles, and they
+  need no `permissions.network` and no `attributes: [entity_picture]`. Only the entity the tile, card or step shows.
 
 The manifest's `pictures` of the tile says how many places it has at most ([MANIFEST.md](MANIFEST.md), "Tiles"); the
 app paints no more. A place that lies outside the card, or has no size, gets no picture.
@@ -521,7 +527,7 @@ add_saver("dial", tessera::SaverStep::CLOCK, []() { return new Dial(); });   // 
 | `tessera::drift(epoch)` (0.14) | Where Tessera's slow circle against burn-in stands this minute, an offset of at most a millimetre. For a saver of `moves: true` that moves only some of its parts. |
 | manifest `backdrop: true` (0.14) | A face of the music or the photos gets the step's own picture under it, over the whole glass: the cover, or the photo, moving slowly when the person chose Motion: Slow (a pixel every 1.5 s; the 10-inch screens keep it still). The saver's glass is clear and it draws only what goes over the picture; it needs no `saver:picture` place for it. The way to make a slideshow face (the `photo_clock` plugin). |
 | `tessera::wish(entity, field, value)` (0.14) | A value a finger changed (`Wish::PLAYING` "1" or "0", `Wish::MUTED` "1" or "0", `Wish::ON_OFF` "on" or "off"): it shows at once and Home Assistant squares it. False when it was not sent. |
-| `"saver:picture"` (0.14) | The address of the step's own picture for `ui::set_picture`: the cover of the music on the glass, the photo of the photos step. |
+| `"step:"` (0.17), `"saver:picture"` (0.14) | The address of the step's own picture for `ui::set_picture`: the cover of the music on the glass, the photo of the photos step. A plugin of 0.14 to 0.16 names it `saver:picture`, which every app still reads. |
 
 **When a saver shows, and when it goes.** Only in standby, with a backlight level above 0, without Sleep pressed in Home
 Assistant, with the cards closed and no alert on the glass. It goes, and its object is deleted, when a finger wakes the
@@ -594,8 +600,8 @@ a label, 80 a block, plus its members. A saver is made in PSRAM by itself (`oper
   the screen what it needs for Wi-Fi and touch.
 - **No entities of its own choosing.** A face reads its step's contract; a step of its own reads its entity and its
   fetch, through the app, as a tile does. It cannot read any other entity of Home Assistant.
-- **No video and no live camera.** A picture comes once per address (a cover per track, a photo per photo); the camera
-  step has no plugin faces yet.
+- **No video and no live camera.** A picture comes once per address (a cover per track, a photo per photo, a camera's
+  still for `camera:`); the camera step has no plugin faces yet.
 - **No black glass.** A saver shows something: a step of its own with nothing to show says so with `when`, and the app
   goes on to the next step. A dark saver over a bright glass is not possible either: the level is the person's.
 - **No card, no other page.** A saver opens nothing; the screen wakes for that.
@@ -652,6 +658,8 @@ The screen's look is the same on every tile, so a plugin draws with the core's s
 | `ui::text(parent, Font, Role)` | A label of several lines (0.10): wraps at its width, ends in dots at its height (two lines to start with; set your own). For a description, a title that may take two lines. |
 | `ui::block(parent, Role)` | A rounded block with the radius of a key (a badge, a bar). |
 | `ui::picture(parent)`, `ui::set_picture(place, url, fit)`, `ui::pictures()`, `ui::slide_pictures(dx, ms)` | Pictures on a tile (0.10), on a card (0.13) and on a screensaver (0.14), above. |
+| `ui::picture(parent, Placeholder::NONE)`, `on_picture(place, PictureState)` (0.17) | A place without its block, and what came of a place's picture, above. |
+| `tessera::capturing(plugin, Capture::CAMERA, on)` (0.17) | The plugin uses the screen's own camera on the screen itself ("The screen's own camera", below). |
 | `ui::takes_taps(part)` (0.14) | A part of a screensaver a finger may tap without waking the screen ("A screensaver", above). |
 | `ui::color(Role)` | A colour by its role. |
 | `ui::icon(codepoint)` | An icon of Tessera's set as text, for a label in `Font::ICON` or `ICON_SMALL`. |
@@ -761,9 +769,26 @@ screensavers (0.14). A plugin can bring a camera (0.8): the feature `camera`, an
 `ts_camera` that Home Assistant shows as any ESPHome camera, made from a board's camera sensor (the feature
 `camera_sensor`), as [`plugins/screen_camera/`](../plugins/screen_camera) does. Each will raise the minor.
 
+## The screen's own camera
+
+A screen shows when its own camera is in use: a small green dot in its top right corner, over everything, the
+screensaver too. The core draws it, and no plugin and no setting hides it. It shows by itself while Home Assistant
+takes pictures or a stream of `ts_camera` (the core listens to the camera when a plugin's manifest provides
+`camera`). A plugin that uses the camera on the screen itself, for what never leaves the screen (a light level, motion),
+says so (0.17):
+
+```cpp
+tessera::capturing(this, tessera::Capture::CAMERA, true);    // from the first picture it reads
+tessera::capturing(this, tessera::Capture::CAMERA, false);   // once it reads none any more
+```
+
+Say `true` before the first picture is read and `false` only once none is read any more; a plugin that reads a
+picture every few seconds keeps it `true` all that time. The dot is the person's way to know: a plugin never reads the
+camera without it.
+
 ## Versions
 
-A manifest names the plugin API it was written for: `api: "0.8"` up to `"0.15"`; the plugin API 0.15 is the one the core offers now (on Tessera's dev branch; the release has an older one until the next). When a
+A manifest names the plugin API it was written for: `api: "0.8"` up to `"0.17"`; the plugin API 0.17 is the one the core offers now (on Tessera's dev branch; the release has an older one until the next). When a
 screen is built, `smart_display.register_plugin()` compares it with the core's and stops the build with one sentence
 when it does not fit. A plugin fits a core when all three hold:
 
@@ -776,11 +801,13 @@ when it does not fit. A plugin fits a core when all three hold:
 **While the major is 0** a minor may still change a name or a signature as the API settles. The core lists those
 minors in `PLUGIN_API_BREAKS`, in `screen_manager/app/plugin_manifest.py` and in `components/smart_display/__init__.py`
 (a test keeps the two equal). Today the list holds one: 0.4, where `Plugin::on_tick` became `on_interval`. So with a
-core of 0.15:
+core of 0.17:
 
 | The manifest says | Builds? | Why |
 |---|---|---|
-| `api: "0.15"` | Yes | The core's own. |
+| `api: "0.17"` | Yes | The core's own. |
+| `api: "0.16"` | Yes | Same major, an older minor, and no break after 0.16. |
+| `api: "0.15"` | Yes | Same major, an older minor, and no break after 0.15. |
 | `api: "0.14"` | Yes | Same major, an older minor, and no break after 0.14. |
 | `api: "0.13"` | Yes | Same major, an older minor, and no break after 0.13. |
 | `api: "0.12"` | Yes | Same major, an older minor, and no break after 0.12. |
@@ -790,7 +817,7 @@ core of 0.15:
 | `api: "0.8"` | Yes | Same major, an older minor, and no break after 0.8. |
 | `api: "0.7"` | Yes | Same major, an older minor, and no break after 0.7. |
 | `api: "0.3"` | No | 0.4 changed a name it may use; the build says so in one sentence and asks to update the plugin. |
-| `api: "0.15"` | No | Newer than the core; the build asks to update the plugin or the screen's firmware. |
+| `api: "0.18"` | No | Newer than the core; the build asks to update the plugin or the screen's firmware. |
 | `api: "1.0"` | No | Another major. |
 
 `tools/check.py` applies the same rules against the core it checks with (`api_fits` of `plugin_manifest.py`), so a
@@ -817,6 +844,8 @@ brought:
 | 0.13 | Pictures on a card over the page: `ui::picture`, `ui::set_picture` and `ui::slide_pictures` in a card's calls, and the manifest's `pictures` of a card. |
 | 0.14 | Screensavers: `Saver`, `SaverContext`, `SaverStep`, `Plugin::add_saver`, a face of the clock, the music or the photos or a step of its own, and the manifest's `savers`; `ui::takes_taps`, a part of a saver a finger taps in standby; the address `saver:picture`, the step's own picture; `tessera::wish()` and `Wish`, a value a finger changed. `tools/check.py` refuses these parts in a plugin of an older `api`. |
 | 0.15 | Nothing new in the C++: a tile's options of kind `entity` (the manifest) bring the chosen entities to `on_state` under `entities` ("What `on_state` gets"). `tools/check.py` refuses such an option in a plugin of an older `api`. |
+| 0.16 | `tessera::wake(plugin)`: the screen wakes as Home Assistant's Wake button does, for a plugin that senses someone come (an option of its own, off by default; at most once a second or two, from the screen's loop). |
+| 0.17 | Pictures in one system: `ui::picture(parent, Placeholder::NONE)`, a place without its block; `on_picture(place, PictureState)` on a tile, a card and a saver; the addresses `cover:`, `camera:` and `entity:` of the tile's own entity, and `step:` for the step's own picture (`saver:picture` still read); and `tessera::capturing()` with the camera's dot. |
 
 A minor of the app's or the manifest's side only still counts: a plugin that uses what it brought needs an app that
 knows it ([MANIFEST.md](MANIFEST.md), "Which minor brought a field").

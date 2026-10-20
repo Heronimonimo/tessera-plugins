@@ -1,5 +1,10 @@
 # Wijzigingen
 
+## 0.3.2 - 2026-10-20
+- Echtere kleuren op de M5Stack Tab5 en de reTerminal D1001: zwart is weer zwart. Hun camera gaf zwart door als een
+  donkergrijs dat de chip van het scherm er niet af kon halen, zodat donkere delen van het beeld roze waren en het hele
+  beeld flets. De plugin zet nu het zwartniveau van de sensor zelf.
+
 ## 0.3.1 - 2026-10-20
 - **Beweging wekt het scherm** (eerst uit) en **Beweging blijft aan** (5 seconden tot 10 minuten, eerst 10) zijn ook
   instellingen.

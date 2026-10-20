@@ -52,4 +52,7 @@ camera driver is `esp_video_camera` (github.com/n-IA-hane/esphome-esp-video-came
 esphome/esphome#16944), copied unchanged into `components/esp_video_camera` under the ESPHome License, with its NOTICE.
 The OmniVision OV02C10 of the Guition screens, which Espressif's camera library has no driver for, is a component of its
 own beside it, `components/ov02c10`: the sensor driver and its image tuning (one for rev3 chips, one for older ones),
-with a NOTICE that says where they come from.
+with a NOTICE that says where they come from. The SmartSens SC202CS (SC2356) of the Tab5 and the reTerminal has a small
+component of its own too, `components/sc202cs`: Espressif's driver starts it with a black level of 16 of 255 for the ISP
+to take off, which an ESP32-P4 before rev3 cannot, so the component lowers the sensor's own black level target after the
+camera has started it.

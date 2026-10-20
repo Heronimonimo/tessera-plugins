@@ -151,7 +151,7 @@ Two branches, as Tessera has, and each has its own `index.json`:
 - **The release:** Tessera's release takes this repository along (`tools/release.py publish` there, with
   `tools/release_plugins.py`; its docs/RELEASING.md, "The release", step 6). Before it publishes, it refuses when the
   check is not green on dev, a plugin of dev's index does not fit the release's plugin API, or dev does not merge into
-  main by itself (outside `index.json` and `likes.json`). Right after, it merges dev into main, builds main's index
+  main by itself (outside `index.json`, `likes.json` and `stats.json`). Right after, it merges dev into main, builds main's index
   against the released core and checks it (every plugin fits, every plugin dev offered is there, the check is green on
   main), and moves dev up to main. Nothing of that is done by hand, unless a step failed: then Tessera's
   `tools/release.py plugins --yes` finishes it. A change that needs no newer firmware goes to main and is then merged

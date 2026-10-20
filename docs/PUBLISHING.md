@@ -42,7 +42,7 @@ API waits for Tessera's next release. Each index lists every plugin with its
 manifest, its texts, its README and its changelog at one commit, the plugin versions that are blocked, the plugins Tessera recommends,
 and whose each id is. `tools/build_index.py` writes it; nobody edits it by hand. The app reads it with a conditional
 request and keeps the last one for when the internet is away. Beside it, `likes.json` has how many people like each
-plugin (below).
+plugin and `stats.json` its likes, rating and homes (below).
 
 ## Tessera's own plugins: `plugins/`
 
@@ -218,13 +218,22 @@ the plugin's card and large above its details; without one the card shows the pl
 - A picture of your own is just as welcome. Show what the plugin does on a screen, keep words few and large, and leave
   out what is not true of the plugin: the name of a product it does not support, a feature it does not have.
 
-## Likes
+## Likes, ratings and homes
 
-A like is a heart a person gives a plugin in the Tessera app: a thank-you to its maker and a hint for others. Only a
-plugin of the index that runs on one of their screens can have their like, one per app installation, and the app asks
-once that the like counts in a public number. Tessera's website counts the likes, and `tools/build_likes.py` copies the
-counts into `likes.json` every hour, in the index's commit. The app reads them from there, never from the website. The
-file holds only plugins of the index.
+What people share about a plugin from the Tessera app, so others find the good ones and a maker sees that the work is
+used. Each is one per app installation, given only when someone chooses to.
+
+- A **like** is a heart: a thank-you to its maker. Anyone can give one to any plugin of the index, also one that runs
+  on none of their screens. The app asks once that the like counts in a public number.
+- A **rating** is one to five stars from someone who has run the plugin on a screen for a few days, with the plugin's
+  version and the screen model. The average shows from three ratings, also per screen model on the website.
+- **Homes** are the installations that agreed to be counted and said in the last 30 days that they run the plugin.
+  Counting is off until someone turns it on; the app then says once a day which plugins of the index its screens run.
+
+Tessera's website counts them (one home network adds at most two of each to a plugin; more is held for review) and
+shows them on the plugin's page there, with the versions in use for its maker signed in with GitHub.
+`tools/build_likes.py` copies them every hour, in the index's commit: the likes into `likes.json`, all of them into
+`stats.json`. The app reads them from there, never from the website. Both files hold only plugins of the index.
 
 ## Labels in the app
 

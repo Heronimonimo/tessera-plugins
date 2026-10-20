@@ -1,0 +1,53 @@
+{
+ "format": 1,
+ "plugins": {
+  "custom_card": {
+   "likes": 2,
+   "rating": null,
+   "ratings": 0,
+   "homes": 0
+  },
+  "ov_departures": {
+   "likes": 2,
+   "rating": null,
+   "ratings": 0,
+   "homes": 0
+  },
+  "photo_clock": {
+   "likes": 1,
+   "rating": null,
+   "ratings": 0,
+   "homes": 0
+  },
+  "picture_frame": {
+   "likes": 1,
+   "rating": null,
+   "ratings": 0,
+   "homes": 0
+  },
+  "tap_sound": {
+   "likes": 1,
+   "rating": null,
+   "ratings": 0,
+   "homes": 0
+  },
+  "vinyl_deck": {
+   "likes": 1,
+   "rating": null,
+   "ratings": 0,
+   "homes": 0
+  },
+  "waste_collection": {
+   "likes": 2,
+   "rating": null,
+   "ratings": 0,
+   "homes": 0
+  },
+  "world_clock": {
+   "likes": 1,
+   "rating": null,
+   "ratings": 0,
+   "homes": 0
+  }
+ }
+}

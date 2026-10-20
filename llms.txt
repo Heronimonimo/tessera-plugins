@@ -17,7 +17,7 @@ Start with AGENTS.md (rules for AI assistants), then docs/MAKING_A_PLUGIN.md.
 - [docs/TRANSLATIONS.md](docs/TRANSLATIONS.md): screen and app texts, plurals
 - [docs/PREVIEW.md](docs/PREVIEW.md): the bench, tools/preview.py: every tile at every size, cards, top bar, screensavers and settings on every kind of screen (boards, a glass of your own, grids), light and dark, on the real firmware built for your computer, with a check of what it draws; preview.yaml gives the data
 - [docs/TESTING.md](docs/TESTING.md): check.py (needs PyYAML), a test from a GitHub link, a test folder in Home Assistant, a local build, and how long a round of each takes
-- [docs/PUBLISHING.md](docs/PUBLISHING.md): where a plugin comes from (index, link, branch, folder) and how it is pinned and updated, id and origin, what is checked for a community plugin and what is the maker's own, what listing means (no review; blocked.yaml stops a version), whose id it is, finding a plugin, the picture on the Plugins page (store.png), featured, likes, labels, blocked versions, versions
+- [docs/PUBLISHING.md](docs/PUBLISHING.md): where a plugin comes from (index, link, branch, folder) and how it is pinned and updated, id and origin, what is checked for a community plugin and what is the maker's own, what listing means (no review; blocked.yaml stops a version), whose id it is, finding a plugin, the picture on the Plugins page (store.png), featured, likes, ratings and homes, labels, blocked versions, versions
 - [docs/README.md](docs/README.md): the list of pages, and the words these docs use mapped to the usual terms
 - [docs/LIMITS.md](docs/LIMITS.md): what fits and what does not, what plugin.yaml may not set
 
@@ -41,7 +41,7 @@ Start with AGENTS.md (rules for AI assistants), then docs/MAKING_A_PLUGIN.md.
 - tools/preview.py [folder]: the bench (docs/PREVIEW.md); --setup once, then --board, --all, --screen WxH@inch, --grid CxR|max, --window, --watch, --live, --open
 - tools/store_image.py [folder]: store.png, the plugin's picture on the Plugins page, made from the bench (docs/PUBLISHING.md, "The picture on the Plugins page"); --from a bench run, --large, --small, --tiny, --out
 - tools/build_index.py: write index.json
-- tools/build_likes.py: write likes.json
+- tools/build_likes.py: write likes.json and stats.json
 
 ## The core
 - Tessera repository: https://github.com/MaxGramser/homeassistant_espscreen (branch dev while plugins are new)

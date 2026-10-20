@@ -381,7 +381,7 @@ class ESPVideoCamera : public camera::Camera {
   std::atomic<int> rt_exposure_{-1};  // V4L2_CID_EXPOSURE, 2-235 on OV5647
   std::atomic<int> rt_vflip_{-1};    // V4L2_CID_VFLIP 0/1
   std::atomic<int> rt_hflip_{-1};    // V4L2_CID_HFLIP 0/1
-  std::atomic<int> rt_quality_{-1};  // V4L2_CID_JPEG_COMPRESSION_QUALITY 1-63
+  std::atomic<int> rt_quality_{-1};  // V4L2_CID_JPEG_COMPRESSION_QUALITY 1-100, higher is better
   std::atomic<bool> ctrls_dirty_{false};
 };
 

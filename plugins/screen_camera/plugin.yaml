@@ -51,7 +51,7 @@ switch:
 number:
   - platform: template
     id: screen_camera_motion_time_out
-    name: "Camera motion time-out"
+    name: "Camera motion timeout"
     icon: mdi:timer-outline
     optimistic: true
     restore_value: true

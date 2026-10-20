@@ -21,4 +21,4 @@ flash_kb: 310
 settings:
   - { key: camera_light_level_and_motion, label: setting_sensing, hint: setting_sensing_hint }
   - { key: camera_motion_wakes_the_screen, label: setting_wake, hint: setting_wake_hint }
-  - { key: camera_motion_time_out, label: setting_time_out, hint: setting_time_out_hint }
+  - { key: camera_motion_timeout, label: setting_time_out, hint: setting_time_out_hint }

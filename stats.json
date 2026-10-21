@@ -20,7 +20,7 @@
    "homes": 0
   },
   "microplant": {
-   "likes": 1,
+   "likes": 2,
    "rating": null,
    "ratings": 0,
    "homes": 0
@@ -62,13 +62,13 @@
    "homes": 0
   },
   "voice_assist": {
-   "likes": 1,
+   "likes": 2,
    "rating": null,
    "ratings": 0,
    "homes": 0
   },
   "waste_collection": {
-   "likes": 2,
+   "likes": 3,
    "rating": null,
    "ratings": 0,
    "homes": 0

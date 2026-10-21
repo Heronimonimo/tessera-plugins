@@ -2,17 +2,17 @@
  "format": 1,
  "likes": {
   "cinema": 1,
-  "custom_card": 3,
+  "custom_card": 4,
   "electricity_price": 1,
   "microplant": 1,
   "new_music": 1,
   "ov_departures": 2,
-  "photo_clock": 1,
+  "photo_clock": 2,
   "picture_frame": 1,
   "tap_sound": 1,
   "vinyl_deck": 1,
   "voice_assist": 1,
   "waste_collection": 2,
-  "world_clock": 1
+  "world_clock": 2
  }
 }

@@ -1,5 +1,14 @@
 # Wijzigingen
 
+## 0.4.0 - 2026-10-21
+- **Video**, een onderdeel dat aan staat als je de plugin toevoegt: de camera als live video met geluid in Home
+  Assistant, een camera **Video** bij het apparaat van het scherm die speelt in de browser en de app, ongeveer een derde
+  seconde later. H.264 uit de video-encoder van het scherm (1280 x 720, 15 beelden per seconde) en de microfoon als Opus,
+  in sync. Installeer eenmalig Video in Home Assistant onder Instellingen van Tessera (Tessera met die kaart nodig);
+  Tessera voegt daarna elk scherm zelf toe. Met het onderdeel loopt de camera vanaf de start en verdwijnt **Camera** van
+  het apparaat: **Video** geeft de stilstaande beelden. Lichtniveau en beweging blijven werken. Een scherm dat de plugin
+  al heeft houdt hem zoals hij is tot je Video aanvinkt.
+
 ## 0.3.2 - 2026-10-20
 - Echtere kleuren op de M5Stack Tab5 en de reTerminal D1001: zwart is weer zwart. Hun camera gaf zwart door als een
   donkergrijs dat de chip van het scherm er niet af kon halen, zodat donkere delen van het beeld roze waren en het hele

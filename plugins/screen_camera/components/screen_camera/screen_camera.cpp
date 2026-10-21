@@ -61,19 +61,25 @@ void ScreenCamera::apply_sensing_() {
     light_level_ = -1.0f;
     last_exposure_product_ = 0;
     settle_until_ms_ = millis() + SETTLE_MS;
-    if (!video->register_raw_frame_consumer(this, esp_video_camera::RawVideoPixelFormat::RGB565_LE) ||
-        !video->start_raw_frame_consumer(this)) {
+    if (frames_from_video_) {
+      // The video runs the camera from boot and hands every frame on (consume_raw_video_frame).
+      reading_frames_ = true;
+    } else if (!video->register_raw_frame_consumer(this, esp_video_camera::RawVideoPixelFormat::RGB565_LE) ||
+               !video->start_raw_frame_consumer(this)) {
       ESP_LOGW(TAG, "The camera does not hand out its frames; no light level or motion");
       return;
     }
     ESP_LOGI(TAG, "Sensing light and motion");
   } else {
-    video->stop_raw_frame_consumer(this);
+    if (frames_from_video_) {
+      reading_frames_ = false;
+    } else {
+      video->stop_raw_frame_consumer(this);
+    }
     ESP_LOGI(TAG, "Sensing stopped");
   }
   sensing_on_ = on;
-  // The camera runs on the screen itself now, for what never leaves it: the core's dot shows while it does.
-  tessera::capturing(this, tessera::Capture::CAMERA, on);
+  show_dot_();
 #ifdef USE_SENSOR
   // Off: the light level reads unknown in Home Assistant, not the last value it had.
   if (!on && illuminance_ != nullptr) {
@@ -85,14 +91,33 @@ void ScreenCamera::apply_sensing_() {
   publish_sensing_();
 }
 
+void ScreenCamera::set_video_watched(bool watched) {
+  video_watched_ = watched;
+  show_dot_();
+}
+
+// The camera runs on the screen itself, for what never leaves it (sensing) or for the video while someone watches: the
+// core's dot shows while it does.
+void ScreenCamera::show_dot_() {
+  const bool on = sensing_on_ || video_watched_;
+  if (on == dot_on_) return;
+  dot_on_ = on;
+  tessera::capturing(this, tessera::Capture::CAMERA, on);
+}
+
 void ScreenCamera::consume_raw_video_frame(const esp_video_camera::RawVideoFrame &frame) {
+  if (frames_from_video_ && !reading_frames_.load()) return;
   const uint32_t now = millis();
   if (last_sample_ms_ != 0 && now - last_sample_ms_ < SAMPLE_MS) return;
-  if (frame.pixel_format != esp_video_camera::RawVideoPixelFormat::RGB565_LE || frame.width < GRID_W * 4 ||
+  const bool yuv = frame.pixel_format == esp_video_camera::RawVideoPixelFormat::YUV420_OUYY_EVYY;
+  if ((!yuv && frame.pixel_format != esp_video_camera::RawVideoPixelFormat::RGB565_LE) || frame.width < GRID_W * 4 ||
       frame.height < GRID_H * 4 || frame.data == nullptr) {
     return;
   }
   last_sample_ms_ = now;
+  // A row of the video's YUV420 (the encoder's O_UYY_E_VYY) is three bytes for every two points: U or V, then the
+  // brightness (Y) of both. So a point's brightness is read as it is, with no colour to weigh.
+  const size_t yuv_row = static_cast<size_t>(frame.width) * 3 / 2;
 
   // The grid: each cell the mean brightness (0..255) of 4 x 4 points spread over it.
   uint8_t grid[GRID_W * GRID_H];
@@ -103,6 +128,14 @@ void ScreenCamera::consume_raw_video_frame(const esp_video_camera::RawVideoFrame
       uint32_t sum = 0;
       for (int sy = 0; sy < 4; sy++) {
         const int y = gy * cell_h + (2 * sy + 1) * cell_h / 8;
+        if (yuv) {
+          const uint8_t *row = frame.data + (size_t) y * yuv_row;
+          for (int sx = 0; sx < 4; sx++) {
+            const int x = gx * cell_w + (2 * sx + 1) * cell_w / 8;
+            sum += row[(x / 2) * 3 + 1 + (x & 1)];
+          }
+          continue;
+        }
         const auto *row = reinterpret_cast<const uint16_t *>(frame.data + (size_t) y * frame.stride_bytes);
         for (int sx = 0; sx < 4; sx++) {
           const uint16_t p = row[gx * cell_w + (2 * sx + 1) * cell_w / 8];

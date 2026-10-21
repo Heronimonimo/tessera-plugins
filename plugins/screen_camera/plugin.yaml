@@ -17,6 +17,10 @@ esp_video_camera:
   jpeg_quality: 80                 # 1 to 100, higher is better: a picture of about 150 to 300 KB
   max_framerate: 5
 
+# The camera above makes JPEG pictures only, so the build takes an empty esp_h264 instead of the encoder. The part
+# "Video" (parts/video.yaml) removes this and gets the real one.
+esp_h264_placeholder:
+
 # The OmniVision OV02C10 of the Guition ESP32-P4 screens, which esp_cam_sensor has no driver for (components/ov02c10).
 ov02c10:
 

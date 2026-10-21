@@ -7,12 +7,14 @@
  },
  "app": {
   "name": "Schermcamera",
-  "summary": "De eigen camera van het scherm als camera in Home Assistant, en daaruit het lichtniveau en beweging in de kamer.",
+  "summary": "De eigen camera van het scherm in Home Assistant, als live video met geluid of als foto's, en daaruit het lichtniveau en beweging in de kamer.",
   "setting_sensing": "Lichtniveau en beweging",
   "setting_sensing_hint": "De camera meet het licht in de kamer en merkt beweging op, op het scherm zelf: hiervoor gaat geen beeld van het scherm af. De camera blijft aan zolang dit aan staat.",
   "setting_wake": "Beweging wekt het scherm",
   "setting_wake_hint": "Met lichtniveau en beweging aan wekt iemand die voor het scherm beweegt het scherm, zoals een aanraking.",
   "setting_time_out": "Beweging blijft aan",
-  "setting_time_out_hint": "Hoe lang Beweging aan blijft na de laatste beweging: een paar seconden voor iemand die langsloopt, minuten om een lege kamer te zien."
+  "setting_time_out_hint": "Hoe lang Beweging aan blijft na de laatste beweging: een paar seconden voor iemand die langsloopt, minuten om een lege kamer te zien.",
+  "part_video": "Video",
+  "part_video_hint": "Live video met geluid in Home Assistant, als camera Video bij het apparaat van het scherm. De camera loopt dan vanaf de start; zijn foto's komen uit de video. Installeer eenmalig Video in Home Assistant onder Instellingen van Tessera."
  }
 }

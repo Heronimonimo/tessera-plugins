@@ -176,18 +176,8 @@ async def to_code(config):
     # Use the published component so its compatible esp_cam_sensor, esp_ipa
     # and esp_h264 dependencies are resolved by the IDF component manager.
     add_idf_component(name="espressif/esp_video", ref="2.4.1")
-    if jpeg_enabled:
-        # esp_video's manifest pulls esp_h264 on every P4 build although
-        # both its H.264 source and CMake requirement are correctly Kconfig
-        # gated. IDF local-component precedence supplies an empty dependency
-        # only for JPEG firmware; H.264 profiles resolve the real library.
-        add_extra_build_file(
-            "components/esp_h264/CMakeLists.txt",
-            Path(__file__).parent
-            / "build_stubs"
-            / "esp_h264"
-            / "CMakeLists.txt",
-        )
+    # Tessera: the empty esp_h264 a JPEG-only build takes instead of the encoder is the component esp_h264_placeholder
+    # (Screen camera's plugin.yaml), so that the video's build, which goes without it, gets a clean build folder.
     if config[CONF_ENABLE_UVC]:
         # USB-UVC host driver, aligned with esp_video 2.x's own dependency.
         add_idf_component(name="espressif/usb_host_uvc", ref="2.5.*")

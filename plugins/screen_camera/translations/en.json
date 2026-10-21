@@ -7,12 +7,14 @@
  },
  "app": {
   "name": "Screen camera",
-  "summary": "The screen's own camera as a camera in Home Assistant, and the room's light level and motion from it.",
+  "summary": "The screen's own camera in Home Assistant, as live video with sound or as pictures, and the room's light level and motion from it.",
   "setting_sensing": "Light level and motion",
   "setting_sensing_hint": "The camera measures the room's light and notices movement, on the screen itself: no picture leaves it for this. The camera stays on while this is on.",
   "setting_wake": "Motion wakes the screen",
   "setting_wake_hint": "With light level and motion on, someone moving in front of the screen wakes it, as a touch does.",
   "setting_time_out": "Motion time-out",
-  "setting_time_out_hint": "How long Motion stays on after the last movement: a few seconds for someone walking past, minutes to tell an empty room."
+  "setting_time_out_hint": "How long Motion stays on after the last movement: a few seconds for someone walking past, minutes to tell an empty room.",
+  "part_video": "Video",
+  "part_video_hint": "Live video with sound in Home Assistant, as a camera Video on the screen's device. The camera then runs from the start; its pictures come from the video. Install Video in Home Assistant once under Tessera's Settings."
  }
 }

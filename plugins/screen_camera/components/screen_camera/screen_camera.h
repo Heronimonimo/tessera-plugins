@@ -45,8 +45,14 @@ class ScreenCamera : public Component,
   void set_sensing(bool on);
   // Motion wakes the screen or not (the setting, off by default).
   void set_wake_on_motion(bool on) { wake_on_motion_ = on; }
-  // On the camera's task, for every frame while sensing is on.
+  // On the camera's task, for every frame while sensing is on; with the video, for every frame (it reads them only
+  // while sensing is on). RGB565, or the video's YUV420.
   void consume_raw_video_frame(const esp_video_camera::RawVideoFrame &frame) override;
+  // With the video (the part "Video", screen_video): the camera hands its frames to the video, and the video hands
+  // them on here, so sensing never asks the camera itself. Called in the video's setup(), before this one's.
+  void take_frames_from_video() { frames_from_video_ = true; }
+  // Someone watches the video, or nobody any more: the core's dot, as for sensing (from the loop).
+  void set_video_watched(bool watched);
 
  protected:
   // The coarse grid sensing reads: 32 x 18 cells, each the mean of 4 x 4 points.
@@ -55,6 +61,7 @@ class ScreenCamera : public Component,
 
   void apply_sensing_();
   void publish_sensing_();
+  void show_dot_();
   esp_video_camera::ESPVideoCamera *video_() const { return camera_; }
 
   esp_video_camera::ESPVideoCamera *camera_{};
@@ -72,6 +79,10 @@ class ScreenCamera : public Component,
   bool sensing_wanted_{false};
   bool sensing_on_{false};
   bool set_up_{false};
+  bool frames_from_video_{false};
+  std::atomic<bool> reading_frames_{false};  // sensing reads the frames the video hands on
+  bool video_watched_{false};
+  bool dot_on_{false};
   uint8_t grid_[GRID_W * GRID_H]{};
   bool grid_valid_{false};
   uint32_t last_sample_ms_{0};

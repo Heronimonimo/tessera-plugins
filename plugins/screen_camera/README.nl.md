@@ -24,6 +24,26 @@ instelling haalt hem weg.
    in Tessera, of **Camera light level and motion** bij het apparaat in Home Assistant). Dan volgen **Light level** en
    **Motion** de kamer.
 
+## Video
+
+Het onderdeel **Video** (aan als je de plugin toevoegt, in de details van de plugin op het tabblad Plugins van het
+scherm) maakt van de camera live video met geluid in Home Assistant: H.264 uit de eigen video-encoder van het scherm,
+1280 x 720 met 15 beelden per seconde, en de microfoon als Opus, in sync, ongeveer een derde seconde later. Het speelt in
+de browserpagina en de app van Home Assistant zoals elke camera.
+
+1. Bouw het scherm met het onderdeel aan.
+2. Open in Tessera **Instellingen, Video in Home Assistant**, druk op **Installeren in Home Assistant** en daarna op
+   **Home Assistant herstarten**. Dat is één keer voor je hele huis.
+3. Vanaf dan heeft elk scherm met het onderdeel een camera **Video** bij zijn apparaat in Home Assistant. Tessera voegt
+   hem zelf toe, en niemand typt een wachtwoord: dat wordt aan beide kanten uit de API-sleutel van het scherm berekend.
+
+Met het onderdeel loopt de camera vanaf de start van het scherm, en zijn foto's komen uit de video: de camera **Camera**
+verdwijnt van het apparaat van het scherm, en **Video** geeft de stilstaande beelden. Lichtniveau en beweging blijven
+werken. De stip staat er zolang iemand kijkt, en de microfoon luistert alleen dan. De video heeft een ESP32-P4 met een
+microfoon nodig; hij is geprobeerd op de reTerminal D1001.
+
+docs/CAMERA.md van Tessera, "The screen's own camera as video in Home Assistant", zegt hoe het werkt en wat het vraagt.
+
 ## Lichtniveau en beweging
 
 Uit tot je het aanzet. Zolang het aan staat blijft de camera draaien en bepaalt het scherm er twee dingen uit:

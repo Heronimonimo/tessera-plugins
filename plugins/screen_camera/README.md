@@ -23,6 +23,26 @@ Tessera shows a dot in the top right corner of the screen, so whoever stands in 
    **Camera light level and motion** on the device in Home Assistant). Then **Light level** and **Motion** follow the
    room.
 
+## Video
+
+The part **Video** (on when you add the plugin, in the plugin's details on the screen's Plugins tab) makes the camera
+live video with sound in Home Assistant: H.264 from the screen's own video encoder, 1280 x 720 at 15 frames a second,
+and the microphone as Opus, in sync, about a third of a second behind. It plays in Home Assistant's browser page and
+app like any camera.
+
+1. Build the screen with the part on.
+2. In Tessera, open **Settings, Video in Home Assistant**, press **Install in Home Assistant**, then **Restart Home
+   Assistant**. This is once for your whole home.
+3. From then on each screen with the part has a camera **Video** on its device in Home Assistant. Tessera adds it by
+   itself, and nobody types a password: it is worked out from the screen's API key on both sides.
+
+With the part, the camera runs from the screen's start, and its pictures come from the video: the camera **Camera**
+leaves the screen's device, and **Video** gives the stills. Light level and motion keep working. The dot shows while
+someone watches, and the microphone listens only then. The video needs an ESP32-P4 with a microphone; it was tried on
+the reTerminal D1001.
+
+Tessera's docs/CAMERA.md, "The screen's own camera as video in Home Assistant", says how it works and what it takes.
+
 ## Light level and motion
 
 Off until you switch it on. While it is on, the camera keeps running and the screen works out two things from it:
@@ -40,7 +60,8 @@ it, as a touch does.
 
 ## Privacy
 
-Nothing leaves the screen until Home Assistant asks for a picture, and every picture goes only to your Home Assistant.
+Nothing leaves the screen until Home Assistant asks for a picture or the video, and every picture goes only to your
+Home Assistant. The video asks for a password made from the screen's own API key.
 With light level and motion on, the camera looks all the time, but what it sees stays on the screen.
 Everyone who can open the screen's device or a dashboard with its camera can see through it. To stop that for a while,
 disable the camera entity in Home Assistant; to stop it for good, remove the plugin from the screen.
@@ -49,7 +70,11 @@ disable the camera entity in Home Assistant; to stop it for good, remove the plu
 
 The camera is ESPHome's camera with id `ts_camera` (the feature `camera`), so another plugin can build on it. The
 camera driver is `esp_video_camera` (github.com/n-IA-hane/esphome-esp-video-camera, from ESPHome pull request
-esphome/esphome#16944), copied unchanged into `components/esp_video_camera` under the ESPHome License, with its NOTICE.
+esphome/esphome#16944), copied into `components/esp_video_camera` under the ESPHome License, with its NOTICE; Tessera's few changes are marked
+"Tessera" in it. Its empty esp_h264 for a JPEG-only build is a component of its own, `components/esp_h264_placeholder`,
+which the part Video removes, so that ESPHome cleans the build folder and the video's build finds the real encoder.
+The video is `components/screen_video`: the camera's one raw frame consumer, which hands every frame on to the light
+level and motion, encodes it with Espressif's esp_h264 and serves it over RTSP.
 The OmniVision OV02C10 of the Guition screens, which Espressif's camera library has no driver for, is a component of its
 own beside it, `components/ov02c10`: the sensor driver and its image tuning (one for rev3 chips, one for older ones),
 with a NOTICE that says where they come from. The SmartSens SC202CS (SC2356) of the Tab5 and the reTerminal has a small

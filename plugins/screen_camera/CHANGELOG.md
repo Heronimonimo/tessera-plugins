@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.0 - 2026-10-21
+- **Video**, a part that is on when you add the plugin: the camera as live video with sound in Home Assistant, a camera
+  **Video** on the screen's device that plays in the browser and the app, about a third of a second behind. H.264 from
+  the screen's video encoder (1280 x 720, 15 frames a second) and the microphone as Opus, in sync. Install Video in
+  Home Assistant once under Tessera's Settings (needs Tessera with that card); Tessera then adds each screen by itself.
+  With the part the camera runs from the start and **Camera** leaves the device: **Video** gives the stills. Light level
+  and motion keep working. A screen that has the plugin already keeps it as it is until you tick Video.
+
 ## 0.3.2 - 2026-10-20
 - Truer colours on the M5Stack Tab5 and the reTerminal D1001: black is black again. Their camera sent black as a dark
   grey that the screen's chip could not take off, so dark parts of the picture looked pink and the whole picture

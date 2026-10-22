@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.2 - 2026-10-22
+- Builds on an ESPHome build server on Windows. The camera's colour tuning was handed to the build as a Windows path,
+  which lost its backslashes on the way, so the build stopped at a file `sc202cs_ipa.json` it could not find.
+
 ## 0.4.1 - 2026-10-22
 - Video on the Guition ESP32-P4 screens. It asked for exactly 1280 x 720, which their camera (OV02C10) did not give
   (1288 x 728), so Video showed nothing there. That camera now has a 1280 x 720 mode, its first, and Video takes the

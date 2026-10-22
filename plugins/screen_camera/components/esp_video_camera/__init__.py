@@ -225,6 +225,9 @@ async def to_code(config):
     # colour than the stock default, validated on the M5Stack Tab5 / reTerminal.
     # Override the sensor's default IPA configuration with it. esp_cam_sensor's
     # project_include.cmake embeds the file pointed to by the CUSTOMIZED path.
+    # CMake reads that path from sdkconfig as a string, where a backslash is an
+    # escape: a Windows path lost every one of them and ninja found no file
+    # (a build server on Windows), so it goes in with forward slashes.
     ipa_json = "esp_video_camera/sc202cs_ipa.json"
     add_extra_build_file(ipa_json, Path(__file__).parent / "cfg" / "sc202cs.json")
     add_idf_sdkconfig_option(
@@ -235,5 +238,5 @@ async def to_code(config):
     )
     add_idf_sdkconfig_option(
         "CONFIG_CAMERA_SC202CS_CUSTOMIZED_IPA_JSON_CONFIGURATION_FILE_PATH",
-        str(CORE.relative_build_path(ipa_json)),
+        Path(CORE.relative_build_path(ipa_json)).as_posix(),
     )

@@ -61,6 +61,12 @@
    "ratings": 0,
    "homes": 0
   },
+  "screen_camera": {
+   "likes": 0,
+   "rating": null,
+   "ratings": 1,
+   "homes": 0
+  },
   "tap_sound": {
    "likes": 1,
    "rating": null,

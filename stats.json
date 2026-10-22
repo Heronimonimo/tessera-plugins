@@ -2,7 +2,7 @@
  "format": 1,
  "plugins": {
   "cinema": {
-   "likes": 1,
+   "likes": 2,
    "rating": null,
    "ratings": 0,
    "homes": 0
@@ -14,6 +14,12 @@
    "homes": 0
   },
   "electricity_price": {
+   "likes": 1,
+   "rating": null,
+   "ratings": 0,
+   "homes": 0
+  },
+  "flip_clock": {
    "likes": 1,
    "rating": null,
    "ratings": 0,
@@ -43,6 +49,12 @@
    "ratings": 0,
    "homes": 0
   },
+  "photo_slideshow": {
+   "likes": 1,
+   "rating": null,
+   "ratings": 0,
+   "homes": 0
+  },
   "picture_frame": {
    "likes": 1,
    "rating": null,
@@ -68,7 +80,13 @@
    "homes": 0
   },
   "waste_collection": {
-   "likes": 4,
+   "likes": 5,
+   "rating": null,
+   "ratings": 0,
+   "homes": 0
+  },
+  "waze_traveltime": {
+   "likes": 1,
    "rating": null,
    "ratings": 0,
    "homes": 0

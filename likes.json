@@ -1,18 +1,21 @@
 {
  "format": 1,
  "likes": {
-  "cinema": 1,
+  "cinema": 2,
   "custom_card": 4,
   "electricity_price": 1,
+  "flip_clock": 1,
   "microplant": 2,
   "new_music": 1,
   "ov_departures": 2,
   "photo_clock": 2,
+  "photo_slideshow": 1,
   "picture_frame": 1,
   "tap_sound": 1,
   "vinyl_deck": 1,
   "voice_assist": 2,
-  "waste_collection": 4,
+  "waste_collection": 5,
+  "waze_traveltime": 1,
   "world_clock": 2
  }
 }

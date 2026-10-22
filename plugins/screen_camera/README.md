@@ -26,7 +26,7 @@ Tessera shows a dot in the top right corner of the screen, so whoever stands in 
 ## Video
 
 The part **Video** (on when you add the plugin, in the plugin's details on the screen's Plugins tab) makes the camera
-live video with sound in Home Assistant: H.264 from the screen's own video encoder, 1280 x 720 at 15 frames a second,
+live video with sound in Home Assistant: H.264 from the screen's own video encoder, the camera's own size (1280 x 720 on most boards) at 15 frames a second,
 and the microphone as Opus, in sync, about a third of a second behind. It plays in Home Assistant's browser page and
 app like any camera.
 

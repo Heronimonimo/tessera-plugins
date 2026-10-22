@@ -67,8 +67,9 @@ void ScreenVideo::setup() {
 }
 
 void ScreenVideo::dump_config() {
-  ESP_LOGCONFIG(TAG, "Screen video:\n  RTSP port: %u\n  H.264: %ux%u, %u fps, %u kbit/s, a key frame every %u frames",
-                port_, WIDTH, HEIGHT, FRAMERATE, (unsigned) (BITRATE / 1000), GOP);
+  ESP_LOGCONFIG(TAG, "Screen video:\n  RTSP port: %u\n  H.264: the camera's size (%ux%u so far), %u fps, %u kbit/s, "
+                "a key frame every %u frames",
+                port_, width_, height_, FRAMERATE, (unsigned) (BITRATE / 1000), GOP);
 #ifdef USE_SCREEN_VIDEO_SOUND
   ESP_LOGCONFIG(TAG, "  Sound: Opus, %u Hz mono, 32 kbit/s%s", (unsigned) sound_rate_, opus_ ? "" : " (no encoder)");
 #endif
@@ -99,9 +100,13 @@ void ScreenVideo::loop() {
   reported_ms_ = now;
   const uint32_t frames = frames_.load(), bytes = bytes_.load(), n = frames - reported_frames_;
   if (n > 0) {
-    ESP_LOGI(TAG, "%.1f fps, %u kbit/s; since boot %u dropped, %u failed, %u skipped for internal RAM, %u bytes of it free",
-             n * 1000.0f / span, (unsigned) ((bytes - reported_bytes_) * 8ULL / span), (unsigned) dropped_.load(),
-             (unsigned) failed_.load(), (unsigned) held_.load(), (unsigned) heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
+    const uint32_t crop_us = crop_us_.load();
+    ESP_LOGI(TAG, "%.1f fps, %u kbit/s, cutting %.1f ms a frame; since boot %u dropped, %u failed, %u skipped for internal RAM, "
+             "%u bytes of it free",
+             n * 1000.0f / span, (unsigned) ((bytes - reported_bytes_) * 8ULL / span), (crop_us - reported_crop_us_) / 1000.0f / n,
+             (unsigned) dropped_.load(), (unsigned) failed_.load(), (unsigned) held_.load(),
+             (unsigned) heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
+    reported_crop_us_ = crop_us;
   }
   reported_frames_ = frames;
   reported_bytes_ = bytes;
@@ -118,22 +123,44 @@ void ScreenVideo::loop() {
 void ScreenVideo::consume_raw_video_frame(const esp_video_camera::RawVideoFrame &frame) {
   // Light level and motion read the same frame first, at their own pace (Screen camera).
   if (screen_camera_ != nullptr) screen_camera_->consume_raw_video_frame(frame);
-  if (frame.pixel_format != esp_video_camera::RawVideoPixelFormat::YUV420_OUYY_EVYY) return;
-  if (frame.width != WIDTH || frame.height != HEIGHT || frame.stride_bytes != frame.width) {
-    if (!size_reported_) {
-      size_reported_ = true;
-      ESP_LOGE(TAG, "The camera gives %ux%u frames; the video needs %ux%u", frame.width, frame.height, WIDTH, HEIGHT);
-    }
+  if (frame.pixel_format != esp_video_camera::RawVideoPixelFormat::YUV420_OUYY_EVYY || frame.stride_bytes != frame.width)
     return;
-  }
   if (encoder_ == nullptr && !encoder_failed_) {
+    // The stream's size: the camera's, cut to whole macroblocks, its middle. The camera's frame is the encoder's own
+    // YUV420 (a line of U Y Y..., a line of V Y Y..., 3 bytes for 2 pixels): a cut starts on an even line, so the
+    // lines keep their U and V, and on an even pixel, so the groups of two stay whole.
+    width_ = frame.width & ~15;
+    height_ = frame.height & ~15;
+    if (width_ < 160 || height_ < 96 || static_cast<uint32_t>(width_) * height_ > MAX_PIXELS) {
+      ESP_LOGE(TAG, "The camera gives %ux%u frames; the video takes %s. Give the camera a smaller mode in the part's "
+               "YAML (esp_video_camera resolution).",
+               frame.width, frame.height, width_ < 160 || height_ < 96 ? "nothing this small" : "at most 1280x800");
+      encoder_failed_ = true;
+      return;
+    }
+    if (width_ != frame.width || height_ != frame.height) {
+      crop_x_ = ((frame.width - width_) / 2) & ~1;
+      crop_y_ = ((frame.height - height_) / 2) & ~1;
+      crop_ = static_cast<uint8_t *>(psram_dma(static_cast<size_t>(width_) * height_ * 3 / 2));
+      // The PPA cuts it, by DMA: a memcpy of the frame on the camera's task took 77 ms (the camera's buffer is not
+      // cached). Its burst of 64 bytes, as every PPA client on a screen: the panel keeps its share of the bus.
+      ppa_client_config_t client{};
+      client.oper_type = PPA_OPERATION_SRM;
+      client.max_pending_trans_num = 1;
+      client.data_burst_length = PPA_DATA_BURST_LENGTH_64;
+      if (crop_ == nullptr || ppa_register_client(&client, &ppa_) != ESP_OK) {
+        ESP_LOGE(TAG, "No memory or PPA for the cut frame");
+        encoder_failed_ = true;
+        return;
+      }
+    }
     const size_t internal_before = heap_caps_get_free_size(MALLOC_CAP_INTERNAL);
     esp_h264_enc_cfg_hw_t cfg{};
     cfg.pic_type = ESP_H264_RAW_FMT_O_UYY_E_VYY;
     cfg.gop = GOP;
     cfg.fps = FRAMERATE;
-    cfg.res.width = WIDTH;
-    cfg.res.height = HEIGHT;
+    cfg.res.width = width_;
+    cfg.res.height = height_;
     cfg.rc.bitrate = BITRATE;
     cfg.rc.qp_min = 25;
     cfg.rc.qp_max = 42;
@@ -145,10 +172,18 @@ void ScreenVideo::consume_raw_video_frame(const esp_video_camera::RawVideoFrame 
       encoder_ = nullptr;
       return;
     }
-    ESP_LOGI(TAG, "H.264 encoder ready at %ux%u; it keeps %d bytes of internal RAM", WIDTH, HEIGHT,
-             (int) internal_before - (int) heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
+    if (crop_ != nullptr) {
+      ESP_LOGW(TAG, "H.264 encoder ready at %ux%u, the middle of the camera's %ux%u; it keeps %d bytes of internal RAM. "
+               "The cut costs the camera's task about 60 ms a frame (fewer frames a second): a camera mode in whole "
+               "macroblocks of 16 is better",
+               width_, height_, frame.width, frame.height, (int) internal_before - (int) heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
+    } else {
+      ESP_LOGI(TAG, "H.264 encoder ready at %ux%u, the camera's own size; it keeps %d bytes of internal RAM", width_,
+               height_, (int) internal_before - (int) heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
+    }
   }
   if (encoder_ == nullptr || !playing_.load()) return;
+  if (frame.width < crop_x_ + width_ || frame.height < crop_y_ + height_) return;  // a frame of another size: not ours
   const uint32_t now = static_cast<uint32_t>(esp_timer_get_time());
   if (last_frame_us_ != 0 && now - last_frame_us_ < 1000000U / FRAMERATE - 3000U) return;
   last_frame_us_ = now;
@@ -168,9 +203,43 @@ void ScreenVideo::consume_raw_video_frame(const esp_video_camera::RawVideoFrame 
     if (esp_h264_enc_hw_get_param_hd(encoder_, &param) == ESP_H264_ERR_OK && param != nullptr)
       esp_h264_enc_force_idr(&param->base);
   }
+  const uint8_t *picture = frame.data;
+  if (crop_ != nullptr) {
+    // The cut: the middle block of the camera's frame, YUV420 in and out, no scaling, by the PPA.
+    const int64_t started = esp_timer_get_time();
+    ppa_srm_oper_config_t cut{};
+    cut.in.buffer = frame.data;
+    cut.in.pic_w = frame.width;
+    cut.in.pic_h = frame.height;
+    cut.in.block_w = width_;
+    cut.in.block_h = height_;
+    cut.in.block_offset_x = crop_x_;
+    cut.in.block_offset_y = crop_y_;
+    cut.in.srm_cm = PPA_SRM_COLOR_MODE_YUV420;
+    cut.in.yuv_range = PPA_COLOR_RANGE_LIMIT;
+    cut.in.yuv_std = PPA_COLOR_CONV_STD_RGB_YUV_BT601;
+    cut.out.buffer = crop_;
+    cut.out.buffer_size = static_cast<size_t>(width_) * height_ * 3 / 2;
+    cut.out.pic_w = width_;
+    cut.out.pic_h = height_;
+    cut.out.srm_cm = PPA_SRM_COLOR_MODE_YUV420;
+    cut.out.yuv_range = PPA_COLOR_RANGE_LIMIT;
+    cut.out.yuv_std = PPA_COLOR_CONV_STD_RGB_YUV_BT601;
+    cut.rotation_angle = PPA_SRM_ROTATION_ANGLE_0;
+    cut.scale_x = cut.scale_y = 1.0f;
+    cut.mode = PPA_TRANS_MODE_BLOCKING;
+    const bool ok = ppa_do_scale_rotate_mirror(ppa_, &cut) == ESP_OK;
+    crop_us_ += static_cast<uint32_t>(esp_timer_get_time() - started);
+    if (!ok) {
+      failed_++;
+      slot.state = 0;
+      return;
+    }
+    picture = crop_;
+  }
   esp_h264_enc_in_frame_t in{};
-  in.raw_data.buffer = const_cast<uint8_t *>(frame.data);
-  in.raw_data.len = static_cast<uint32_t>(WIDTH) * HEIGHT * 3 / 2;
+  in.raw_data.buffer = const_cast<uint8_t *>(picture);
+  in.raw_data.len = static_cast<uint32_t>(width_) * height_ * 3 / 2;
   in.pts = frame.timestamp_90khz;
   esp_h264_enc_out_frame_t out{};
   out.raw_data.buffer = slot.data;

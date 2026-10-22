@@ -132,6 +132,26 @@ static const esp_cam_sensor_isp_info_t ov02c10_isp_info[] = {
 
 static const esp_cam_sensor_format_t ov02c10_format_info[] = {
     {
+        // First, so the camera's own choice (`resolution: auto`) is a size in whole macroblocks: the part Video encodes
+        // it as it is, no cutting on the way.
+        .name = "MIPI_1lane_24Minput_RAW10_1280x720_30fps",
+        .format = ESP_CAM_SENSOR_PIXFORMAT_RAW10,
+        .port = ESP_CAM_SENSOR_MIPI_CSI,
+        .xclk = 24000000,
+        .width = 1280,
+        .height = 720,
+        .regs = ov02c10_input_24M_MIPI_1lane_raw10_1280x720_30fps,
+        .regs_size = ARRAY_SIZE(ov02c10_input_24M_MIPI_1lane_raw10_1280x720_30fps),
+        .fps = 30,
+        .isp_info = &ov02c10_isp_info[0],
+        .mipi_info = {
+            .mipi_clk = OV02C10_MIPI_CSI_LINE_RATE_800x640_50FPS,
+            .lane_num = 1,
+            .line_sync_en = CONFIG_CAMERA_OV02C10_CSI_LINESYNC_ENABLE ? true : false,
+        },
+        .reserved = NULL,
+    },
+    {
         .name = "MIPI_1lane_24Minput_RAW10_1288x728_30fps",
         .format = ESP_CAM_SENSOR_PIXFORMAT_RAW10,
         .port = ESP_CAM_SENSOR_MIPI_CSI,

@@ -15,6 +15,7 @@
 #include <freertos/stream_buffer.h>
 #endif
 
+#include "driver/ppa.h"
 #include "esp_h264_enc_single_hw.h"
 
 #include <freertos/FreeRTOS.h>
@@ -42,9 +43,13 @@ class ScreenVideo : public Component, public esp_video_camera::RawVideoFrameCons
   void consume_raw_video_frame(const esp_video_camera::RawVideoFrame &frame) override;
 
  protected:
-  // The stream: 720p at 15 frames a second, 1 Mbit/s, a key frame every second. The encoder is made for this size
-  // once, at boot, and keeps it (a viewer never chooses another).
-  static constexpr uint16_t WIDTH = 1280, HEIGHT = 720;
+  // The stream: the camera's own size, 15 frames a second, 1 Mbit/s, a key frame every second. The encoder wants
+  // width and height in whole macroblocks (16), so a camera whose size is not (the OV02C10's 1288 x 728) has the edge
+  // of its frames cut off on the way: its middle, 1280 x 720. The encoder is made for that size once, at the first
+  // frame, and keeps it (a viewer never chooses another). Its reference frame lives in internal RAM and grows with the
+  // size (about 100 KB at 720p), which a screen runs short of, so the video takes no camera above MAX_PIXELS: that
+  // sensor's smaller mode goes in the part's YAML (esp_video_camera `resolution`), never in a board file.
+  static constexpr uint32_t MAX_PIXELS = 1280UL * 800UL;
   static constexpr uint8_t FRAMERATE = 15, GOP = 15;
   static constexpr uint32_t BITRATE = 1000000;
   // One access unit at most. A key frame of a dark, noisy room is over 200 KB, and an encoder whose output did not fit
@@ -104,10 +109,15 @@ class ScreenVideo : public Component, public esp_video_camera::RawVideoFrameCons
   const char *password_{""};
   std::string expected_auth_;
 
-  // The camera's task owns the encoder.
+  // The camera's task owns the encoder, and the size it was made for.
   esp_h264_enc_handle_t encoder_{nullptr};
   bool encoder_failed_{false};
-  bool size_reported_{false};
+  uint16_t width_{0}, height_{0};         // the stream's size: the camera's, cut to whole macroblocks
+  uint16_t crop_x_{0}, crop_y_{0};        // where the stream's frame starts in the camera's, 0 when they are one
+  uint8_t *crop_{nullptr};                // the cut frame, in PSRAM, only when the camera's size needs cutting
+  ppa_client_handle_t ppa_{nullptr};      // what cuts it: the P4's pixel DMA engine (a memcpy took 77 ms a frame)
+  std::atomic<uint32_t> crop_us_{0};      // what the cutting costs, for the loop's line
+  uint32_t reported_crop_us_{0};
   uint32_t last_frame_us_{0};
   Slot slots_[SLOTS];
   QueueHandle_t ready_{nullptr};  // indices of filled slots, oldest first

@@ -1,5 +1,13 @@
 # Wijzigingen
 
+## 0.4.1 - 2026-10-22
+- Video op de Guition ESP32-P4-schermen. Het vroeg precies 1280 x 720, en hun camera (OV02C10) gaf dat niet
+  (1288 x 728), dus daar liet Video niets zien. Die camera heeft nu een modus van 1280 x 720, zijn eerste, en Video
+  neemt op elk bord de maat van de camera zelf: een maat die niet in hele macroblokken van 16 past wordt onderweg tot
+  zijn midden geknipt (dat kost beelden per seconde, het log zegt het), en een camera boven 1280 x 800 vraagt om een
+  kleinere modus in de YAML van het onderdeel. Geen bord noemt een maat. Nog niet geprobeerd op een Guition-scherm:
+  zeg wat je ziet.
+
 ## 0.4.0 - 2026-10-21
 - **Video**, een onderdeel dat aan staat als je de plugin toevoegt: de camera als live video met geluid in Home
   Assistant, een camera **Video** bij het apparaat van het scherm die speelt in de browser en de app, ongeveer een derde

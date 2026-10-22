@@ -28,7 +28,7 @@ instelling haalt hem weg.
 
 Het onderdeel **Video** (aan als je de plugin toevoegt, in de details van de plugin op het tabblad Plugins van het
 scherm) maakt van de camera live video met geluid in Home Assistant: H.264 uit de eigen video-encoder van het scherm,
-1280 x 720 met 15 beelden per seconde, en de microfoon als Opus, in sync, ongeveer een derde seconde later. Het speelt in
+de maat van de camera (1280 x 720 op de meeste borden) met 15 beelden per seconde, en de microfoon als Opus, in sync, ongeveer een derde seconde later. Het speelt in
 de browserpagina en de app van Home Assistant zoals elke camera.
 
 1. Bouw het scherm met het onderdeel aan.

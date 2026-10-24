@@ -8,6 +8,7 @@
 #include "esphome/components/camera/camera.h"
 #include "esphome/components/esp_video_camera/esp_video_camera.h"
 #include "esphome/components/smart_display/plugin_api.h"
+#include "frame_hub.h"
 #ifdef USE_SENSOR
 #include "esphome/components/sensor/sensor.h"
 #endif
@@ -22,8 +23,9 @@ namespace esphome::screen_camera {
 // draws nothing of its own for that.
 // And, only while a person switches it on (the setting "Camera light level and motion", off by default), the room's
 // light level and motion, worked out on the screen from the camera's frames: no picture leaves the screen for them. The
-// camera hands its processed frames (RGB565) to this plugin on its own task (RawVideoFrameConsumer); the plugin reads a
-// coarse grid of them and gives the results to the main loop. While it runs it tells the core (tessera::capturing), so
+// camera hands its processed frames to the frame hub (frame_hub.h), which hands them on to this plugin on the camera's
+// own task while sensing is on (RGB565, or the part Video's YUV420); the plugin reads a coarse grid of them through the
+// frame reader (frame_reader.h) and gives the results to the main loop. While it runs it tells the core (tessera::capturing), so
 // the dot shows then too; with the setting "Camera motion wakes the screen" (off by default) motion wakes the screen.
 class ScreenCamera : public Component,
                      public tessera::Plugin,
@@ -34,7 +36,12 @@ class ScreenCamera : public Component,
   float get_setup_priority() const override { return setup_priority::LATE; }
   void on_interval(uint32_t now_ms) override;
 
-  void set_camera(esp_video_camera::ESPVideoCamera *c) { camera_ = c; }
+  void set_camera(esp_video_camera::ESPVideoCamera *c) {
+    camera_ = c;
+    frames_.set_camera(c);
+  }
+  // The camera's frames, for every consumer on the screen (the part Video's encoder adds itself here too).
+  FrameHub &frames() { return frames_; }
 #ifdef USE_SENSOR
   void set_illuminance(sensor::Sensor *s) { illuminance_ = s; }
 #endif
@@ -45,12 +52,8 @@ class ScreenCamera : public Component,
   void set_sensing(bool on);
   // Motion wakes the screen or not (the setting, off by default).
   void set_wake_on_motion(bool on) { wake_on_motion_ = on; }
-  // On the camera's task, for every frame while sensing is on; with the video, for every frame (it reads them only
-  // while sensing is on). RGB565, or the video's YUV420.
+  // On the camera's task, from the frame hub, for every frame while sensing is on. RGB565, or the video's YUV420.
   void consume_raw_video_frame(const esp_video_camera::RawVideoFrame &frame) override;
-  // With the video (the part "Video", screen_video): the camera hands its frames to the video, and the video hands
-  // them on here, so sensing never asks the camera itself. Called in the video's setup(), before this one's.
-  void take_frames_from_video() { frames_from_video_ = true; }
   // Someone watches the video, or nobody any more: the core's dot, as for sensing (from the loop).
   void set_video_watched(bool watched);
 
@@ -65,6 +68,8 @@ class ScreenCamera : public Component,
   esp_video_camera::ESPVideoCamera *video_() const { return camera_; }
 
   esp_video_camera::ESPVideoCamera *camera_{};
+  FrameHub frames_;
+  bool added_{false};  // sensing is one of the hub's consumers
 #ifdef USE_SENSOR
   sensor::Sensor *illuminance_{};
 #endif
@@ -79,8 +84,6 @@ class ScreenCamera : public Component,
   bool sensing_wanted_{false};
   bool sensing_on_{false};
   bool set_up_{false};
-  bool frames_from_video_{false};
-  std::atomic<bool> reading_frames_{false};  // sensing reads the frames the video hands on
   bool video_watched_{false};
   bool dot_on_{false};
   uint8_t grid_[GRID_W * GRID_H]{};

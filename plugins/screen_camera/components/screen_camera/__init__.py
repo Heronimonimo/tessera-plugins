@@ -1,8 +1,9 @@
 """Screen camera: the room's light level and motion from the screen's own camera, worked out on the screen.
 
 The camera itself is esp_video_camera beside this folder (plugin.yaml); the core shows its dot while Home Assistant
-takes pictures of it, and while this component senses (tessera::capturing). register_plugin() takes the id, version and
-the screen's texts from the manifest and translations/ beside this folder.
+takes pictures of it, and while this component senses (tessera::capturing). The sensors the camera finds by itself are
+this plugin's table (sensors.py), and the camera's frames go to every consumer through the frame hub (frame_hub.h).
+register_plugin() takes the id, version and the screen's texts from the manifest and translations/ beside this folder.
 """
 import esphome.codegen as cg
 import esphome.config_validation as cv
@@ -14,6 +15,8 @@ from esphome.const import (
     STATE_CLASS_MEASUREMENT,
     UNIT_LUX,
 )
+
+from . import sensors
 
 DEPENDENCIES = ["smart_display", "camera"]
 AUTO_LOAD = ["sensor", "binary_sensor"]
@@ -47,6 +50,7 @@ CONFIG_SCHEMA = cv.Schema(
 
 
 async def to_code(config):
+    sensors.to_code()
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
     await smart_display.register_plugin(var, __file__)

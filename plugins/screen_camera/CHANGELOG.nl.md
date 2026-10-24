@@ -1,5 +1,11 @@
 # Wijzigingen
 
+## 0.4.3 - 2026-10-24
+- Er verandert niets op het scherm of in Home Assistant: de code van de camera is anders ingedeeld voor wat komt. De
+  beelden van de camera gaan via een eigen verdeler naar lichtniveau en beweging en naar de video, in plaats van via
+  de video, de sensoren die de camera zelf vindt staan in een tabel van de plugin, en de encoder, de server en het
+  geluid van de video hebben elk een eigen bestand. Werk bij als het wordt aangeboden; het scherm bouwt opnieuw.
+
 ## 0.4.2 - 2026-10-22
 - Bouwt op een ESPHome-bouwserver onder Windows. De kleurafstelling van de camera ging als Windows-pad naar de bouw,
   dat onderweg zijn backslashes kwijtraakte, dus de bouw stopte bij een bestand `sc202cs_ipa.json` dat niet te vinden

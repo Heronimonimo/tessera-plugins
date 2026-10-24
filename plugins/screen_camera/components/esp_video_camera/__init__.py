@@ -8,12 +8,9 @@ All Espressif sources are pulled through the IDF component manager as managed
 components. Nothing is vendored.
 """
 
-from pathlib import Path
-
 import esphome.codegen as cg
 from esphome.components import i2c
 from esphome.components.esp32 import (
-    add_extra_build_file,
     add_idf_component,
     add_idf_sdkconfig_option,
 )
@@ -212,31 +209,6 @@ async def to_code(config):
     if config[CONF_ENABLE_UVC]:
         add_idf_sdkconfig_option("CONFIG_ESP_VIDEO_ENABLE_USB_UVC_VIDEO_DEVICE", True)
 
-    # Auto-detect the MIPI-CSI sensors shipped with espressif/esp_cam_sensor over
-    # the shared I2C bus. Kconfig keys verified against esp_cam_sensor 2.4.
-    for sensor in ("SC202CS", "OV5647", "SC2336"):
-        add_idf_sdkconfig_option(f"CONFIG_CAMERA_{sensor}", True)
-        add_idf_sdkconfig_option(
-            f"CONFIG_CAMERA_{sensor}_AUTO_DETECT_MIPI_INTERFACE_SENSOR", True
-        )
-
-    # SC202CS colour tuning. The SC2356 module is the same SC202CS silicon
-    # (PID 0xeb52 @ SCCB 0x36) but ships an IPA JSON with noticeably better
-    # colour than the stock default, validated on the M5Stack Tab5 / reTerminal.
-    # Override the sensor's default IPA configuration with it. esp_cam_sensor's
-    # project_include.cmake embeds the file pointed to by the CUSTOMIZED path.
-    # CMake reads that path from sdkconfig as a string, where a backslash is an
-    # escape: a Windows path lost every one of them and ninja found no file
-    # (a build server on Windows), so it goes in with forward slashes.
-    ipa_json = "esp_video_camera/sc202cs_ipa.json"
-    add_extra_build_file(ipa_json, Path(__file__).parent / "cfg" / "sc202cs.json")
-    add_idf_sdkconfig_option(
-        "CONFIG_CAMERA_SC202CS_DEFAULT_IPA_JSON_CONFIGURATION_FILE", False
-    )
-    add_idf_sdkconfig_option(
-        "CONFIG_CAMERA_SC202CS_CUSTOMIZED_IPA_JSON_CONFIGURATION_FILE", True
-    )
-    add_idf_sdkconfig_option(
-        "CONFIG_CAMERA_SC202CS_CUSTOMIZED_IPA_JSON_CONFIGURATION_FILE_PATH",
-        Path(CORE.relative_build_path(ipa_json)).as_posix(),
-    )
+    # Tessera: the MIPI-CSI sensors esp_cam_sensor auto-detects, and the SC202CS's
+    # colour tuning, are Screen camera's table (components/screen_camera/sensors.py),
+    # which that component applies; see NOTICE, "Changed in Tessera's copy".

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.3 - 2026-10-24
+- Nothing changes on the screen or in Home Assistant: the camera's code is laid out anew for what comes next. The
+  camera's frames reach light level and motion and the video through one hub of their own instead of through the
+  video, the sensors the camera finds by itself are a table of the plugin's own, and the video's encoder, server and
+  sound are each a file. Update when it is offered; the screen builds again.
+
 ## 0.4.2 - 2026-10-22
 - Builds on an ESPHome build server on Windows. The camera's colour tuning was handed to the build as a Windows path,
   which lost its backslashes on the way, so the build stopped at a file `sc202cs_ipa.json` it could not find.

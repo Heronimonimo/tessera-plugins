@@ -73,8 +73,12 @@ camera driver is `esp_video_camera` (github.com/n-IA-hane/esphome-esp-video-came
 esphome/esphome#16944), copied into `components/esp_video_camera` under the ESPHome License, with its NOTICE; Tessera's few changes are marked
 "Tessera" in it. Its empty esp_h264 for a JPEG-only build is a component of its own, `components/esp_h264_placeholder`,
 which the part Video removes, so that ESPHome cleans the build folder and the video's build finds the real encoder.
-The video is `components/screen_video`: the camera's one raw frame consumer, which hands every frame on to the light
-level and motion, encodes it with Espressif's esp_h264 and serves it over RTSP.
+The camera's raw frames go to one consumer of the camera, Screen camera's frame hub (`components/screen_camera/frame_hub.h`),
+which hands each to the light level and motion and to the video while they are on; a consumer reads a frame through
+`frame_reader.h` (`tests/test_frame_reader.cpp` checks it on a PC). The sensors the camera finds by itself, and the
+SC202CS's colour tuning, are the table in `components/screen_camera/sensors.py`: a sensor Espressif's camera library
+drives is a row there. The video is `components/screen_video`: the frame path and Espressif's esp_h264 in
+`video_encoder.cpp`, the RTSP server in `rtsp_server.cpp`, the microphone as Opus in `opus_sound.cpp`.
 The OmniVision OV02C10 of the Guition screens, which Espressif's camera library has no driver for, is a component of its
 own beside it, `components/ov02c10`: the sensor driver and its image tuning (one for rev3 chips, one for older ones),
 with a NOTICE that says where they come from. The SmartSens SC202CS (SC2356) of the Tab5 and the reTerminal has a small

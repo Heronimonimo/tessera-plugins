@@ -1,9 +1,9 @@
 """Screen camera's video: the camera as H.264 with the microphone as Opus, over RTSP, for Home Assistant.
 
 The part "Video" (parts/video.yaml) puts the camera in its raw mode (esp_video_camera device: csi) and adds this
-component. It is the camera's one raw frame consumer: the ESP32-P4's hardware encoder (Espressif's esp_h264, which
-esp_video already brings) takes every frame as the camera gives it while someone watches, and Screen camera's light
-level and motion read the same frames. A small RTSP server on the screen serves the stream to up to three viewers (Home
+component. It takes the camera's raw frames from Screen camera's frame hub (screen_camera/frame_hub.h), which hands the
+same frames to its light level and motion: the ESP32-P4's hardware encoder (Espressif's esp_h264, which esp_video
+already brings) takes every frame as the camera gives it while someone watches. A small RTSP server on the screen serves the stream to up to three viewers (Home
 Assistant's go2rtc, which turns it into WebRTC without transcoding, and Home Assistant's own stream).
 
 The password is not typed anywhere: it is worked out here from the screen's API key, and Home Assistant's tessera_video

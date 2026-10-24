@@ -1,4 +1,5 @@
 #include "screen_camera.h"
+#include "frame_reader.h"
 
 #include <cmath>
 #include <cstdlib>
@@ -41,6 +42,9 @@ static constexpr float INVERSE_GAMMA = 1.8f;
 
 void ScreenCamera::setup() {
   set_up_ = true;
+  // Sensing reads either layout, so it takes the frames as the camera hands them out: the video's YUV420 when the part
+  // Video added itself first, RGB565 otherwise.
+  added_ = camera_ != nullptr && frames_.add(this, esp_video_camera::RawVideoPixelFormat::RGB565_LE, true);
   apply_sensing_();
 }
 
@@ -55,27 +59,19 @@ void ScreenCamera::apply_sensing_() {
   if (!set_up_ || camera_ == nullptr || camera_->is_failed()) return;
   const bool on = sensing_wanted_;
   if (on == sensing_on_) return;
-  auto *video = video_();
   if (on) {
     grid_valid_ = false;
     light_level_ = -1.0f;
     last_exposure_product_ = 0;
     settle_until_ms_ = millis() + SETTLE_MS;
-    if (frames_from_video_) {
-      // The video runs the camera from boot and hands every frame on (consume_raw_video_frame).
-      reading_frames_ = true;
-    } else if (!video->register_raw_frame_consumer(this, esp_video_camera::RawVideoPixelFormat::RGB565_LE) ||
-               !video->start_raw_frame_consumer(this)) {
+    // With the part Video the camera runs from boot already, and the hub only starts handing frames on here.
+    if (!added_ || !frames_.set_on(this, true)) {
       ESP_LOGW(TAG, "The camera does not hand out its frames; no light level or motion");
       return;
     }
     ESP_LOGI(TAG, "Sensing light and motion");
   } else {
-    if (frames_from_video_) {
-      reading_frames_ = false;
-    } else {
-      video->stop_raw_frame_consumer(this);
-    }
+    frames_.set_on(this, false);
     ESP_LOGI(TAG, "Sensing stopped");
   }
   sensing_on_ = on;
@@ -106,7 +102,6 @@ void ScreenCamera::show_dot_() {
 }
 
 void ScreenCamera::consume_raw_video_frame(const esp_video_camera::RawVideoFrame &frame) {
-  if (frames_from_video_ && !reading_frames_.load()) return;
   const uint32_t now = millis();
   if (last_sample_ms_ != 0 && now - last_sample_ms_ < SAMPLE_MS) return;
   const bool yuv = frame.pixel_format == esp_video_camera::RawVideoPixelFormat::YUV420_OUYY_EVYY;
@@ -115,9 +110,7 @@ void ScreenCamera::consume_raw_video_frame(const esp_video_camera::RawVideoFrame
     return;
   }
   last_sample_ms_ = now;
-  // A row of the video's YUV420 (the encoder's O_UYY_E_VYY) is three bytes for every two points: U or V, then the
-  // brightness (Y) of both. So a point's brightness is read as it is, with no colour to weigh.
-  const size_t yuv_row = static_cast<size_t>(frame.width) * 3 / 2;
+  const FrameReader reader(frame.data, yuv ? Layout::YUV420_OUYY_EVYY : Layout::RGB565_LE, frame.width, frame.stride_bytes);
 
   // The grid: each cell the mean brightness (0..255) of 4 x 4 points spread over it.
   uint8_t grid[GRID_W * GRID_H];
@@ -128,21 +121,7 @@ void ScreenCamera::consume_raw_video_frame(const esp_video_camera::RawVideoFrame
       uint32_t sum = 0;
       for (int sy = 0; sy < 4; sy++) {
         const int y = gy * cell_h + (2 * sy + 1) * cell_h / 8;
-        if (yuv) {
-          const uint8_t *row = frame.data + (size_t) y * yuv_row;
-          for (int sx = 0; sx < 4; sx++) {
-            const int x = gx * cell_w + (2 * sx + 1) * cell_w / 8;
-            sum += row[(x / 2) * 3 + 1 + (x & 1)];
-          }
-          continue;
-        }
-        const auto *row = reinterpret_cast<const uint16_t *>(frame.data + (size_t) y * frame.stride_bytes);
-        for (int sx = 0; sx < 4; sx++) {
-          const uint16_t p = row[gx * cell_w + (2 * sx + 1) * cell_w / 8];
-          const uint32_t r = (p >> 11) & 0x1F, g = (p >> 5) & 0x3F, b = p & 0x1F;
-          // BT.601 luma from 5-6-5 bits: R and B x 8, G x 4 to 0..255.
-          sum += (r * 8 * 77 + g * 4 * 150 + b * 8 * 29) >> 8;
-        }
+        for (int sx = 0; sx < 4; sx++) sum += reader.brightness(gx * cell_w + (2 * sx + 1) * cell_w / 8, y);
       }
       const uint8_t cell = static_cast<uint8_t>(sum / 16);
       grid[gy * GRID_W + gx] = cell;

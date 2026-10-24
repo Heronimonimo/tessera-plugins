@@ -39,7 +39,7 @@ class ScreenVideo : public Component, public esp_video_camera::RawVideoFrameCons
   void set_microphone_source(microphone::MicrophoneSource *m) { mic_ = m; }
 #endif
 
-  // On the camera's capture task, for every frame from boot on.
+  // On the camera's capture task, from Screen camera's frame hub, for every frame from boot on.
   void consume_raw_video_frame(const esp_video_camera::RawVideoFrame &frame) override;
 
  protected:

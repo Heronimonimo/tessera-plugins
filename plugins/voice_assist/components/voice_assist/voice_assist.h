@@ -25,6 +25,7 @@ class VoiceAssist : public Component, public tessera::Plugin {
   void loop() override;
   float get_setup_priority() const override { return setup_priority::LATE; }
   void on_ready() override;
+  void on_interval(uint32_t now_ms) override;
   bool settings(tessera::SettingsPage &page) override;
   void before_update() override { stop(); }
 
@@ -55,6 +56,13 @@ class VoiceAssist : public Component, public tessera::Plugin {
   void failed(const std::string &code, const std::string &message);
   // Wake phrase chose its option `index`: that model listens, the others rest.
   void choose_phrase(size_t index);
+
+  // The microphone and the speaker through the screen's audio owner (plugin API 0.19, tessera::audio, the role VOICE):
+  // the wake word holds the microphone while it listens, and a session holds the speaker too, so music pauses for it and
+  // a doorbell's ring takes both. listen(): the wake word should listen (the setting on, Home Assistant connected) or
+  // not; session(): a session starts (on_listening) or ends (on_end).
+  void listen(bool on);
+  void session(bool on);
 
   // A tap on the tile, or Ask on the settings page: ask now, or stop what runs.
   void ask();
@@ -89,6 +97,12 @@ class VoiceAssist : public Component, public tessera::Plugin {
 
   // Starts to listen: the wake sound, once, when it was not listening yet; and the popup.
   void listening_();
+  // The wake word's claim on the microphone: made, or made again after a session, with the wake word's own answers to
+  // losing it and getting it back. False when a higher role holds it; on_interval tries again, a refused claim is never
+  // queued.
+  bool claim_wake_word_();
+  bool wake_wanted_{false};  // the wake word should listen
+  bool wake_holds_{false};   // and holds the microphone
   // The popup: shown while it listens, thinks and answers, and closed a while after (close_at_).
   void popup_show_();
   void popup_update_();

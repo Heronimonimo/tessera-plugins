@@ -34,16 +34,18 @@ voice_assistant:
   noise_suppression_level: 2
   auto_gain: 31dBFS
   volume_multiplier: 2.0
+  # The wake word and a session go through the screen's audio owner (plugin API 0.19): listen() and session() claim the
+  # microphone and the speaker as the voice, and a doorbell's ring takes them (components/voice_assist).
   on_client_connected:
     - if:
         condition:
           switch.is_on: va_wake_word
         then:
-          - lambda: 'id(va_wake)->start();'
+          - lambda: 'id(va_plugin).listen(true);'
   on_client_disconnected:
-    - lambda: 'id(va_assistant)->request_stop(); id(va_wake)->stop();'
+    - lambda: 'id(va_assistant)->request_stop(); id(va_plugin).listen(false);'
   on_listening:
-    - lambda: 'id(va_plugin).phase(esphome::voice_assist::Phase::LISTENING);'
+    - lambda: 'id(va_plugin).session(true); id(va_plugin).phase(esphome::voice_assist::Phase::LISTENING);'
   on_stt_vad_end:
     - lambda: 'id(va_plugin).phase(esphome::voice_assist::Phase::THINKING);'
   on_stt_end:
@@ -57,7 +59,7 @@ voice_assistant:
   on_tts_end:
     - lambda: 'id(va_plugin).speaking(x);'
   on_end:
-    - lambda: 'id(va_plugin).ended();'
+    - lambda: 'id(va_plugin).ended(); id(va_plugin).session(false);'
   on_error:
     - lambda: 'id(va_plugin).failed(code, message);'
 
@@ -75,9 +77,9 @@ switch:
           condition:
             api.connected:
           then:
-            - lambda: 'id(va_wake)->start();'
+            - lambda: 'id(va_plugin).listen(true);'
     on_turn_off:
-      - lambda: 'id(va_wake)->stop();'
+      - lambda: 'id(va_plugin).listen(false);'
   # Its two sounds on the screen's speaker: when it starts to listen, and a plop again and again while Assist thinks.
   - platform: template
     id: va_wake_sound

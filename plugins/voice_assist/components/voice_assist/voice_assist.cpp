@@ -321,6 +321,64 @@ void VoiceAssist::choose_phrase(size_t index) {
   tessera::refresh();
 }
 
+bool VoiceAssist::claim_wake_word_() {
+  if (wake_word_ == nullptr) return false;
+  using tessera::audio::Role;
+  using tessera::audio::Side;
+  wake_holds_ = tessera::audio::claim(
+      Side::IN, Role::VOICE, 0,
+      [this]() {
+        wake_holds_ = false;
+        wake_word_->stop();
+      },
+      [this]() {
+        wake_holds_ = true;
+        if (wake_wanted_) wake_word_->start();
+      });
+  return wake_holds_;
+}
+
+void VoiceAssist::listen(bool on) {
+  using tessera::audio::Role;
+  using tessera::audio::Side;
+  wake_wanted_ = on;
+  if (wake_word_ == nullptr) return;
+  if (on) {
+    if (claim_wake_word_()) wake_word_->start();
+    return;
+  }
+  wake_word_->stop();
+  if (!busy()) tessera::audio::release(Side::IN, Role::VOICE, 0);
+  wake_holds_ = false;
+}
+
+void VoiceAssist::session(bool on) {
+  using tessera::audio::Role;
+  using tessera::audio::Side;
+  if (on) {
+    // The same claim as the wake word's (VOICE, 0) on the microphone, and the speaker beside it: music pauses and stays
+    // paused (media waits for nothing), and a ring that takes either side stops the session.
+    const bool held = tessera::audio::claim(Side::BOTH, Role::VOICE, 0, [this]() {
+      wake_holds_ = false;
+      if (wake_word_ != nullptr) wake_word_->stop();
+      if (busy()) assistant_->request_stop();
+    });
+    if (!held && busy()) assistant_->request_stop();
+    return;
+  }
+  tessera::audio::release(Side::OUT, Role::VOICE, 0);
+  // The microphone stays the wake word's (its own answers back) while it should listen; otherwise it goes.
+  if (wake_wanted_) claim_wake_word_();
+  else tessera::audio::release(Side::IN, Role::VOICE, 0);
+}
+
+void VoiceAssist::on_interval(uint32_t) {
+  // A wake word refused the microphone (a ring had it) listens again once nobody above it holds it.
+  if (wake_wanted_ && !wake_holds_ && !busy() &&
+      tessera::audio::open(tessera::audio::Side::IN, tessera::audio::Role::VOICE) && claim_wake_word_())
+    wake_word_->start();
+}
+
 void VoiceAssist::ask() {
   if (assistant_ == nullptr) return;
   if (busy()) {

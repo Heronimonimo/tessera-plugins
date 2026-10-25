@@ -18,6 +18,7 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <sys/param.h>
 #include <freertos/FreeRTOS.h>
@@ -86,6 +87,8 @@ typedef struct {
     // How far the picture may move inside the sensor's window: window size less picture size.
     uint16_t room_x;
     uint16_t room_y;
+    // A field of view's mode (Screen camera's setting): its window offsets stay as its table has them (below).
+    bool field_mode;
 } ov02c10_state_t;
 
 // Total gain x 1000 for each analog gain step, the menu esp_video's ISP pipeline picks from.
@@ -396,13 +399,21 @@ static esp_err_t ov02c10_apply_orientation(esp_cam_sensor_device_t *dev)
     uint8_t y_win = state->base_y_win;
 
     const bool true_view_bit = !state->hmirror;
+    // In a field of view's mode the offsets count binned or skipped pixels and the window has 8 and 16 of them to spare
+    // (968 x 544 for 960 x 528): its table's even offsets stay, the bits alone turn the picture. A Guition tester saw
+    // the first build's picture moved and striped (2026-10-25); the log reads back what the ISP makes of it.
+    const bool shift = !state->field_mode;
     if (((rotate & OV02C10_ROTATE_MIRROR) != 0) != true_view_bit) {
         rotate ^= OV02C10_ROTATE_MIRROR;
-        x_win = ov02c10_shift_window(x_win, (rotate & OV02C10_ROTATE_MIRROR) ? -1 : 1, state->room_x);
+        if (shift) {
+            x_win = ov02c10_shift_window(x_win, (rotate & OV02C10_ROTATE_MIRROR) ? -1 : 1, state->room_x);
+        }
     }
     if (state->vflip) {
         rotate ^= OV02C10_ROTATE_FLIP;
-        y_win = ov02c10_shift_window(y_win, (rotate & OV02C10_ROTATE_FLIP) ? 1 : -1, state->room_y);
+        if (shift) {
+            y_win = ov02c10_shift_window(y_win, (rotate & OV02C10_ROTATE_FLIP) ? 1 : -1, state->room_y);
+        }
     }
 
     esp_err_t ret = ov02c10_write(dev->sccb_handle, OV02C10_REG_ROTATE, rotate);
@@ -537,6 +548,7 @@ static esp_err_t ov02c10_set_format(esp_cam_sensor_device_t *dev, const esp_cam_
     dev->cur_format = format;
 
     // Exposure and gain start where the ISP pipeline expects them; the orientation chosen before stays.
+    state->field_mode = format->name != NULL && strncmp(format->name, "OV02C10_full_", 13) == 0;
     state->base_rotate = ov02c10_table_value(regs, OV02C10_REG_ROTATE, 0xa0);
     state->base_x_win = ov02c10_table_value(regs, OV02C10_REG_X_WIN_L, 0x07);
     state->base_y_win = ov02c10_table_value(regs, OV02C10_REG_Y_WIN_L, 0x04);
@@ -712,11 +724,10 @@ typedef struct {
 
 // Every other pair of columns and of lines (odd increment 3, even 1: the Bayer pairs stay whole), 960 x 528 out of the
 // 968 x 544 that leaves: its middle, in whole macroblocks for the video's encoder (a horizontal size must be a multiple
-// of 8, section 2.3), with the offsets one pixel off even as the tables have them, so a mirror or flip moves them by
-// one.
+// of 8, section 2.3), at even offsets (4 and 8) that a mirror or flip leaves where they are (field_mode).
 #define OV02C10_HALF_CHANGES                                                                    \
     {0x3808, 0x03}, {0x3809, 0xc0}, {0x380a, 0x02}, {0x380b, 0x10},                             \
-    {0x3810, 0x00}, {0x3811, 0x05}, {0x3812, 0x00}, {0x3813, 0x08},                             \
+    {0x3810, 0x00}, {0x3811, 0x04}, {0x3812, 0x00}, {0x3813, 0x08},                             \
     {0x3814, 0x03}, {0x3815, 0x01}, {0x3816, 0x03}, {0x3817, 0x01}
 // Full (binning): the pairs averaged, columns and lines (0x3820 0xa3: the table's 0xa0 with hbin2_o and vbinf_o; the
 // driver's mirror and flip keep bits 0 and 1; the table's 0x4501 0x00 averages).
@@ -792,15 +803,32 @@ const esp_cam_sensor_format_t *tessera_camera_field_format(int field)
                                "OV02C10_full_skipped_960x528", 960, 528);
 }
 
-// What the sensor says it does, for the log after a change: 0x3820 (FORMAT1) and the ISP's 0x5024 (ISP_TOP_36: bit 5
-// x_bin2, bit 4 y_bin2, bit 7 flip, bit 6 mirror).
-bool tessera_camera_field_status(uint8_t *format1, uint8_t *isp_status)
+// What the sensor says it does, for the log ten seconds after a change: 0x3820 (FORMAT1) and the window offsets as
+// written, and the ISP's own account (table 6-19, ISP_TOP_36 to 53, 0x5024 to 0x5035): binning, flip and mirror, the
+// array it reads, and the output's offset and size. The length written, 0 without an OV02C10.
+int tessera_camera_field_report(char *out, size_t size)
 {
-    if (s_device == NULL) {
-        return false;
+    if (s_device == NULL || out == NULL || size == 0) {
+        return 0;
     }
-    return ov02c10_read(s_device->sccb_handle, OV02C10_REG_ROTATE, format1) == ESP_OK &&
-           ov02c10_read(s_device->sccb_handle, 0x5024, isp_status) == ESP_OK;
+    uint8_t format1 = 0, x_win = 0, y_win = 0, r[18] = {0};
+    esp_err_t ret = ov02c10_read(s_device->sccb_handle, OV02C10_REG_ROTATE, &format1);
+    ret |= ov02c10_read(s_device->sccb_handle, OV02C10_REG_X_WIN_L, &x_win);
+    ret |= ov02c10_read(s_device->sccb_handle, OV02C10_REG_Y_WIN_L, &y_win);
+    for (int i = 0; i < 18; i++) {
+        ret |= ov02c10_read(s_device->sccb_handle, 0x5024 + i, &r[i]);
+    }
+    if (ret != ESP_OK) {
+        return snprintf(out, size, "the sensor did not answer");
+    }
+#define OV02C10_R11(hi, lo) ((unsigned)(((r[hi] & 0x07) << 8) | r[lo]))
+    return snprintf(out, size,
+                    "0x3820 0x%02X, isp_x_win %u, isp_y_win %u; the ISP: x_bin2 %u y_bin2 %u flip %u mirror %u, "
+                    "array x %u..%u y %u..%u, output %ux%u at %u,%u",
+                    format1, x_win, y_win, (r[0] >> 5) & 1u, (r[0] >> 4) & 1u, (r[0] >> 7) & 1u, (r[0] >> 6) & 1u,
+                    OV02C10_R11(2, 3), OV02C10_R11(4, 5), OV02C10_R11(6, 7), OV02C10_R11(8, 9),
+                    OV02C10_R11(12, 13), OV02C10_R11(16, 17), OV02C10_R11(10, 11), OV02C10_R11(14, 15));
+#undef OV02C10_R11
 }
 
 esp_cam_sensor_device_t *ov02c10_detect(esp_cam_sensor_config_t *config)

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.1 - 2026-10-25
+- Camera field of view on the Guition: the first test showed more of the room, but moved towards the top right
+  and with stripes. Both Full modes now keep their window's offsets even and where they are when the picture is
+  mirrored or flipped, and ten seconds after a change the log says what the sensor makes of it: its binning, flip
+  and mirror, the part of the array it reads, and the size and place of its output. Testers: try both Full modes
+  again, and send that log line with a screenshot of each.
+
 ## 0.6.0 - 2026-10-25
 - A new setting, **Camera field of view**, for the Guition ESP32-P4 screens' camera (OV02C10), to try. **Sharp** is
   the old behaviour, the middle of the camera's picture, and the default. **Full (binning)** and **Full (skip)** show

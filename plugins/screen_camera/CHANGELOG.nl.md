@@ -1,5 +1,12 @@
 # Wijzigingen
 
+## 0.6.1 - 2026-10-25
+- Beeldveld camera op de Guition: de eerste test toonde meer van de kamer, maar naar rechtsboven verschoven en met
+  strepen. Beide Full-standen houden de offsets van hun venster nu even, en op hun plek als het beeld gespiegeld of
+  gedraaid wordt, en tien seconden na een wissel zegt de log wat de sensor ervan maakt: zijn binning, draaien en
+  spiegelen, het deel van de sensor dat hij leest, en de maat en plek van zijn uitvoer. Testers: probeer beide
+  Full-standen opnieuw, en stuur die logregel met een screenshot van elk.
+
 ## 0.6.0 - 2026-10-25
 - Een nieuwe instelling, **Beeldveld camera**, voor de camera van de Guition ESP32-P4-schermen (OV02C10), om te
   proberen. **Sharp** is het oude gedrag, het midden van het camerabeeld, en de standaard. **Full (binning)** en

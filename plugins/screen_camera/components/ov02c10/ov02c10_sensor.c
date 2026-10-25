@@ -735,26 +735,17 @@ typedef struct {
     {0x3808, 0x03}, {0x3809, 0xc0}, {0x380a, 0x02}, {0x380b, 0x10},                             \
     {0x3810, 0x00}, {0x3811, 0x04}, {0x3812, 0x00}, {0x3813, 0x08},                             \
     {0x3814, 0x03}, {0x3815, 0x01}, {0x3816, 0x03}, {0x3817, 0x01}
-// TEST BUILD (not for release): on a Guition 10.1-inch both modes above gave a frame and then stalled (0.6.2, the sensor
-// reporting x_bin2 and y_bin2 with a 960 x 528 output as asked), binning and skip alike. The two slots of this build
-// each change one thing, to tell the sensor's stepping from the size the P4 gets:
-// Full (binning) slot: no stepping at all, the same 968 x 544 window and 960 x 528 output at 4,8, in the middle of the
-// array (484..1451 x 276..819). If this stalls too, the fault is the size on the P4's side, not the sensor.
-static const ov02c10_change_t s_binned_changes[] = {
-    {0x3800, 0x01}, {0x3801, 0xe4}, {0x3802, 0x01}, {0x3803, 0x14},
-    {0x3804, 0x05}, {0x3805, 0xab}, {0x3806, 0x03}, {0x3807, 0x33},
-    {0x3808, 0x03}, {0x3809, 0xc0}, {0x380a, 0x02}, {0x380b, 0x10},
-    {0x3810, 0x00}, {0x3811, 0x04}, {0x3812, 0x00}, {0x3813, 0x08},
-};
-// Full (skip) slot: columns stepped only (0x3814 3, the lines 1:1), the whole width and Sharp's lines (180..911), 960 x
-// 720 out at 4,4: the picture is squeezed sideways. If this runs, the lines' stepping is what stalls.
-static const ov02c10_change_t s_skipped_changes[] = {
-    {0x3800, 0x00}, {0x3801, 0x00}, {0x3802, 0x00}, {0x3803, 0xb4},
-    {0x3804, 0x07}, {0x3805, 0x8f}, {0x3806, 0x03}, {0x3807, 0x8f},
-    {0x3808, 0x03}, {0x3809, 0xc0}, {0x380a, 0x02}, {0x380b, 0xd0},
-    {0x3810, 0x00}, {0x3811, 0x04}, {0x3812, 0x00}, {0x3813, 0x04},
-    {0x3814, 0x03}, {0x3815, 0x01}, {0x3816, 0x01}, {0x3817, 0x01},
-};
+// TEST BUILD 2 (not for release). On a Guition 10.1-inch with 0.6.2 both modes above gave a frame and then stalled,
+// binning and skip alike. Test build 1 (2026-10-25) narrowed it: a 960 x 528 crop at 1:1 ran (29.8 frames a second, the
+// video's encoder at that size), and so did the columns stepped alone (0x3814 3, 960 x 720, x_bin2 1 y_bin2 0): the
+// lines' stepping (0x3816 3) is what stalls. The OV5675, OV8856 and OV13858 (Linux drivers/media/i2c) change, with
+// their lines binned: 0x3714 by +4 (0x24 to 0x28 on two of them, the value this table has) and the black level's last
+// line 0x4009 to about half (its lines are binned too; this table's 0x23 to 0x11). Both slots carry those two:
+// Full (binning) slot: OV02C10_HALF_CHANGES, the binning bits, the two registers.
+static const ov02c10_change_t s_binned_changes[] = {OV02C10_HALF_CHANGES, {0x3820, 0xa3}, {0x4501, 0x00},
+                                                    {0x3714, 0x28}, {0x4009, 0x11}};
+// Full (skip) slot: OV02C10_HALF_CHANGES and the two registers.
+static const ov02c10_change_t s_skipped_changes[] = {OV02C10_HALF_CHANGES, {0x3714, 0x28}, {0x4009, 0x11}};
 #define OV02C10_FIELD_REGS 320
 static ov02c10_reginfo_t s_field_regs[2][OV02C10_FIELD_REGS];
 static esp_cam_sensor_format_t s_field_format[2];
@@ -818,11 +809,11 @@ const esp_cam_sensor_format_t *tessera_camera_field_format(int field)
     if (field == 1) {
         return ov02c10_build_field(index, &ov02c10_format_info[1], s_binned_changes,
                                    sizeof(s_binned_changes) / sizeof(s_binned_changes[0]),
-                                   "OV02C10_full_test_crop_960x528", 960, 528);
+                                   "OV02C10_full_test2_binned_960x528", 960, 528);
     }
     return ov02c10_build_field(index, &ov02c10_format_info[1], s_skipped_changes,
                                sizeof(s_skipped_changes) / sizeof(s_skipped_changes[0]),
-                               "OV02C10_full_test_colskip_960x720", 960, 720);
+                               "OV02C10_full_test2_skipped_960x528", 960, 528);
 }
 
 // What the sensor says it does, for the log ten seconds after a change: 0x3820 (FORMAT1) and the window offsets as

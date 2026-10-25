@@ -1,6 +1,12 @@
 {
  "format": 1,
  "plugins": {
+  "bt_proxy": {
+   "likes": 0,
+   "rating": null,
+   "ratings": 1,
+   "homes": 1
+  },
   "cinema": {
    "likes": 2,
    "rating": null,
@@ -11,7 +17,7 @@
    "likes": 6,
    "rating": null,
    "ratings": 0,
-   "homes": 0
+   "homes": 1
   },
   "electricity_price": {
    "likes": 1,
@@ -23,7 +29,7 @@
    "likes": 2,
    "rating": null,
    "ratings": 0,
-   "homes": 0
+   "homes": 1
   },
   "microplant": {
    "likes": 2,
@@ -59,7 +65,7 @@
    "likes": 1,
    "rating": null,
    "ratings": 0,
-   "homes": 0
+   "homes": 1
   },
   "screen_camera": {
    "likes": 0,
@@ -70,8 +76,8 @@
   "tap_sound": {
    "likes": 1,
    "rating": null,
-   "ratings": 0,
-   "homes": 0
+   "ratings": 1,
+   "homes": 1
   },
   "vinyl_deck": {
    "likes": 1,
@@ -82,14 +88,14 @@
   "voice_assist": {
    "likes": 2,
    "rating": null,
-   "ratings": 0,
-   "homes": 0
+   "ratings": 1,
+   "homes": 1
   },
   "waste_collection": {
-   "likes": 5,
+   "likes": 6,
    "rating": null,
-   "ratings": 0,
-   "homes": 0
+   "ratings": 1,
+   "homes": 1
   },
   "waze_traveltime": {
    "likes": 1,
@@ -101,7 +107,7 @@
    "likes": 2,
    "rating": null,
    "ratings": 0,
-   "homes": 0
+   "homes": 1
   }
  }
 }

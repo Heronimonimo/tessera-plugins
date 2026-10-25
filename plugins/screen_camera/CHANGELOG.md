@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.1 - 2026-10-25
+- The video's server counts its connections (its listener and its three viewers) into the ones the screen's firmware
+  allows. With four live camera tiles on the glass beside the video's viewers the screen ran out of them, and a fifth
+  camera tile's picture found no connection. Update when it is offered; the screen builds again.
+
 ## 0.5.0 - 2026-10-25
 - The camera stands upright by itself: on a screen whose board mounts it upside down (the M5Stack Tab5) and on a
   screen turned half way round. The sensor turns its own picture, so the pictures in Home Assistant, the video and the

@@ -1,5 +1,10 @@
 # Wijzigingen
 
+## 0.5.1 - 2026-10-25
+- De server van de video telt zijn verbindingen (zijn luisterpoort en zijn drie kijkers) mee in wat de firmware van het
+  scherm toestaat. Met vier live camerategels op het scherm naast de kijkers van de video raakten ze op, en vond het
+  plaatje van een vijfde camerategel geen verbinding. Werk bij als het wordt aangeboden; het scherm wordt opnieuw gebouwd.
+
 ## 0.5.0 - 2026-10-25
 - De camera staat vanzelf rechtop: op een scherm waarvan het bord hem op zijn kop monteert (de M5Stack Tab5) en op
   een scherm dat een halve slag gedraaid is. De sensor draait zijn eigen beeld, dus de plaatjes in Home Assistant, de

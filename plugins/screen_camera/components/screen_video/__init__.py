@@ -14,7 +14,7 @@ import hashlib
 import esphome.codegen as cg
 import esphome.config_validation as cv
 import esphome.final_validate as fv
-from esphome.components import microphone
+from esphome.components import microphone, socket
 from esphome.components.esp32 import add_idf_component
 from esphome.const import CONF_ID, CONF_MICROPHONE, CONF_PORT
 from esphome.core import CORE
@@ -60,6 +60,16 @@ CONFIG_SCHEMA = cv.Schema(
     }
 ).extend(cv.COMPONENT_SCHEMA)
 
+
+# The server's connections, which ESPHome sums into the screen's socket count: its listener and one for each of
+# ScreenVideo::MAX_VIEWERS (screen_video.h). Without them the screen's count ran out with four live tiles beside three
+# viewers.
+MAX_VIEWERS = 3
+CONFIG_SCHEMA = cv.All(
+    CONFIG_SCHEMA,
+    socket.consume_sockets(MAX_VIEWERS, "screen_video"),
+    socket.consume_sockets(1, "screen_video", socket.SocketType.TCP_LISTEN),
+)
 
 FINAL_VALIDATE_SCHEMA = _raw_camera
 

@@ -1,6 +1,6 @@
 {
  "format": 1,
- "generated": "2026-10-23T18:27:39Z",
+ "generated": "2026-10-25T12:37:28Z",
  "plugin_api": "0.14",
  "blocked": [],
  "featured": [
@@ -2583,14 +2583,14 @@
    "label": "community",
    "status": "ok",
    "release": {
-    "version": "0.6.6",
-    "sha": "7a25cf6d08738be4377ed7b50a4d894d563ab374",
-    "date": "2026-10-19",
-    "tag": "v0.6.6"
+    "version": "0.9.0",
+    "sha": "0f4665cfb79803a609419432ec62cd14a4ace819",
+    "date": "2026-10-25",
+    "tag": "v0.9.0"
    },
    "manifest": {
     "id": "electricity_price",
-    "version": "0.6.6",
+    "version": "0.9.0",
     "api": "0.12",
     "icon": "flash",
     "maintainer": "Heronimonimo",
@@ -2614,7 +2614,7 @@
        "max": "9x9",
        "full": true
       },
-      "memory": 13000,
+      "memory": 16000,
       "domains": [
        "sensor"
       ],
@@ -2666,6 +2666,65 @@
         "default": 3,
         "label": "decimals",
         "hint": "decimals_hint"
+       },
+       {
+        "id": "delivery",
+        "kind": "text",
+        "default": "",
+        "label": "delivery",
+        "hint": "delivery_hint"
+       },
+       {
+        "id": "feed_in",
+        "kind": "text",
+        "default": "",
+        "label": "feed_in",
+        "hint": "feed_in_hint"
+       },
+       {
+        "id": "graph",
+        "kind": "choice",
+        "default": "bars",
+        "label": "graph",
+        "hint": "graph_hint",
+        "choices": [
+         {
+          "value": "bars",
+          "label": "graph_bars"
+         },
+         {
+          "value": "line",
+          "label": "graph_line"
+         }
+        ]
+       },
+       {
+        "id": "fill",
+        "kind": "toggle",
+        "default": true,
+        "label": "fill",
+        "hint": "fill_hint"
+       },
+       {
+        "id": "grid",
+        "kind": "choice",
+        "default": "none",
+        "label": "grid",
+        "hint": "grid_hint",
+        "choices": [
+         {
+          "value": "none",
+          "label": "grid_none"
+         },
+         {
+          "value": "solid",
+          "label": "grid_solid"
+         },
+         {
+          "value": "dotted",
+          "label": "grid_dotted"
+         }
+        ]
        }
       ]
      },
@@ -2678,7 +2737,7 @@
        "max": "9x9",
        "full": true
       },
-      "memory": 13000,
+      "memory": 16000,
       "domains": [
        "sensor"
       ],
@@ -2730,6 +2789,65 @@
         "default": 3,
         "label": "decimals",
         "hint": "decimals_hint"
+       },
+       {
+        "id": "delivery",
+        "kind": "text",
+        "default": "",
+        "label": "delivery",
+        "hint": "delivery_hint"
+       },
+       {
+        "id": "feed_in",
+        "kind": "text",
+        "default": "",
+        "label": "feed_in",
+        "hint": "feed_in_hint"
+       },
+       {
+        "id": "graph",
+        "kind": "choice",
+        "default": "bars",
+        "label": "graph",
+        "hint": "graph_hint",
+        "choices": [
+         {
+          "value": "bars",
+          "label": "graph_bars"
+         },
+         {
+          "value": "line",
+          "label": "graph_line"
+         }
+        ]
+       },
+       {
+        "id": "fill",
+        "kind": "toggle",
+        "default": true,
+        "label": "fill",
+        "hint": "fill_hint"
+       },
+       {
+        "id": "grid",
+        "kind": "choice",
+        "default": "none",
+        "label": "grid",
+        "hint": "grid_hint",
+        "choices": [
+         {
+          "value": "none",
+          "label": "grid_none"
+         },
+         {
+          "value": "solid",
+          "label": "grid_solid"
+         },
+         {
+          "value": "dotted",
+          "label": "grid_dotted"
+         }
+        ]
        }
       ]
      },
@@ -2742,7 +2860,7 @@
        "max": "9x9",
        "full": true
       },
-      "memory": 13000,
+      "memory": 16000,
       "domains": [
        "sensor"
       ],
@@ -2794,6 +2912,65 @@
         "default": 3,
         "label": "decimals",
         "hint": "decimals_hint"
+       },
+       {
+        "id": "delivery",
+        "kind": "text",
+        "default": "",
+        "label": "delivery",
+        "hint": "delivery_hint"
+       },
+       {
+        "id": "feed_in",
+        "kind": "text",
+        "default": "",
+        "label": "feed_in",
+        "hint": "feed_in_hint"
+       },
+       {
+        "id": "graph",
+        "kind": "choice",
+        "default": "bars",
+        "label": "graph",
+        "hint": "graph_hint",
+        "choices": [
+         {
+          "value": "bars",
+          "label": "graph_bars"
+         },
+         {
+          "value": "line",
+          "label": "graph_line"
+         }
+        ]
+       },
+       {
+        "id": "fill",
+        "kind": "toggle",
+        "default": true,
+        "label": "fill",
+        "hint": "fill_hint"
+       },
+       {
+        "id": "grid",
+        "kind": "choice",
+        "default": "none",
+        "label": "grid",
+        "hint": "grid_hint",
+        "choices": [
+         {
+          "value": "none",
+          "label": "grid_none"
+         },
+         {
+          "value": "solid",
+          "label": "grid_solid"
+         },
+         {
+          "value": "dotted",
+          "label": "grid_dotted"
+         }
+        ]
        }
       ]
      }
@@ -2820,7 +2997,9 @@
       "low": "Low {value}",
       "high": "High {value}",
       "average": "Average",
-      "no_graph": "No prices for today"
+      "no_graph": "No prices for today",
+      "feed_in": "Feed-in {value}",
+      "formula_error": "Check the formula"
      },
      "app": {
       "name": "Electricity price",
@@ -2835,7 +3014,22 @@
       "unit_eur": "EUR/kWh",
       "unit_cents": "ct/kWh",
       "decimals": "Decimals",
-      "decimals_hint": "How many decimals the price shows. In cents one is enough."
+      "decimals_hint": "How many decimals the price shows. In cents one is enough.",
+      "feed_in": "Feed-in price",
+      "feed_in_hint": "A formula in p for what a kWh you feed back brings, such as p-0.02, or a fixed price such as 0.07. Each bar then runs from the feed-in price to the delivery price. Empty: no feed-in price.",
+      "delivery": "Delivery price",
+      "delivery_hint": "A formula in p, the sensor's price per kWh in its own currency (also when you show cents): (p+0.12)*1.21 adds the energy tax and surcharge, then 21% VAT. A number alone is a fixed price. Empty: the sensor's price.",
+      "graph": "Graph",
+      "graph_hint": "Bars, or a stepped line that follows the price slot by slot. The card shows the graph of the tile you open it from.",
+      "graph_bars": "Bars",
+      "graph_line": "Stepped line",
+      "fill": "Fill under the line",
+      "fill_hint": "With a stepped line: a faint fill under it, down to zero or to the feed-in price.",
+      "grid": "Grid lines",
+      "grid_hint": "Lines across the graph at the price labels it shows.",
+      "grid_none": "None",
+      "grid_solid": "Solid",
+      "grid_dotted": "Dotted"
      }
     },
     "nl": {
@@ -2851,7 +3045,9 @@
       "low": "Laag {value}",
       "high": "Hoog {value}",
       "average": "Gemiddeld",
-      "no_graph": "Geen prijzen voor vandaag"
+      "no_graph": "Geen prijzen voor vandaag",
+      "feed_in": "Teruglevering {value}",
+      "formula_error": "Controleer de formule"
      },
      "app": {
       "name": "Stroomprijs",
@@ -2866,15 +3062,30 @@
       "unit_eur": "EUR/kWh",
       "unit_cents": "ct/kWh",
       "decimals": "Decimalen",
-      "decimals_hint": "Hoeveel decimalen de prijs toont. In centen is er één genoeg."
+      "decimals_hint": "Hoeveel decimalen de prijs toont. In centen is er één genoeg.",
+      "feed_in": "Terugleverprijs",
+      "feed_in_hint": "Een formule met p voor wat een kWh die je teruglevert oplevert, zoals p-0,02, of een vaste prijs zoals 0,07. Elke balk loopt dan van de terugleverprijs tot de leveringsprijs. Leeg: geen terugleverprijs.",
+      "delivery": "Leveringsprijs",
+      "delivery_hint": "Een formule met p, de prijs van de sensor per kWh in zijn eigen munt (ook als je centen toont): (p+0,12)*1,21 telt energiebelasting en opslag op en dan 21% btw. Alleen een getal is een vaste prijs. Leeg: de prijs van de sensor.",
+      "graph": "Grafiek",
+      "graph_hint": "Balken, of een trappenlijn die de prijs per tijdvak volgt. De kaart toont de grafiek van de tegel waarmee je hem opent.",
+      "graph_bars": "Balken",
+      "graph_line": "Trappenlijn",
+      "fill": "Vulling onder de lijn",
+      "fill_hint": "Bij een trappenlijn: een lichte vulling eronder, tot nul of tot de terugleverprijs.",
+      "grid": "Rasterlijnen",
+      "grid_hint": "Lijnen dwars door de grafiek bij de prijzen die hij toont.",
+      "grid_none": "Geen",
+      "grid_solid": "Doorgetrokken",
+      "grid_dotted": "Gestippeld"
      }
     }
    },
    "readme": {
-    "en": "# Electricity price\n\nThe electricity price now as a tile, with the graph of today and tomorrow on bigger tiles and on a card of its own.\nIt reads the price sensor of **Nord Pool** (HACS `nordpool`), **ENTSO-e** (`entsoe`) or **GE-Spot** (`ge_spot`) in Home Assistant. For GE-Spot, use its price sensor in a currency per kWh (not the cents display).\n\nIt runs on every board Tessera supports (`boards: any`), from the CYD to the 10.1-inch screens.\n\n## Set up\n\n1. In Tessera, open **Plugins** and choose **Electricity price**, or choose **Add with a link** and paste\n   `https://github.com/Heronimonimo/tessera-electricity-price`. Tick your screens; each builds once.\n2. In Layout, place the **Electricity price (Nord Pool)**, **Electricity price (ENTSO-e)** or **Electricity price\n   (GE-Spot)** tile from the library's Plugins group, at any size from 1x1 up to the whole page. A tile smaller than\n   2x2 shows the price with the meter bar; from 2x2 up it adds the graph.\n3. In the inspector, choose your price sensor. The list holds only the sensors that fit the tile you placed.\n4. Choose the unit, **EUR/kWh** (`0.273`) or **ct/kWh** (`27.3`), and the number of decimals (in ct/kWh at most one).\n5. Tap a bar of the graph to see its price and time slot for a few seconds, on a bigger tile and on the full screen card. On a tile, tap that bar again, or beside the bars, to open the card: the price now, the lowest and highest still to come, the day's average, and the graph.\n\n## Good to know\n\n- The graph has a bar for every quarter of an hour when the sensor has quarter prices, else for every hour. A tile\n  with more than 100 slots (quarters of today and tomorrow) joins neighbouring quarters into one bar; the card shows\n  them all. Past bars are grey, the bar now is the accent colour, and the bars to come are green, amber or red by their\n  place between the lowest and highest price. Prices below zero hang under the zero line.\n- Tomorrow's bars appear on their own as soon as the sensor has them (the day-ahead prices come in the afternoon).\n- The unit comes from the sensor (`EUR/kWh` shows as `€/kWh`). A sensor that reports per MWh is shown per kWh.\n- On the days the clock changes, the graph has 23 or 25 hours, each where it is on the clock.\n"
+    "en": "# Electricity price\n\nThe electricity price now as a tile, with the graph of today and tomorrow on bigger tiles and on a card of its own.\nIt reads the price sensor of **Nord Pool** (HACS `nordpool`), **ENTSO-e** (`entsoe`) or **GE-Spot** (`ge_spot`) in Home Assistant. For GE-Spot, use its price sensor in a currency per kWh (not the cents display).\n\nIt runs on every board Tessera supports (`boards: any`), from the CYD to the 10.1-inch screens.\n\n## Set up\n\n1. In Tessera, open **Plugins** and choose **Electricity price**, or choose **Add with a link** and paste\n   `https://github.com/Heronimonimo/tessera-electricity-price`. Tick your screens; each builds once.\n2. In Layout, place the **Electricity price (Nord Pool)**, **Electricity price (ENTSO-e)** or **Electricity price\n   (GE-Spot)** tile from the library's Plugins group, at any size from 1x1 up to the whole page. A tile smaller than\n   2x2 shows the price with the meter bar; from 2x2 up it adds the graph.\n3. In the inspector, choose your price sensor. The list holds only the sensors that fit the tile you placed.\n4. Choose the unit, **EUR/kWh** (`0.273`) or **ct/kWh** (`27.3`), and the number of decimals (in ct/kWh at most one).\n5. Optionally set your tariff (below).\n6. Tap a bar of the graph to see its price and time slot for a few seconds, on a bigger tile and on the full screen card. On a tile, tap that bar again, or beside the bars, to open the card: the price now, the lowest and highest still to come, the day's average, and the graph.\n\n## Your tariff\n\nThe sensor gives the market price p. In the inspector you can type what you really pay, and what you get back, as a\nformula in p:\n\n| Field | Example | Means |\n|---|---|---|\n| **Delivery price** | `(p+0.12)*1.21` | Energy tax and surcharge on top, then 21% VAT |\n| | `0.25` | A fixed price |\n| **Feed-in price** | `p-0.02` | The market price minus your supplier's 2 cents |\n| | `0,07` | A fixed feed-in price |\n\nA formula has p, numbers (`0.12` or `0,12`), `+ - * /` and brackets. The numbers are in the sensor's currency per\nkWh (0.02, not 2), also when the tile shows cents. An empty delivery price is the sensor's own price; an empty feed-in\nprice is none. A formula with a typo shows \"Check the formula\" on the screen in place of the price; the editor\ncannot check it for you.\n\nWith a feed-in price each bar runs from the feed-in price to the delivery price, so you see the gap between the two\nover the day, also when feed-in is the higher one. The tile and the card show the feed-in price of now under the\nprice. The editor's preview shows the sensor's own price: it cannot work out the formula.\n\n## Bars or a stepped line\n\nIn the inspector, **Graph** chooses **Bars** or **Stepped line**. The stepped line follows the price slot by slot in\nthe same colours as the bars, with a dot for now. With a feed-in price it is a thin grey line under the delivery\nprice. **Fill under the line** adds a faint fill down to zero, or to the feed-in price. The card shows the graph of\nthe tile you open it from. **Grid lines** draws solid or dotted lines across the graph at its price labels.\n\n## Good to know\n\n- The graph has a bar for every quarter of an hour when the sensor has quarter prices, else for every hour. A tile\n  with more than 100 slots (quarters of today and tomorrow) joins neighbouring quarters into one bar; the card shows\n  them all. Past bars are grey, the bar now is the accent colour, and the bars to come are green, amber or red by their\n  place between the lowest and highest price. Prices below zero hang under the zero line.\n- Tomorrow's bars appear on their own as soon as the sensor has them (the day-ahead prices come in the afternoon).\n- The unit comes from the sensor (`EUR/kWh` shows as `€/kWh`). A sensor that reports per MWh is shown per kWh.\n- On the days the clock changes, the graph has 23 or 25 hours, each where it is on the clock.\n"
    },
    "changelog": {
-    "en": "# Changelog\n\n## 0.6.6\n- A sensor that reports per MWh shows its price per kWh, in EUR/kWh and in ct/kWh alike. Before, ct/kWh multiplied a\n  price per MWh by 100.\n- On the days the clock changes (23 or 25 hours), the bar of now, the times under the graph and the time slots of a\n  tapped bar and of the highest and lowest price are right. Before, they were an hour off after the change.\n- When tomorrow's prices come in another resolution than today's (hours beside quarters), the graph shows them in\n  today's, without gaps.\n- \"Choose a price sensor\" and \"No price\" fit on a small tile and on the card, in every language: without a price\n  the message takes the whole row, in a smaller font where needed. Before, it was cut off.\n\n## 0.6.5\n- The tiles also take the whole page (`full: true`): a tile as big as the grid, such as 5x5 on a 5x5 grid, was not offered before.\n- The editor shows the price with its unit.\n\n## 0.6.4\n- The tiles come in every size, from 1x1 up to 9x9 (before, at most 4x3).\n\n## 0.6.3\n- Graph: the bars share the whole width of the plot. Before, each bar had a whole number of pixels, so on a screen where 192 quarters did not divide the width the bars took only part of it.\n\n## 0.6.2\n- Card: the highest and the lowest price only count from now on, tomorrow included once it is known. A time slot of tomorrow says \"Tomorrow\" in front.\n\n## 0.6.1\n- The card is as wide as the glass, like Tessera's own graph.\n\n## 0.6.0\n- Card: the unit behind the average, the highest and the lowest. A tapped bar shows its price under its time slot in the middle, and the price of now stays at the left.\n\n## 0.5.4\n- Store picture (store.png) made on the bench.\n- Fixes found by the first real build: the GE-Spot tile is registered, no `strlcpy`, the Tomorrow label stays inside the card.\n- The name keeps the tile-label font, the price takes what is left.\n\n## 0.5.3\n- The graph shows from 2 wide and 2 high; smaller tiles show the price with the meter bar.\n\n## 0.5.2\n- Tile with a graph: the name at the left and the price of now at the right, like the small tile. A tapped bar shows its time in place of the name.\n\n## 0.5.1\n- Small tile like the meter bar tile: the name at the left, the price with its unit at the right.\n\n## 0.5.0\n- GE-Spot as a source: a third tile reads `today_interval_prices` and `tomorrow_interval_prices` (the `value` of each interval).\n\n## 0.4.1\n- Tapping a bar works on the full screen card too (needs API 0.12). High, low and average use the font of the history card.\n\n## 0.4.0\n- Tap a bar of the graph on a tile to see its price and time slot for a few seconds. Tap it again, or beside the bars, to open the card.\n\n## 0.3.1\n- Card header like the history card: price at the left, average in the middle, highest and lowest at the right with their time slot.\n\n## 0.3.0\n- Choose the unit: EUR/kWh or ct/kWh.\n- Time axis and price axis in the look of Tessera's history graph; the small tile is the meter's bar of cells.\n\n## 0.2.0\n- The graph shows quarter-hour prices when the sensor has them.\n- One tile per integration (Nord Pool, ENTSO-e), so the inspector lists only compatible sensors.\n\n## 0.1.0\n- First version: a tile with the electricity price now, a graph of today and tomorrow on bigger tiles and on a card.\n  Works with the Nord Pool and ENTSO-e sensors.\n"
+    "en": "# Changelog\n\n## 0.9.0\n- Graph: bars or a stepped line, chosen per tile in the editor. The stepped line follows the price slot by slot in the\n  colours of the bars, with a dot for now; a feed-in price is a thin grey line under it. A tapped slot gets a line\n  down through it and a dot on each price.\n- Fill under the line (on by default): a faint fill down to zero, or to the feed-in price.\n- Grid lines (none by default): solid or dotted lines across the graph at the price labels it shows. The lines\n  that were there before were a pixel wide by mistake, so none showed.\n- The card shows the graph of the tile you open it from.\n\n## 0.8.1\n- A tapped bar shows its feed-in price too: after its time on a tile, where it fits, and on the card in the feed-in\n  line, with its time slot.\n\n## 0.8.0\n- The tariff is a formula you type, one for delivery and one for feed-in: `(p+0.12)*1.21`, `p-0.02`, or a number\n  alone for a fixed price. p is the sensor's price per kWh; + - * /, brackets and a decimal point or comma work.\n  A formula with a typo shows \"Check the formula\" in place of the price.\n- The a, b and c options of 0.7.0 are gone: type your tariff again as a formula.\n\n## 0.7.0\n- Your own tariff on top of the market price: the delivery price is (p + a) × b + c, with a for the energy tax and the\n  supplier's surcharge, b for the VAT and c added after it. b 0 and c your price make a fixed price.\n- An optional feed-in price, (p + a) × b + c with its own a, b and c. With it each bar of the graph runs from the\n  feed-in price up to the delivery price; the colours stay those of the delivery price.\n- The feed-in price of now under the price on the meter tile, where it has room, and under the price on the card.\n\n## 0.6.6\n- A sensor that reports per MWh shows its price per kWh, in EUR/kWh and in ct/kWh alike. Before, ct/kWh multiplied a\n  price per MWh by 100.\n- On the days the clock changes (23 or 25 hours), the bar of now, the times under the graph and the time slots of a\n  tapped bar and of the highest and lowest price are right. Before, they were an hour off after the change.\n- When tomorrow's prices come in another resolution than today's (hours beside quarters), the graph shows them in\n  today's, without gaps.\n- \"Choose a price sensor\" and \"No price\" fit on a small tile and on the card, in every language: without a price\n  the message takes the whole row, in a smaller font where needed. Before, it was cut off.\n\n## 0.6.5\n- The tiles also take the whole page (`full: true`): a tile as big as the grid, such as 5x5 on a 5x5 grid, was not offered before.\n- The editor shows the price with its unit.\n\n## 0.6.4\n- The tiles come in every size, from 1x1 up to 9x9 (before, at most 4x3).\n\n## 0.6.3\n- Graph: the bars share the whole width of the plot. Before, each bar had a whole number of pixels, so on a screen where 192 quarters did not divide the width the bars took only part of it.\n\n## 0.6.2\n- Card: the highest and the lowest price only count from now on, tomorrow included once it is known. A time slot of tomorrow says \"Tomorrow\" in front.\n\n## 0.6.1\n- The card is as wide as the glass, like Tessera's own graph.\n\n## 0.6.0\n- Card: the unit behind the average, the highest and the lowest. A tapped bar shows its price under its time slot in the middle, and the price of now stays at the left.\n\n## 0.5.4\n- Store picture (store.png) made on the bench.\n- Fixes found by the first real build: the GE-Spot tile is registered, no `strlcpy`, the Tomorrow label stays inside the card.\n- The name keeps the tile-label font, the price takes what is left.\n\n## 0.5.3\n- The graph shows from 2 wide and 2 high; smaller tiles show the price with the meter bar.\n\n## 0.5.2\n- Tile with a graph: the name at the left and the price of now at the right, like the small tile. A tapped bar shows its time in place of the name.\n\n## 0.5.1\n- Small tile like the meter bar tile: the name at the left, the price with its unit at the right.\n\n## 0.5.0\n- GE-Spot as a source: a third tile reads `today_interval_prices` and `tomorrow_interval_prices` (the `value` of each interval).\n\n## 0.4.1\n- Tapping a bar works on the full screen card too (needs API 0.12). High, low and average use the font of the history card.\n\n## 0.4.0\n- Tap a bar of the graph on a tile to see its price and time slot for a few seconds. Tap it again, or beside the bars, to open the card.\n\n## 0.3.1\n- Card header like the history card: price at the left, average in the middle, highest and lowest at the right with their time slot.\n\n## 0.3.0\n- Choose the unit: EUR/kWh or ct/kWh.\n- Time axis and price axis in the look of Tessera's history graph; the small tile is the meter's bar of cells.\n\n## 0.2.0\n- The graph shows quarter-hour prices when the sensor has them.\n- One tile per integration (Nord Pool, ENTSO-e), so the inspector lists only compatible sensors.\n\n## 0.1.0\n- First version: a tile with the electricity price now, a graph of today and tomorrow on bigger tiles and on a card.\n  Works with the Nord Pool and ENTSO-e sensors.\n"
    },
    "image": "store.png"
   },

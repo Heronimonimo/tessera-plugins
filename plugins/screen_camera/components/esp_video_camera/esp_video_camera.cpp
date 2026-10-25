@@ -33,6 +33,11 @@ extern "C" {
 #include "esp_intr_alloc.h"
 #include "usb/usb_host.h"
 #endif
+#if CONFIG_IDF_TARGET_ESP32P4
+#include "soc/isp_struct.h"
+#include "soc/mipi_csi_bridge_struct.h"
+#include "soc/mipi_csi_host_struct.h"
+#endif
 }
 
 #ifndef V4L2_CID_JPEG_COMPRESSION_QUALITY
@@ -49,6 +54,26 @@ static const char *const FIELD_NAMES[] = {"Sharp", "Full (binning)", "Full (skip
 extern "C" const esp_cam_sensor_format_t *tessera_camera_field_format(int field) __attribute__((weak));
 // And what the sensor says it does, for the log ten seconds after a change (the OV02C10: binning, window and output).
 extern "C" int tessera_camera_field_report(char *out, size_t size) __attribute__((weak));
+
+#if CONFIG_IDF_TARGET_ESP32P4
+// TEST BUILD 4: what the P4's MIPI receiver, CSI bridge and ISP saw when a field of view stalls. The receiver's
+// int_st_* clear when read; the bridge's and ISP's int_raw stay until the driver clears them. Bridge int_raw bit 0:
+// the frame had fewer lines than set (vadr_num greater than real), bit 1 more, bit 2 a frame cut short, bit 3/4 an
+// overrun. ISP int_raw bit 0 a data type error, 3 a size setting error, 5 a line length unlike the setting.
+static void log_p4_capture_state(const char *field) {
+  ESP_LOGW(TAG,
+           "Field of view %s: the P4 says MIPI main 0x%08x phy_fatal 0x%08x pkt_fatal 0x%08x bndry 0x%08x seq 0x%08x "
+           "crc 0x%08x pld_crc 0x%08x data_id 0x%08x phy 0x%08x stopstate 0x%08x; bridge int_raw 0x%08x frame_cfg "
+           "0x%08x; ISP int_raw 0x%08x int_ena 0x%08x frame_cfg 0x%08x",
+           field, (unsigned) MIPI_CSI_HOST.int_st_main.val, (unsigned) MIPI_CSI_HOST.int_st_phy_fatal.val,
+           (unsigned) MIPI_CSI_HOST.int_st_pkt_fatal.val, (unsigned) MIPI_CSI_HOST.int_st_bndry_frame_fatal.val,
+           (unsigned) MIPI_CSI_HOST.int_st_seq_frame_fatal.val, (unsigned) MIPI_CSI_HOST.int_st_crc_frame_fatal.val,
+           (unsigned) MIPI_CSI_HOST.int_st_pld_crc_fatal.val, (unsigned) MIPI_CSI_HOST.int_st_data_id.val,
+           (unsigned) MIPI_CSI_HOST.int_st_phy.val, (unsigned) MIPI_CSI_HOST.phy_stopstate.val,
+           (unsigned) MIPI_CSI_BRIDGE.int_raw.val, (unsigned) MIPI_CSI_BRIDGE.frame_cfg.val, (unsigned) ISP.int_raw.val,
+           (unsigned) ISP.int_ena.val, (unsigned) ISP.frame_cfg.val);
+}
+#endif
 
 // ===========================================================================
 // Pipeline init helpers (run esp_video_init on core 0, optional LEDC XCLK)
@@ -678,6 +703,10 @@ void ESPVideoCamera::capture_task_run_() {
       // none): back to the sensor's own mode, with the retries anew. A Guition 4.3-inch kept its Full mode through four
       // time-outs when only "no frame at all" counted (GitHub issue #326).
       if (this->field_active_ != 0 && (this->field_frames_ == 0 || !this->field_told_)) {
+#if CONFIG_IDF_TARGET_ESP32P4
+        // Before the capture stops, while the receiver and the ISP still hold what they saw.
+        log_p4_capture_state(FIELD_NAMES[this->field_active_]);
+#endif
         this->field_failed_(this->field_frames_ == 0 ? "no frame came in it" : "its frames stopped");
         this->capture_retry_attempts_.store(0, std::memory_order_release);
       }
@@ -768,6 +797,11 @@ void ESPVideoCamera::loop_jpeg_pipeline_() {
     return;
   }
   this->field_frames_++;
+  // TEST BUILD 4: the first frames of a field of view of the driver's, as the capture got them.
+  if (this->field_active_ != 0 && this->field_frames_ <= 3)
+    ESP_LOGI(TAG, "Field of view %s: frame %u, %u bytes (%u expected), %u ms after the change",
+             FIELD_NAMES[this->field_active_], (unsigned) this->field_frames_, (unsigned) cap_buf.bytesused,
+             (unsigned) this->capture_frame_bytes_, (unsigned) (millis() - this->field_since_ms_));
   if (!this->field_told_ && millis() - this->field_since_ms_ >= 10000) {
     this->field_told_ = true;
     ESP_LOGI(TAG, "Field of view %s: %.1f frames a second over its first 10 s, %ux%u", FIELD_NAMES[this->field_active_],

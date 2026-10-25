@@ -89,13 +89,7 @@ typedef struct {
     uint16_t room_y;
     // A field of view's mode (Screen camera's setting): its window offsets stay as its table has them (below).
     bool field_mode;
-    // TEST BUILD 3: once set_format is done, the ISP pipeline's exposure (1) or exposure and gain (2) are held at the
-    // format's defaults: counted, not written (s_held_*).
-    int hold;
 } ov02c10_state_t;
-
-static uint32_t s_held_exposure;
-static uint32_t s_held_gain;
 
 // Total gain x 1000 for each analog gain step, the menu esp_video's ISP pipeline picks from.
 static uint32_t s_gain_values[OV02C10_GAIN_COUNT];
@@ -348,10 +342,6 @@ static esp_err_t ov02c10_set_exposure(esp_cam_sensor_device_t *dev, uint32_t lin
     uint32_t max = dev->cur_format->isp_info->isp_v1_info.vts - OV02C10_EXPOSURE_MAX_MARGIN;
     lines = MAX(lines, OV02C10_EXPOSURE_MIN);
     lines = MIN(lines, max);
-    if (state->hold >= 1) {
-        s_held_exposure++;
-        return ESP_OK;
-    }
 
     esp_err_t ret = ov02c10_write(dev->sccb_handle, OV02C10_REG_EXPOSURE_H, (lines >> 8) & 0xff);
     ret |= ov02c10_write(dev->sccb_handle, OV02C10_REG_EXPOSURE_L, lines & 0xff);
@@ -368,10 +358,6 @@ static esp_err_t ov02c10_set_gain_index(esp_cam_sensor_device_t *dev, uint32_t i
     ov02c10_state_t *state = (ov02c10_state_t *)dev->priv;
     index = MIN(index, OV02C10_GAIN_COUNT - 1);
     uint32_t reg = (index + OV02C10_GAIN_STEP_MIN) << 4;
-    if (state->hold >= 2) {
-        s_held_gain++;
-        return ESP_OK;
-    }
 
     esp_err_t ret = ov02c10_write(dev->sccb_handle, OV02C10_REG_ANALOG_GAIN_H, (reg >> 8) & 0xff);
     ret |= ov02c10_write(dev->sccb_handle, OV02C10_REG_ANALOG_GAIN_L, reg & 0xff);
@@ -562,7 +548,6 @@ static esp_err_t ov02c10_set_format(esp_cam_sensor_device_t *dev, const esp_cam_
     dev->cur_format = format;
 
     // Exposure and gain start where the ISP pipeline expects them; the orientation chosen before stays.
-    state->hold = 0;
     state->field_mode = format->name != NULL && strncmp(format->name, "OV02C10_full_", 13) == 0;
     state->base_rotate = ov02c10_table_value(regs, OV02C10_REG_ROTATE, 0xa0);
     state->base_x_win = ov02c10_table_value(regs, OV02C10_REG_X_WIN_L, 0x07);
@@ -580,14 +565,6 @@ static esp_err_t ov02c10_set_format(esp_cam_sensor_device_t *dev, const esp_cam_
     // stop stream default
     ret = ov02c10_set_stream(dev, 0);
     ESP_RETURN_ON_FALSE(ret == ESP_OK, ret, TAG, "write stream regs failed");
-
-    s_held_exposure = 0;
-    s_held_gain = 0;
-    if (format->name != NULL && strstr(format->name, "_hold_all_") != NULL) {
-        state->hold = 2;
-    } else if (format->name != NULL && strstr(format->name, "_hold_exposure_") != NULL) {
-        state->hold = 1;
-    }
 
     return ret;
 }
@@ -758,15 +735,16 @@ typedef struct {
     {0x3808, 0x03}, {0x3809, 0xc0}, {0x380a, 0x02}, {0x380b, 0x10},                             \
     {0x3810, 0x00}, {0x3811, 0x04}, {0x3812, 0x00}, {0x3813, 0x08},                             \
     {0x3814, 0x03}, {0x3815, 0x01}, {0x3816, 0x03}, {0x3817, 0x01}
-// TEST BUILD 3 (not for release). On a Guition 10.1-inch the lines' stepping (0x3816 3) stalls after a frame, binned
-// or skipped, while the columns stepped alone and a 960 x 528 crop at 1:1 keep running (test build 1); 0x3714 0x28 and
-// 0x4009 0x11, as the sensor's relatives have them binned, changed nothing (test build 2). After the first frames the
-// first writes to the sensor are the ISP pipeline's exposure and gain. Both slots are 0.6.2's Full (binning); the
-// driver holds (set_format, state->hold):
-// Full (binning) slot: exposure and gain (OV02C10_full_test3_hold_all_960x528).
-// Full (skip) slot: the exposure alone (OV02C10_full_test3_hold_exposure_960x528).
+// TEST BUILD 4 (not for release). On a Guition 10.1-inch the lines' stepping (0x3816 3) stalls after a frame, binned
+// or skipped, while the columns stepped alone and a 960 x 528 crop at 1:1 keep running (test build 1). Neither 0x3714
+// 0x28 with 0x4009 0x11, as the sensor's relatives have them binned (test build 2), nor holding the ISP pipeline's
+// exposure and gain (test build 3, which held none: nothing was written before the stall) changed it. Both slots are
+// 0.6.2's modes again; esp_video_camera reads the P4's MIPI receiver, CSI bridge and ISP when they stall.
+// Full (binning): the pairs averaged, columns and lines (0x3820 0xa3: the table's 0xa0 with hbin2_o and vbinf_o; the
+// driver's mirror and flip keep bits 0 and 1; the table's 0x4501 0x00 averages).
 static const ov02c10_change_t s_binned_changes[] = {OV02C10_HALF_CHANGES, {0x3820, 0xa3}, {0x4501, 0x00}};
-static const ov02c10_change_t s_skipped_changes[] = {OV02C10_HALF_CHANGES, {0x3820, 0xa3}, {0x4501, 0x00}};
+// Full (skip): the pairs read, the others skipped: fine patterns may shimmer.
+static const ov02c10_change_t s_skipped_changes[] = {OV02C10_HALF_CHANGES};
 #define OV02C10_FIELD_REGS 320
 static ov02c10_reginfo_t s_field_regs[2][OV02C10_FIELD_REGS];
 static esp_cam_sensor_format_t s_field_format[2];
@@ -830,11 +808,11 @@ const esp_cam_sensor_format_t *tessera_camera_field_format(int field)
     if (field == 1) {
         return ov02c10_build_field(index, &ov02c10_format_info[1], s_binned_changes,
                                    sizeof(s_binned_changes) / sizeof(s_binned_changes[0]),
-                                   "OV02C10_full_test3_hold_all_960x528", 960, 528);
+                                   "OV02C10_full_test4_binned_960x528", 960, 528);
     }
     return ov02c10_build_field(index, &ov02c10_format_info[1], s_skipped_changes,
                                sizeof(s_skipped_changes) / sizeof(s_skipped_changes[0]),
-                               "OV02C10_full_test3_hold_exposure_960x528", 960, 528);
+                               "OV02C10_full_test4_skipped_960x528", 960, 528);
 }
 
 // What the sensor says it does, for the log ten seconds after a change: 0x3820 (FORMAT1) and the window offsets as
@@ -858,11 +836,10 @@ int tessera_camera_field_report(char *out, size_t size)
 #define OV02C10_R11(hi, lo) ((unsigned)(((r[hi] & 0x07) << 8) | r[lo]))
     return snprintf(out, size,
                     "0x3820 0x%02X, isp_x_win %u, isp_y_win %u; the ISP: x_bin2 %u y_bin2 %u flip %u mirror %u, "
-                    "array x %u..%u y %u..%u, output %ux%u at %u,%u; held %u exposure and %u gain writes",
+                    "array x %u..%u y %u..%u, output %ux%u at %u,%u",
                     format1, x_win, y_win, (r[0] >> 5) & 1u, (r[0] >> 4) & 1u, (r[0] >> 7) & 1u, (r[0] >> 6) & 1u,
                     OV02C10_R11(2, 3), OV02C10_R11(4, 5), OV02C10_R11(6, 7), OV02C10_R11(8, 9),
-                    OV02C10_R11(12, 13), OV02C10_R11(16, 17), OV02C10_R11(10, 11), OV02C10_R11(14, 15),
-                    (unsigned)s_held_exposure, (unsigned)s_held_gain);
+                    OV02C10_R11(12, 13), OV02C10_R11(16, 17), OV02C10_R11(10, 11), OV02C10_R11(14, 15));
 #undef OV02C10_R11
 }
 

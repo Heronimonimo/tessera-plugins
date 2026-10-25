@@ -773,7 +773,7 @@ void ESPVideoCamera::loop_jpeg_pipeline_() {
     ESP_LOGI(TAG, "Field of view %s: %.1f frames a second over its first 10 s, %ux%u", FIELD_NAMES[this->field_active_],
              this->field_frames_ * 1000.0f / (millis() - this->field_since_ms_), (unsigned) this->capture_width_,
              (unsigned) this->capture_height_);
-    char report[200];
+    char report[256];
     if (tessera_camera_field_report != nullptr && tessera_camera_field_report(report, sizeof(report)) > 0)
       ESP_LOGI(TAG, "Field of view %s: the sensor says %s", FIELD_NAMES[this->field_active_], report);
   }
@@ -1813,7 +1813,7 @@ void ESPVideoCamera::field_failed_(const char *why) {
   if (this->field_wanted_.exchange(0, std::memory_order_acq_rel) != 0 || this->field_active_ != 0) {
     ESP_LOGW(TAG, "Field of view back to Sharp: %s", why);
     // What the sensor made of the mode that failed, for the tester's report.
-    char report[200];
+    char report[256];
     if (this->field_active_ != 0 && tessera_camera_field_report != nullptr &&
         tessera_camera_field_report(report, sizeof(report)) > 0)
       ESP_LOGW(TAG, "Field of view %s: the sensor said %s", FIELD_NAMES[this->field_active_], report);

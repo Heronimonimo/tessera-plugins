@@ -19,7 +19,9 @@ Tessera shows a dot in the top right corner of the screen, so whoever stands in 
 1. In Tessera, open **Plugins**, choose **Screen camera** and tick your screens. Each screen builds once with it.
 2. In Home Assistant, open the screen's device (Settings, Devices): its camera is there as **Camera**. Put it on a
    dashboard with a Picture entity or a Picture glance card.
-3. Optional: switch on **Light level and motion** in the plugin's settings (the screen's Plugins tab in Tessera, or
+3. The camera stands upright by itself, also on a screen turned half way round. On a screen mounted the other way
+   round, switch on **Camera upside down** in the plugin's settings.
+4. Optional: switch on **Light level and motion** in the plugin's settings (the screen's Plugins tab in Tessera, or
    **Camera light level and motion** on the device in Home Assistant). Then **Light level** and **Motion** follow the
    room.
 

@@ -1,4 +1,5 @@
 #include "screen_camera.h"
+#include "picture_turn.h"
 #include "frame_reader.h"
 
 #include <cmath>
@@ -110,6 +111,13 @@ void ScreenCamera::consume_raw_video_frame(const esp_video_camera::RawVideoFrame
     return;
   }
   last_sample_ms_ = now;
+  // The picture turned: the cells changed places, which is no motion.
+  const uint32_t turns = frames_.turns();
+  if (turns != seen_turns_) {
+    seen_turns_ = turns;
+    grid_valid_ = false;
+    settle_until_ms_ = now + SETTLE_MS;
+  }
   const FrameReader reader(frame.data, yuv ? Layout::YUV420_OUYY_EVYY : Layout::RGB565_LE, frame.width, frame.stride_bytes);
 
   // The grid: each cell the mean brightness (0..255) of 4 x 4 points spread over it.
@@ -220,6 +228,10 @@ void ScreenCamera::publish_sensing_() {
 #endif
 }
 
-void ScreenCamera::on_interval(uint32_t now_ms) { publish_sensing_(); }
+void ScreenCamera::on_interval(uint32_t now_ms) {
+  // The picture's turn follows the screen's rotation, which the app changes without a build.
+  frames_.turn(picture_turn(tessera::camera_turn(), upside_down_));
+  publish_sensing_();
+}
 
 }  // namespace esphome::screen_camera

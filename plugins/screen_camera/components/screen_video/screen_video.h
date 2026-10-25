@@ -47,8 +47,10 @@ class ScreenVideo : public Component, public esp_video_camera::RawVideoFrameCons
   // width and height in whole macroblocks (16), so a camera whose size is not (the OV02C10's 1288 x 728) has the edge
   // of its frames cut off on the way: its middle, 1280 x 720. The encoder is made for that size once, at the first
   // frame, and keeps it (a viewer never chooses another). Its reference frame lives in internal RAM and grows with the
-  // size (about 100 KB at 720p), which a screen runs short of, so the video takes no camera above MAX_PIXELS: that
-  // sensor's smaller mode goes in the part's YAML (esp_video_camera `resolution`), never in a board file.
+  // size, three rows of macroblocks across (92 KB at 1280 wide). It stays there: in PSRAM its traffic shares the memory
+  // bus with the panel's frame buffer, and the panel ran dry dozens of times a minute (blue frames over the live tiles
+  // of a reTerminal D1001, 2026-10-25). The video takes no camera above MAX_PIXELS: that sensor's smaller mode goes in
+  // the part's YAML (esp_video_camera `resolution`), never in a board file.
   static constexpr uint32_t MAX_PIXELS = 1280UL * 800UL;
   static constexpr uint8_t FRAMERATE = 15, GOP = 15;
   static constexpr uint32_t BITRATE = 1000000;
@@ -117,8 +119,15 @@ class ScreenVideo : public Component, public esp_video_camera::RawVideoFrameCons
   uint8_t *crop_{nullptr};                // the cut frame, in PSRAM, only when the camera's size needs cutting
   ppa_client_handle_t ppa_{nullptr};      // what cuts it: the P4's pixel DMA engine (a memcpy took 77 ms a frame)
   std::atomic<uint32_t> crop_us_{0};      // what the cutting costs, for the loop's line
-  uint32_t reported_crop_us_{0};
+  std::atomic<uint32_t> encode_us_{0};    // and the encoding
+  uint32_t reported_crop_us_{0}, reported_encode_us_{0};
   uint32_t last_frame_us_{0};
+  uint32_t seen_turns_{0};                // the hub's turns the stream follows (video_encoder.cpp)
+  uint8_t idr_in_{0};                     // frames until the second key frame after a turn
+  // The internal RAM the encoder took when it was made, for the loop's line (the camera's task writes it before its
+  // first frame).
+  std::atomic<int> encoder_internal_{0};
+  static constexpr uint8_t TURN_IDR_FRAMES = 4;
   Slot slots_[SLOTS];
   QueueHandle_t ready_{nullptr};  // indices of filled slots, oldest first
 

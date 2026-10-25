@@ -60,14 +60,16 @@ void ScreenVideo::consume_raw_video_frame(const esp_video_camera::RawVideoFrame 
       encoder_ = nullptr;
       return;
     }
+    const int kept = (int) internal_before - (int) heap_caps_get_free_size(MALLOC_CAP_INTERNAL);
+    encoder_internal_ = kept;
     if (crop_ != nullptr) {
       ESP_LOGW(TAG, "H.264 encoder ready at %ux%u, the middle of the camera's %ux%u; it keeps %d bytes of internal RAM. "
                "The cut costs the camera's task about 60 ms a frame (fewer frames a second): a camera mode in whole "
                "macroblocks of 16 is better",
-               width_, height_, frame.width, frame.height, (int) internal_before - (int) heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
+               width_, height_, frame.width, frame.height, kept);
     } else {
       ESP_LOGI(TAG, "H.264 encoder ready at %ux%u, the camera's own size; it keeps %d bytes of internal RAM", width_,
-               height_, (int) internal_before - (int) heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
+               height_, kept);
     }
   }
   if (encoder_ == nullptr || !playing_.load()) return;
@@ -86,6 +88,17 @@ void ScreenVideo::consume_raw_video_frame(const esp_video_camera::RawVideoFrame 
     return;
   }
   Slot &slot = slots_[index];
+  // The picture turned (Screen camera's frame hub): the frames after it would point back at pictures the other way
+  // round until a key frame, and the camera's queue may still hold one or two of those. A key frame now, and one a few
+  // frames on.
+  const uint32_t turns = screen_camera_->frames().turns();
+  if (turns != seen_turns_) {
+    seen_turns_ = turns;
+    want_idr_ = true;
+    idr_in_ = TURN_IDR_FRAMES;
+  } else if (idr_in_ > 0 && --idr_in_ == 0) {
+    want_idr_ = true;
+  }
   if (want_idr_.exchange(false)) {
     esp_h264_enc_param_hw_handle_t param = nullptr;
     if (esp_h264_enc_hw_get_param_hd(encoder_, &param) == ESP_H264_ERR_OK && param != nullptr)
@@ -113,6 +126,7 @@ void ScreenVideo::consume_raw_video_frame(const esp_video_camera::RawVideoFrame 
     cut.out.srm_cm = PPA_SRM_COLOR_MODE_YUV420;
     cut.out.yuv_range = PPA_COLOR_RANGE_LIMIT;
     cut.out.yuv_std = PPA_COLOR_CONV_STD_RGB_YUV_BT601;
+    // No turn here: the sensor turns the picture (FrameHub::turn), for every consumer at once and at no cost.
     cut.rotation_angle = PPA_SRM_ROTATION_ANGLE_0;
     cut.scale_x = cut.scale_y = 1.0f;
     cut.mode = PPA_TRANS_MODE_BLOCKING;
@@ -132,7 +146,10 @@ void ScreenVideo::consume_raw_video_frame(const esp_video_camera::RawVideoFrame 
   esp_h264_enc_out_frame_t out{};
   out.raw_data.buffer = slot.data;
   out.raw_data.len = ENCODED_BYTES;
-  if (esp_h264_enc_process(encoder_, &in, &out) != ESP_H264_ERR_OK || out.length == 0 || out.length > ENCODED_BYTES) {
+  const int64_t encoding = esp_timer_get_time();
+  const bool encoded = esp_h264_enc_process(encoder_, &in, &out) == ESP_H264_ERR_OK;
+  encode_us_ += static_cast<uint32_t>(esp_timer_get_time() - encoding);
+  if (!encoded || out.length == 0 || out.length > ENCODED_BYTES) {
     failed_++;
     slot.state = 0;
     return;

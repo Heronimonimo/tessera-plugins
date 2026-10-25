@@ -1,5 +1,14 @@
 # Wijzigingen
 
+## 0.5.0 - 2026-10-25
+- De camera staat vanzelf rechtop: op een scherm waarvan het bord hem op zijn kop monteert (de M5Stack Tab5) en op
+  een scherm dat een halve slag gedraaid is. De sensor draait zijn eigen beeld, dus de plaatjes in Home Assistant, de
+  video en de lichtsterkte en beweging volgen allemaal, zonder kosten. Een nieuwe instelling, **Camera omgekeerd**,
+  draait hem nog een keer voor een scherm dat andersom hangt. Vraagt Tessera's firmware met plugin-API 0.19 (dev);
+  werk het scherm daarmee bij.
+- De regel van de video in het log zegt hoe lang de encoder over een beeld doet en hoeveel intern geheugen hij vasthoudt.
+- Tab5-bezitters: kijk of de camera rechtop staat in Home Assistant, en meld het.
+
 ## 0.4.3 - 2026-10-24
 - Er verandert niets op het scherm of in Home Assistant: de code van de camera is anders ingedeeld voor wat komt. De
   beelden van de camera gaan via een eigen verdeler naar lichtniveau en beweging en naar de video, in plaats van via

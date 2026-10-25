@@ -56,6 +56,20 @@ switch:
     turn_off_action:
       - lambda: id(screen_camera_plugin).set_wake_on_motion(false);
 
+# A screen mounted the other way round from how its board is built: the camera's picture turns half way on top of what
+# the board and the screen's rotation say (tessera::camera_turn), for the pictures, the video and sensing alike.
+  - platform: template
+    id: screen_camera_upside_down
+    name: "Camera upside down"
+    icon: mdi:camera-flip
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    entity_category: config
+    turn_on_action:
+      - lambda: id(screen_camera_plugin).set_upside_down(true);
+    turn_off_action:
+      - lambda: id(screen_camera_plugin).set_upside_down(false);
+
 # How long Motion stays on after the last movement: seconds for "someone walked past", minutes for "the room is empty".
 number:
   - platform: template

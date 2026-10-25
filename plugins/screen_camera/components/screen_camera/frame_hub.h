@@ -30,6 +30,13 @@ class FrameHub : public esp_video_camera::RawVideoFrameConsumer {
 
   // On the camera's task.
   void consume_raw_video_frame(const esp_video_camera::RawVideoFrame &frame) override;
+  // The picture turned 0 or 180 degrees (picture_turn.h), from the main loop: the sensor flips and mirrors its readout,
+  // which the camera applies between frames on its task and again whenever it starts. The rotation lives in the sensor
+  // on purpose: it costs nothing, and every consumer gets it, the stills too, without a turn in each one's PPA step.
+  void turn(int degrees);
+  // How often the picture turned since boot, for a consumer on the camera's task: the video asks for a key frame, sensing
+  // starts its motion grid again.
+  uint32_t turns() const { return turns_.load(std::memory_order_acquire); }
 
  protected:
   struct Entry {
@@ -43,6 +50,8 @@ class FrameHub : public esp_video_camera::RawVideoFrameConsumer {
   Entry entries_[MAX_CONSUMERS];
   std::atomic<int> count_{0};  // entries added; the camera's task reads up to it
   bool registered_{false};
+  int turn_{0};
+  std::atomic<uint32_t> turns_{0};
   Format format_{Format::RGB565_LE};
 };
 

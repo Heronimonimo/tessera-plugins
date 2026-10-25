@@ -85,13 +85,15 @@ void ScreenVideo::loop() {
   reported_ms_ = now;
   const uint32_t frames = frames_.load(), bytes = bytes_.load(), n = frames - reported_frames_;
   if (n > 0) {
-    const uint32_t crop_us = crop_us_.load();
-    ESP_LOGI(TAG, "%.1f fps, %u kbit/s, cutting %.1f ms a frame; since boot %u dropped, %u failed, %u skipped for internal RAM, "
-             "%u bytes of it free",
+    const uint32_t crop_us = crop_us_.load(), encode_us = encode_us_.load();
+    ESP_LOGI(TAG, "%.1f fps, %u kbit/s, cutting %.1f ms and encoding %.1f ms a frame; since boot %u dropped, %u failed, "
+             "%u skipped for internal RAM, %u bytes of it free, %d held by the encoder",
              n * 1000.0f / span, (unsigned) ((bytes - reported_bytes_) * 8ULL / span), (crop_us - reported_crop_us_) / 1000.0f / n,
+             (encode_us - reported_encode_us_) / 1000.0f / n,
              (unsigned) dropped_.load(), (unsigned) failed_.load(), (unsigned) held_.load(),
-             (unsigned) heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
+             (unsigned) heap_caps_get_free_size(MALLOC_CAP_INTERNAL), encoder_internal_.load());
     reported_crop_us_ = crop_us;
+    reported_encode_us_ = encode_us;
   }
   reported_frames_ = frames;
   reported_bytes_ = bytes;

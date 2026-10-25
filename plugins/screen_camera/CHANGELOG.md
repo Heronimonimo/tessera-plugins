@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.0 - 2026-10-25
+- The camera stands upright by itself: on a screen whose board mounts it upside down (the M5Stack Tab5) and on a
+  screen turned half way round. The sensor turns its own picture, so the pictures in Home Assistant, the video and the
+  light level and motion all follow, at no cost. A new setting, **Camera upside down**, turns it once more for a screen
+  mounted the other way round. Needs Tessera's firmware with plugin API 0.19 (dev); update the screen with it.
+- The video's line in the log says how long the encoder takes a frame and how much internal RAM it holds.
+- Tab5 owners: check that the camera stands upright in Home Assistant, and say so.
+
 ## 0.4.3 - 2026-10-24
 - Nothing changes on the screen or in Home Assistant: the camera's code is laid out anew for what comes next. The
   camera's frames reach light level and motion and the video through one hub of their own instead of through the

@@ -52,6 +52,9 @@ class ScreenCamera : public Component,
   void set_sensing(bool on);
   // Motion wakes the screen or not (the setting, off by default).
   void set_wake_on_motion(bool on) { wake_on_motion_ = on; }
+  // The screen is mounted the other way round (the setting "Camera upside down", off by default): the picture turns
+  // half way on top of the core's answer (picture_turn.h), at the next second.
+  void set_upside_down(bool on) { upside_down_ = on; }
   // On the camera's task, from the frame hub, for every frame while sensing is on. RGB565, or the video's YUV420.
   void consume_raw_video_frame(const esp_video_camera::RawVideoFrame &frame) override;
   // Someone watches the video, or nobody any more: the core's dot, as for sensing (from the loop).
@@ -77,6 +80,8 @@ class ScreenCamera : public Component,
   binary_sensor::BinarySensor *motion_{};
 #endif
   bool wake_on_motion_{false};
+  bool upside_down_{false};
+  uint32_t seen_turns_{0};  // the camera's task: the hub's turns its motion grid was made after
   uint32_t woken_for_{0};      // the motion sample the screen was last woken for
   uint32_t last_wake_ms_{0};
 

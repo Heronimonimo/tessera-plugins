@@ -20,7 +20,9 @@ instelling haalt hem weg.
 1. Open in Tessera **Plugins**, kies **Schermcamera** en vink je schermen aan. Elk scherm wordt een keer gebouwd.
 2. Open in Home Assistant het apparaat van het scherm (Instellingen, Apparaten): de camera staat er als **Camera**.
    Zet hem op een dashboard met een kaart die camerabeeld toont (Picture entity of Picture glance).
-3. Optioneel: zet **Lichtniveau en beweging** aan bij de instellingen van de plugin (het tabblad Plugins van het scherm
+3. De camera staat vanzelf rechtop, ook op een scherm dat een halve slag gedraaid is. Hangt het scherm andersom, zet
+   dan **Camera omgekeerd** aan bij de instellingen van de plugin.
+4. Optioneel: zet **Lichtniveau en beweging** aan bij de instellingen van de plugin (het tabblad Plugins van het scherm
    in Tessera, of **Camera light level and motion** bij het apparaat in Home Assistant). Dan volgen **Light level** en
    **Motion** de kamer.
 

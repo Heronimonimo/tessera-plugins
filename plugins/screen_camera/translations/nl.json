@@ -10,6 +10,8 @@
   "summary": "De eigen camera van het scherm in Home Assistant, als live video met geluid of als foto's, en daaruit het lichtniveau en beweging in de kamer.",
   "setting_sensing": "Lichtniveau en beweging",
   "setting_sensing_hint": "De camera meet het licht in de kamer en merkt beweging op, op het scherm zelf: hiervoor gaat geen beeld van het scherm af. De camera blijft aan zolang dit aan staat.",
+  "setting_upside_down": "Camera omgekeerd",
+  "setting_upside_down_hint": "Draait het beeld van de camera een halve slag, voor een scherm dat andersom hangt dan hoe het gebouwd is. De plaatjes, de video en de lichtsterkte en beweging volgen allemaal.",
   "setting_wake": "Beweging wekt het scherm",
   "setting_wake_hint": "Met lichtniveau en beweging aan wekt iemand die voor het scherm beweegt het scherm, zoals een aanraking.",
   "setting_time_out": "Beweging blijft aan",

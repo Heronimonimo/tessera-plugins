@@ -49,6 +49,14 @@ bool FrameHub::set_on(Consumer *consumer, bool on) {
   return true;
 }
 
+void FrameHub::turn(int degrees) {
+  if (camera_ == nullptr || degrees == turn_) return;
+  turn_ = degrees;
+  camera_->set_runtime_vflip(degrees == 180);
+  camera_->set_runtime_hflip(degrees == 180);
+  turns_.fetch_add(1, std::memory_order_release);
+}
+
 void FrameHub::consume_raw_video_frame(const esp_video_camera::RawVideoFrame &frame) {
   const int n = count_.load(std::memory_order_acquire);
   for (int i = 0; i < n; ++i) {

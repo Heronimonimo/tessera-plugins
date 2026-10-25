@@ -674,9 +674,11 @@ void ESPVideoCamera::capture_task_run_() {
       }
     }
     if (this->capture_faulted_.load(std::memory_order_acquire)) {
-      // No frame at all in a field of view of the driver's: back to the sensor's own mode, with the retries anew.
-      if (this->field_active_ != 0 && this->field_frames_ == 0) {
-        this->field_failed_("no frame came in it");
+      // A fault in a field of view of the driver's before it ran its first ten seconds (no frame, or a few and then
+      // none): back to the sensor's own mode, with the retries anew. A Guition 4.3-inch kept its Full mode through four
+      // time-outs when only "no frame at all" counted (GitHub issue #326).
+      if (this->field_active_ != 0 && (this->field_frames_ == 0 || !this->field_told_)) {
+        this->field_failed_(this->field_frames_ == 0 ? "no frame came in it" : "its frames stopped");
         this->capture_retry_attempts_.store(0, std::memory_order_release);
       }
       if (this->stop_capture_())
@@ -1234,6 +1236,15 @@ void ESPVideoCamera::schedule_capture_retry_() {
   if (!this->has_consumers_()) return;
   const uint8_t attempt =
       this->capture_retry_attempts_.fetch_add(1, std::memory_order_acq_rel);
+  // Capture task: a field of view that does not recover goes back to the sensor's own mode and tries again, whoever
+  // takes the frames (the video, a still, sensing), rather than waiting for the next request.
+  if (attempt >= MAX_CAPTURE_RETRIES && this->field_active_ != 0) {
+    this->field_failed_("the camera did not recover in it");
+    this->capture_retry_attempts_.store(0, std::memory_order_release);
+    this->capture_retry_requested_.store(true, std::memory_order_release);
+    this->enable_loop_soon_any_context();
+    return;
+  }
   if (attempt >= MAX_CAPTURE_RETRIES) {
     if (attempt == MAX_CAPTURE_RETRIES) {
       ESP_LOGE(TAG,
@@ -1801,6 +1812,11 @@ void ESPVideoCamera::set_field(int field) {
 void ESPVideoCamera::field_failed_(const char *why) {
   if (this->field_wanted_.exchange(0, std::memory_order_acq_rel) != 0 || this->field_active_ != 0) {
     ESP_LOGW(TAG, "Field of view back to Sharp: %s", why);
+    // What the sensor made of the mode that failed, for the tester's report.
+    char report[200];
+    if (this->field_active_ != 0 && tessera_camera_field_report != nullptr &&
+        tessera_camera_field_report(report, sizeof(report)) > 0)
+      ESP_LOGW(TAG, "Field of view %s: the sensor said %s", FIELD_NAMES[this->field_active_], report);
     this->field_fell_back_.store(true, std::memory_order_release);
   }
 }

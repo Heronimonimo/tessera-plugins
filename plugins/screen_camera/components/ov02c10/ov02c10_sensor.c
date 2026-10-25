@@ -709,7 +709,7 @@ static const esp_cam_sensor_ops_t ov02c10_ops = {
 };
 
 // ---- The field of view (Screen camera's setting "Field of view"; Tessera's docs/PLATFORM_PLAN.md 4.6) ----
-// Two modes over the whole array for a tester to try, each the 1920x1080 table with a few registers changed, built once
+// Two modes over the whole array for a tester to try, each the 1288x728 table with a few registers changed, built once
 // when first asked for, after OmniVision's OV02C10 datasheet (v2.01): the sensor has no scaler, only a window, binning
 // and skipping (table 2-1: "sub2 ... bin2 or skip2"); 0x3814-0x3817 step the columns and lines, 0x3820 (FORMAT1) bit 1
 // bins two columns and bit 0 two lines, and 0x4501 (HBIN_CTRL) bits 3:2 at 00 average them (table 3-1). Neither is
@@ -725,7 +725,13 @@ typedef struct {
 // Every other pair of columns and of lines (odd increment 3, even 1: the Bayer pairs stay whole), 960 x 528 out of the
 // 968 x 544 that leaves: its middle, in whole macroblocks for the video's encoder (a horizontal size must be a multiple
 // of 8, section 2.3), at even offsets (4 and 8) that a mirror or flip leaves where they are (field_mode).
+// On the 1288x728 table, Sharp's: the same PLL, timing and lane rate as the 1920x1080 table, but that one turns the
+// stream on at its end (0x0100 0x01), while the driver still writes exposure and orientation and stops it again, and on
+// a Guition 4.3-inch no frame came after that (GitHub issue #326); the 1288x728 table leaves the stream to esp_video.
+// Its window opened to the whole array (0..1935 x 4..1091).
 #define OV02C10_HALF_CHANGES                                                                    \
+    {0x3800, 0x00}, {0x3801, 0x00}, {0x3802, 0x00}, {0x3803, 0x04},                             \
+    {0x3804, 0x07}, {0x3805, 0x8f}, {0x3806, 0x04}, {0x3807, 0x43},                             \
     {0x3808, 0x03}, {0x3809, 0xc0}, {0x380a, 0x02}, {0x380b, 0x10},                             \
     {0x3810, 0x00}, {0x3811, 0x04}, {0x3812, 0x00}, {0x3813, 0x08},                             \
     {0x3814, 0x03}, {0x3815, 0x01}, {0x3816, 0x03}, {0x3817, 0x01}
@@ -794,11 +800,11 @@ const esp_cam_sensor_format_t *tessera_camera_field_format(int field)
     }
     _Static_assert(sizeof(s_binned_changes) / sizeof(s_binned_changes[0]) <= 32, "changes fit the used marks");
     if (field == 1) {
-        return ov02c10_build_field(index, &ov02c10_format_info[2], s_binned_changes,
+        return ov02c10_build_field(index, &ov02c10_format_info[1], s_binned_changes,
                                    sizeof(s_binned_changes) / sizeof(s_binned_changes[0]),
                                    "OV02C10_full_binned_960x528", 960, 528);
     }
-    return ov02c10_build_field(index, &ov02c10_format_info[2], s_skipped_changes,
+    return ov02c10_build_field(index, &ov02c10_format_info[1], s_skipped_changes,
                                sizeof(s_skipped_changes) / sizeof(s_skipped_changes[0]),
                                "OV02C10_full_skipped_960x528", 960, 528);
 }

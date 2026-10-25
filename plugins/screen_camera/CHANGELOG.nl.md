@@ -1,5 +1,13 @@
 # Wijzigingen
 
+## 0.6.2 - 2026-10-25
+- Beeldveld camera op de Guition 4.3-inch (GitHub issue #326): beide Full-standen gaven daar geen beeld. Ze beginnen
+  nu vanuit de tabel die Sharp gebruikt, die het starten van de camera aan het scherm laat; de vorige zette de
+  camera halverwege het instellen al aan. Dezelfde lanesnelheid en timing als voorheen.
+- Een Full-stand waarvan het beeld in de eerste tien seconden stopt, of waar de camera niet van herstelt, gaat nu
+  vanzelf terug naar Sharp, wat de beelden ook afneemt (de video, een foto, lichtniveau en beweging); eerder kon hij
+  zonder beeld op Full blijven staan tot een herstart. De log zegt dan wat de sensor van de stand maakte.
+
 ## 0.6.1 - 2026-10-25
 - Beeldveld camera op de Guition: de eerste test toonde meer van de kamer, maar naar rechtsboven verschoven en met
   strepen. Beide Full-standen houden de offsets van hun venster nu even, en op hun plek als het beeld gespiegeld of

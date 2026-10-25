@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.2 - 2026-10-25
+- Camera field of view on the Guition 4.3-inch (GitHub issue #326): both Full modes gave no picture there. They now
+  start from the table Sharp uses, which leaves starting the camera to the screen; the one before turned the
+  camera on halfway through being set up. Same lane rate and timing as before.
+- A Full mode whose picture stops in its first ten seconds, or that the camera does not recover from, goes back to
+  Sharp by itself now, whatever takes the pictures (the video, a still, light level and motion); before, it could
+  stay on Full with no picture until a restart. The log then says what the sensor made of the mode.
+
 ## 0.6.1 - 2026-10-25
 - Camera field of view on the Guition: the first test showed more of the room, but moved towards the top right
   and with stripes. Both Full modes now keep their window's offsets even and where they are when the picture is

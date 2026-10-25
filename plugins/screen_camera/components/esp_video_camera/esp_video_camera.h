@@ -177,7 +177,7 @@ class ESPVideoCamera : public camera::Camera {
   }
 
   // The field of view (Screen camera's setting "Field of view"; Tessera's docs/PLATFORM_PLAN.md 4.6): 0 the sensor's
-  // own mode (Sharp), 1 Full (subsampling), 2 Full (sensor scale), the modes the sensor's driver offers
+  // own mode (Sharp), 1 Full (binning), 2 Full (skip), the modes the sensor's driver offers
   // (tessera_camera_field_format; the OV02C10's only, for now). Any thread: the capture task stops, hands the sensor
   // its format and starts again, and goes back to the sensor's own mode by itself when the driver has no such mode or
   // no frame comes in it.

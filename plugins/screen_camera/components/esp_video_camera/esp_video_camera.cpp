@@ -43,7 +43,12 @@ namespace esphome::esp_video_camera {
 
 static const char *const TAG = "esp_video_camera";
 // The field of view's names (set_field), for the log.
-static const char *const FIELD_NAMES[] = {"Sharp", "Full (subsampling)", "Full (sensor scale)"};
+static const char *const FIELD_NAMES[] = {"Sharp", "Full (binning)", "Full (skip)"};
+// A sensor driver that offers the modes defines this (components/ov02c10); otherwise none is linked and the camera
+// keeps its own mode.
+extern "C" const esp_cam_sensor_format_t *tessera_camera_field_format(int field) __attribute__((weak));
+// And what the sensor says it does, for the log ten seconds after a change (the OV02C10: 0x3820 and the ISP's 0x5024).
+extern "C" bool tessera_camera_field_status(uint8_t *format1, uint8_t *isp_status) __attribute__((weak));
 
 // ===========================================================================
 // Pipeline init helpers (run esp_video_init on core 0, optional LEDC XCLK)
@@ -766,6 +771,11 @@ void ESPVideoCamera::loop_jpeg_pipeline_() {
     ESP_LOGI(TAG, "Field of view %s: %.1f frames a second over its first 10 s, %ux%u", FIELD_NAMES[this->field_active_],
              this->field_frames_ * 1000.0f / (millis() - this->field_since_ms_), (unsigned) this->capture_width_,
              (unsigned) this->capture_height_);
+    uint8_t format1 = 0, isp = 0;
+    if (this->field_active_ != 0 && tessera_camera_field_status != nullptr &&
+        tessera_camera_field_status(&format1, &isp))
+      ESP_LOGI(TAG, "Field of view %s: the sensor says 0x3820 = 0x%02X, its ISP 0x5024 = 0x%02X (x_bin2 %u, y_bin2 %u)",
+               FIELD_NAMES[this->field_active_], format1, isp, (isp >> 5) & 1u, (isp >> 4) & 1u);
   }
 
   bool raw_requeued = false;
@@ -1779,9 +1789,6 @@ bool ESPVideoCamera::start_direct_capture_() {
 }
 
 // ---- The field of view (set_field) ----
-// A sensor driver that offers the modes defines this (components/ov02c10); otherwise none is linked and the camera
-// keeps its own mode.
-extern "C" const esp_cam_sensor_format_t *tessera_camera_field_format(int field) __attribute__((weak));
 // The sensor's own format as it was at the first start, given back to it for Sharp. The driver keeps a pointer to the
 // format it was given, so it lives here, for as long as the camera.
 static esp_cam_sensor_format_t s_own_format;

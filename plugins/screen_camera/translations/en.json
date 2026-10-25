@@ -13,7 +13,7 @@
   "setting_upside_down": "Camera upside down",
   "setting_upside_down_hint": "Turns the camera's picture half way round, for a screen mounted the other way up from how it is built. The pictures, the video and the light level and motion all follow.",
   "setting_field_of_view": "Camera field of view",
-  "setting_field_of_view_hint": "Sharp shows the middle of the camera's picture, as before. Full (subsampling) and Full (sensor scale) try to show all the camera sees, at a lower resolution: on the Guition screens' camera only, and testers are trying them now, so say what you see. A mode that gives no picture goes back to Sharp by itself. Works with the part Video.",
+  "setting_field_of_view_hint": "Sharp shows the middle of the camera's picture, as before. Full (binning) and Full (skip) show all the camera sees, at half the resolution: binning averages the pixels, skip reads every other one, so fine patterns may shimmer. On the Guition screens' camera only, and testers are trying them now, so say what you see. A mode that gives no picture goes back to Sharp by itself. Works with the part Video.",
   "setting_wake": "Motion wakes the screen",
   "setting_wake_hint": "With light level and motion on, someone moving in front of the screen wakes it, as a touch does.",
   "setting_time_out": "Motion time-out",

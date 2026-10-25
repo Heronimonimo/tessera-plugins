@@ -2,16 +2,16 @@
 
 ## 0.6.0 - 2026-10-25
 - Een nieuwe instelling, **Beeldveld camera**, voor de camera van de Guition ESP32-P4-schermen (OV02C10), om te
-  proberen. **Scherp** is het oude gedrag, het midden van het camerabeeld, en de standaard; **Volledig
-  (subsampling)** en **Volledig (sensorschaal)** proberen alles te tonen wat de camera ziet, in een lagere resolutie,
-  op twee manieren. Geen van beide is al bewezen op een Guition. Volledig (subsampling) leest elke tweede pixel, dus
-  fijne patronen (jaloezieën, tegels) kunnen trillen; ze middelen (binning) is een latere stap. Guition-eigenaren met
-  een camera en het onderdeel Video: schakel terug naar Scherp als iets vreemd is, en meld bij Volledig welke van de
-  twee werkte, hoeveel van de kamer je ziet vergeleken met Scherp, de kleuren, de beelden per seconde (de log zegt het
-  tien seconden na de wissel), en of het een paar minuten stabiel blijft. Een stand die geen beeld geeft, gaat vanzelf
-  terug naar Scherp. Elke andere camera blijft op Scherp (de sensor van de M5Stack Tab5 en de reTerminal D1001 heeft
-  voor zover we weten zo'n stand niet). Een wissel start de camera en de encoder van de video opnieuw op de nieuwe
-  maat.
+  proberen. **Sharp** is het oude gedrag, het midden van het camerabeeld, en de standaard. **Full (binning)** en
+  **Full (skip)** tonen alles wat de camera ziet op de halve resolutie (960 x 528), zoals de datasheet van
+  OmniVision het beschrijft: binning middelt telkens twee pixels en regels, skip leest er één op de twee, dus
+  fijne patronen (jaloezieën, tegels) kunnen bij skip trillen. Geen van beide is al bewezen op een Guition.
+  Guition-eigenaren met een camera en het onderdeel Video: schakel terug naar Sharp als iets vreemd is, en meld bij
+  Full welke van de twee werkte, hoeveel van de kamer je ziet vergeleken met Sharp, de kleuren, de beelden per
+  seconde (de log zegt het tien seconden na de wissel, en of de sensor de binning aannam), en of het een paar minuten
+  stabiel blijft. Een stand die geen beeld geeft, gaat vanzelf terug naar Sharp. Elke andere camera blijft op Sharp
+  (de sensor van de M5Stack Tab5 en de reTerminal D1001 heeft voor zover we weten zo'n stand niet). Een wissel start
+  de camera en de encoder van de video opnieuw op de nieuwe maat.
 
 ## 0.5.1 - 2026-10-25
 - De server van de video telt zijn verbindingen (zijn luisterpoort en zijn drie kijkers) mee in wat de firmware van het

@@ -665,9 +665,17 @@ static esp_err_t ov02c10_power_off(esp_cam_sensor_device_t *dev)
     return ESP_OK;
 }
 
+// The sensor the field of view's status reads (below), forgotten when it goes.
+static bool s_detected;
+static esp_cam_sensor_device_t *s_device;
+
 static esp_err_t ov02c10_delete(esp_cam_sensor_device_t *dev)
 {
     ESP_LOGD(TAG, "del ov02c10 (%p)", dev);
+    if (dev != NULL && dev == s_device) {
+        s_device = NULL;
+        s_detected = false;
+    }
     if (dev) {
         free(dev->priv);
         free(dev);
@@ -689,35 +697,32 @@ static const esp_cam_sensor_ops_t ov02c10_ops = {
 };
 
 // ---- The field of view (Screen camera's setting "Field of view"; Tessera's docs/PLATFORM_PLAN.md 4.6) ----
-// Two modes over the whole array for a tester to try, each a table above with a few registers changed, built once when
-// first asked for. Neither is proven on a Guition yet: both stay off until a tester says the picture is right.
-static bool s_detected = false;  // an OV02C10 answered (ov02c10_detect)
+// Two modes over the whole array for a tester to try, each the 1920x1080 table with a few registers changed, built once
+// when first asked for, after OmniVision's OV02C10 datasheet (v2.01): the sensor has no scaler, only a window, binning
+// and skipping (table 2-1: "sub2 ... bin2 or skip2"); 0x3814-0x3817 step the columns and lines, 0x3820 (FORMAT1) bit 1
+// bins two columns and bit 0 two lines, and 0x4501 (HBIN_CTRL) bits 3:2 at 00 average them (table 3-1). Neither is
+// proven on a Guition yet: both stay off until a tester says the picture is right.
+static bool s_detected = false;                   // an OV02C10 answered (ov02c10_detect)
+static esp_cam_sensor_device_t *s_device = NULL;  // and which, for the status the log reads back
 
 typedef struct {
     uint16_t reg;
     uint8_t val;
 } ov02c10_change_t;
 
-// Full (subsampling): the 1920x1080 table's whole window, every other pair of columns and of lines (odd increment 3,
-// even 1, the way OmniVision's sensors skip and keep the Bayer pairs whole), 960 x 528 out of the 968 x 544 that
-// leaves: its middle, with the offsets one pixel off even as the tables have them, so a mirror or flip moves them by
-// one. Skipped, not averaged: fine patterns may shimmer (moire). Averaging (binning) needs the sensor's bits, not known
-// yet.
-static const ov02c10_change_t s_subsampled_changes[] = {
-    {0x3808, 0x03}, {0x3809, 0xc0}, {0x380a, 0x02}, {0x380b, 0x10},
-    {0x3810, 0x00}, {0x3811, 0x05}, {0x3812, 0x00}, {0x3813, 0x08},
-    {0x3814, 0x03}, {0x3815, 0x01}, {0x3816, 0x03}, {0x3817, 0x01},
-};
-// Full (sensor scale): the 1288x728 table over the whole window (0..1935 x 4..1091) with a 1280 x 720 output, and the
-// registers github.com/youkorr/esphome_esp-video's tables of that kind set (0x4500 0x38 and 0x4501 0x18 among them),
-// which say the sensor then scales. Whether it scales or crops is what the tester sees.
-static const ov02c10_change_t s_scaled_changes[] = {
-    {0x3800, 0x00}, {0x3801, 0x00}, {0x3802, 0x00}, {0x3803, 0x04},
-    {0x3804, 0x07}, {0x3805, 0x8f}, {0x3806, 0x04}, {0x3807, 0x43},
-    {0x3808, 0x05}, {0x3809, 0x00}, {0x380a, 0x02}, {0x380b, 0xd0},
-    {0x4500, 0x38}, {0x4501, 0x18}, {0x3910, 0x10}, {0x3d85, 0x06}, {0x3d8c, 0x75}, {0x3d8d, 0xef},
-    {0x4033, 0x80}, {0x4050, 0x00}, {0x4051, 0x07},
-};
+// Every other pair of columns and of lines (odd increment 3, even 1: the Bayer pairs stay whole), 960 x 528 out of the
+// 968 x 544 that leaves: its middle, in whole macroblocks for the video's encoder (a horizontal size must be a multiple
+// of 8, section 2.3), with the offsets one pixel off even as the tables have them, so a mirror or flip moves them by
+// one.
+#define OV02C10_HALF_CHANGES                                                                    \
+    {0x3808, 0x03}, {0x3809, 0xc0}, {0x380a, 0x02}, {0x380b, 0x10},                             \
+    {0x3810, 0x00}, {0x3811, 0x05}, {0x3812, 0x00}, {0x3813, 0x08},                             \
+    {0x3814, 0x03}, {0x3815, 0x01}, {0x3816, 0x03}, {0x3817, 0x01}
+// Full (binning): the pairs averaged, columns and lines (0x3820 0xa3: the table's 0xa0 with hbin2_o and vbinf_o; the
+// driver's mirror and flip keep bits 0 and 1; the table's 0x4501 0x00 averages).
+static const ov02c10_change_t s_binned_changes[] = {OV02C10_HALF_CHANGES, {0x3820, 0xa3}, {0x4501, 0x00}};
+// Full (skip): the pairs read, the others skipped: fine patterns may shimmer.
+static const ov02c10_change_t s_skipped_changes[] = {OV02C10_HALF_CHANGES};
 #define OV02C10_FIELD_REGS 320
 static ov02c10_reginfo_t s_field_regs[2][OV02C10_FIELD_REGS];
 static esp_cam_sensor_format_t s_field_format[2];
@@ -765,8 +770,8 @@ static const esp_cam_sensor_format_t *ov02c10_build_field(int index, const esp_c
     return &s_field_format[index];
 }
 
-// The sensor format for Screen camera's field of view: 1 Full (subsampling), 2 Full (sensor scale); NULL for any other,
-// or when no OV02C10 answered. Asked for by esp_video_camera on its capture task, which then hands it to the sensor.
+// The sensor format for Screen camera's field of view: 1 Full (binning), 2 Full (skip); NULL for any other, or when no
+// OV02C10 answered. Asked for by esp_video_camera on its capture task, which then hands it to the sensor.
 const esp_cam_sensor_format_t *tessera_camera_field_format(int field)
 {
     if (!s_detected || field < 1 || field > 2) {
@@ -776,16 +781,26 @@ const esp_cam_sensor_format_t *tessera_camera_field_format(int field)
     if (s_field_built[index]) {
         return &s_field_format[index];
     }
-    _Static_assert(sizeof(s_subsampled_changes) / sizeof(s_subsampled_changes[0]) <= 32, "changes fit the used marks");
-    _Static_assert(sizeof(s_scaled_changes) / sizeof(s_scaled_changes[0]) <= 32, "changes fit the used marks");
+    _Static_assert(sizeof(s_binned_changes) / sizeof(s_binned_changes[0]) <= 32, "changes fit the used marks");
     if (field == 1) {
-        return ov02c10_build_field(index, &ov02c10_format_info[2], s_subsampled_changes,
-                                   sizeof(s_subsampled_changes) / sizeof(s_subsampled_changes[0]),
-                                   "OV02C10_full_subsampled_960x528", 960, 528);
+        return ov02c10_build_field(index, &ov02c10_format_info[2], s_binned_changes,
+                                   sizeof(s_binned_changes) / sizeof(s_binned_changes[0]),
+                                   "OV02C10_full_binned_960x528", 960, 528);
     }
-    return ov02c10_build_field(index, &ov02c10_format_info[1], s_scaled_changes,
-                               sizeof(s_scaled_changes) / sizeof(s_scaled_changes[0]),
-                               "OV02C10_full_sensor_scale_1280x720", 1280, 720);
+    return ov02c10_build_field(index, &ov02c10_format_info[2], s_skipped_changes,
+                               sizeof(s_skipped_changes) / sizeof(s_skipped_changes[0]),
+                               "OV02C10_full_skipped_960x528", 960, 528);
+}
+
+// What the sensor says it does, for the log after a change: 0x3820 (FORMAT1) and the ISP's 0x5024 (ISP_TOP_36: bit 5
+// x_bin2, bit 4 y_bin2, bit 7 flip, bit 6 mirror).
+bool tessera_camera_field_status(uint8_t *format1, uint8_t *isp_status)
+{
+    if (s_device == NULL) {
+        return false;
+    }
+    return ov02c10_read(s_device->sccb_handle, OV02C10_REG_ROTATE, format1) == ESP_OK &&
+           ov02c10_read(s_device->sccb_handle, 0x5024, isp_status) == ESP_OK;
 }
 
 esp_cam_sensor_device_t *ov02c10_detect(esp_cam_sensor_config_t *config)
@@ -840,6 +855,7 @@ esp_cam_sensor_device_t *ov02c10_detect(esp_cam_sensor_config_t *config)
     }
     ESP_LOGI(TAG, "Detected Camera sensor PID=0x%x", dev->id.pid);
     s_detected = true;
+    s_device = dev;
 
     return dev;
 

@@ -58,9 +58,9 @@ class ScreenCamera : public Component,
   // The screen is mounted the other way round (the setting "Camera upside down", off by default): the picture turns
   // half way on top of the core's answer (picture_turn.h), at the next second.
   void set_upside_down(bool on) { upside_down_ = on; }
-  // The field of view (the setting, Sharp by default): 0 Sharp, the sensor's own mode; 1 Full (subsampling); 2 Full
-  // (sensor scale). Only a sensor whose driver offers the modes takes them (the OV02C10, untried until a tester
-  // confirms them); the camera goes back to Sharp by itself otherwise, and on_interval sets the setting back.
+  // The field of view (the setting, Sharp by default): 0 Sharp, the sensor's own mode; 1 Full (binning); 2 Full (skip).
+  // Only a sensor whose driver offers the modes takes them (the OV02C10, untried until a tester confirms them); the
+  // camera goes back to Sharp by itself otherwise, and on_interval sets the setting back.
   void set_field(int field) {
     if (camera_ != nullptr) camera_->set_field(field);
   }

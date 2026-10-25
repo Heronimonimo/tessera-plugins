@@ -2,15 +2,15 @@
 
 ## 0.6.0 - 2026-10-25
 - A new setting, **Camera field of view**, for the Guition ESP32-P4 screens' camera (OV02C10), to try. **Sharp** is
-  the old behaviour, the middle of the camera's picture, and the default; **Full (subsampling)** and **Full (sensor
-  scale)** try to show the whole of what the camera sees, at a lower resolution, two different ways. Neither is
-  proven on a Guition yet. Full (subsampling) reads every other pixel, so fine patterns (blinds, tiles) may shimmer;
-  averaging them (binning) is a later step. Guition owners with a camera and the part Video: switch back to Sharp if
-  anything looks odd, and say for Full which of the two worked, how much of the room you see compared with Sharp, the
-  colours, the frames a second (the log says it ten seconds after the change), and whether it stays stable over a few
-  minutes. A mode that gives no picture goes back to Sharp by itself. Every other camera keeps Sharp (the M5Stack
-  Tab5's and the reTerminal D1001's sensor has no such mode we know of). Changing it restarts the camera and the
-  video's encoder at the new size.
+  the old behaviour, the middle of the camera's picture, and the default. **Full (binning)** and **Full (skip)** show
+  the whole of what the camera sees at half the resolution (960 x 528), as OmniVision's datasheet for the sensor
+  describes it: binning averages each two pixels and lines, skip reads every other one, so fine patterns (blinds,
+  tiles) may shimmer with skip. Neither is proven on a Guition yet. Guition owners with a camera and the part Video:
+  switch back to Sharp if anything looks odd, and say for Full which of the two worked, how much of the room you see
+  compared with Sharp, the colours, the frames a second (the log says it ten seconds after the change, and whether the
+  sensor took the binning), and whether it stays stable over a few minutes. A mode that gives no picture goes back to
+  Sharp by itself. Every other camera keeps Sharp (the M5Stack Tab5's and the reTerminal D1001's sensor has no such
+  mode we know of). Changing it restarts the camera and the video's encoder at the new size.
 
 ## 0.5.1 - 2026-10-25
 - The video's server counts its connections (its listener and its three viewers) into the ones the screen's firmware

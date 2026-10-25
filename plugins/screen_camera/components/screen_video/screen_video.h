@@ -115,6 +115,7 @@ class ScreenVideo : public Component, public esp_video_camera::RawVideoFrameCons
   esp_h264_enc_handle_t encoder_{nullptr};
   bool encoder_failed_{false};
   uint16_t width_{0}, height_{0};         // the stream's size: the camera's, cut to whole macroblocks
+  uint16_t made_w_{0}, made_h_{0};        // the camera's frame size the encoder was made for
   uint16_t crop_x_{0}, crop_y_{0};        // where the stream's frame starts in the camera's, 0 when they are one
   uint8_t *crop_{nullptr};                // the cut frame, in PSRAM, only when the camera's size needs cutting
   ppa_client_handle_t ppa_{nullptr};      // what cuts it: the P4's pixel DMA engine (a memcpy took 77 ms a frame)

@@ -15,6 +15,9 @@
 #ifdef USE_BINARY_SENSOR
 #include "esphome/components/binary_sensor/binary_sensor.h"
 #endif
+#ifdef USE_SELECT
+#include "esphome/components/select/select.h"
+#endif
 
 namespace esphome::screen_camera {
 
@@ -55,6 +58,15 @@ class ScreenCamera : public Component,
   // The screen is mounted the other way round (the setting "Camera upside down", off by default): the picture turns
   // half way on top of the core's answer (picture_turn.h), at the next second.
   void set_upside_down(bool on) { upside_down_ = on; }
+  // The field of view (the setting, Sharp by default): 0 Sharp, the sensor's own mode; 1 Full (subsampling); 2 Full
+  // (sensor scale). Only a sensor whose driver offers the modes takes them (the OV02C10, untried until a tester
+  // confirms them); the camera goes back to Sharp by itself otherwise, and on_interval sets the setting back.
+  void set_field(int field) {
+    if (camera_ != nullptr) camera_->set_field(field);
+  }
+#ifdef USE_SELECT
+  void set_field_select(select::Select *s) { field_select_ = s; }
+#endif
   // On the camera's task, from the frame hub, for every frame while sensing is on. RGB565, or the video's YUV420.
   void consume_raw_video_frame(const esp_video_camera::RawVideoFrame &frame) override;
   // Someone watches the video, or nobody any more: the core's dot, as for sensing (from the loop).
@@ -81,6 +93,9 @@ class ScreenCamera : public Component,
 #endif
   bool wake_on_motion_{false};
   bool upside_down_{false};
+#ifdef USE_SELECT
+  select::Select *field_select_{};
+#endif
   uint32_t seen_turns_{0};  // the camera's task: the hub's turns its motion grid was made after
   uint32_t woken_for_{0};      // the motion sample the screen was last woken for
   uint32_t last_wake_ms_{0};

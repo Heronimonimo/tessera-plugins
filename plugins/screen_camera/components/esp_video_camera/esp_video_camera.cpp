@@ -42,6 +42,8 @@ extern "C" {
 namespace esphome::esp_video_camera {
 
 static const char *const TAG = "esp_video_camera";
+// The field of view's names (set_field), for the log.
+static const char *const FIELD_NAMES[] = {"Sharp", "Full (subsampling)", "Full (sensor scale)"};
 
 // ===========================================================================
 // Pipeline init helpers (run esp_video_init on core 0, optional LEDC XCLK)
@@ -654,7 +656,7 @@ void ESPVideoCamera::capture_task_run_() {
       this->raw_warmup_until_ms_ = millis() + RAW_WARMUP_MS;
     while (this->capture_task_running_.load(std::memory_order_acquire) &&
            this->capture_wanted_.load(std::memory_order_acquire) &&
-           !this->capture_faulted_.load(std::memory_order_acquire)) {
+           !this->capture_faulted_.load(std::memory_order_acquire) && !this->field_pending_()) {
       // VIDIOC_DQBUF sleeps on esp_video's frame queue. Its driver timeout is
       // only a dead-sensor/teardown watchdog; a healthy source wakes this task
       // exactly when a frame becomes ready.
@@ -667,9 +669,18 @@ void ESPVideoCamera::capture_task_run_() {
       }
     }
     if (this->capture_faulted_.load(std::memory_order_acquire)) {
+      // No frame at all in a field of view of the driver's: back to the sensor's own mode, with the retries anew.
+      if (this->field_active_ != 0 && this->field_frames_ == 0) {
+        this->field_failed_("no frame came in it");
+        this->capture_retry_attempts_.store(0, std::memory_order_release);
+      }
       if (this->stop_capture_())
         this->capture_faulted_.store(false, std::memory_order_release);
       this->schedule_capture_retry_();
+    } else if (this->field_pending_() && this->capture_wanted_.load(std::memory_order_acquire)) {
+      // A new field of view while streaming: a fresh start hands the sensor its format and sizes the capture anew.
+      this->stop_capture_();
+      xTaskNotifyGive(xTaskGetCurrentTaskHandle());
     } else {
       // No consumers remain. Stop the hardware clocks/queues, retain the
       // prepared MMAP buffers, then block again on the task notification.
@@ -748,6 +759,13 @@ void ESPVideoCamera::loop_jpeg_pipeline_() {
     this->capture_faulted_.store(true, std::memory_order_release);
     this->capture_wanted_.store(false, std::memory_order_release);
     return;
+  }
+  this->field_frames_++;
+  if (!this->field_told_ && millis() - this->field_since_ms_ >= 10000) {
+    this->field_told_ = true;
+    ESP_LOGI(TAG, "Field of view %s: %.1f frames a second over its first 10 s, %ux%u", FIELD_NAMES[this->field_active_],
+             this->field_frames_ * 1000.0f / (millis() - this->field_since_ms_), (unsigned) this->capture_width_,
+             (unsigned) this->capture_height_);
   }
 
   bool raw_requeued = false;
@@ -1590,6 +1608,9 @@ bool ESPVideoCamera::start_capture_() {
   }
   if (this->is_failed())
     return false;
+  // A new field of view: the buffers are another size, so the capture starts afresh (start_jpeg_pipeline_).
+  if (this->capture_prepared_ && this->field_pending_() && !this->stop_capture_())
+    return false;
   if (this->capture_prepared_) {
     if (!this->resume_capture_())
       return false;
@@ -1757,6 +1778,61 @@ bool ESPVideoCamera::start_direct_capture_() {
   return true;
 }
 
+// ---- The field of view (set_field) ----
+// A sensor driver that offers the modes defines this (components/ov02c10); otherwise none is linked and the camera
+// keeps its own mode.
+extern "C" const esp_cam_sensor_format_t *tessera_camera_field_format(int field) __attribute__((weak));
+// The sensor's own format as it was at the first start, given back to it for Sharp. The driver keeps a pointer to the
+// format it was given, so it lives here, for as long as the camera.
+static esp_cam_sensor_format_t s_own_format;
+static bool s_own_saved = false;
+
+void ESPVideoCamera::set_field(int field) {
+  if (field < 0 || field > 2) field = 0;
+  this->field_wanted_.store(field, std::memory_order_release);
+  if (this->capture_task_ != nullptr) xTaskNotifyGive(this->capture_task_);
+}
+
+void ESPVideoCamera::field_failed_(const char *why) {
+  if (this->field_wanted_.exchange(0, std::memory_order_acq_rel) != 0 || this->field_active_ != 0) {
+    ESP_LOGW(TAG, "Field of view back to Sharp: %s", why);
+    this->field_fell_back_.store(true, std::memory_order_release);
+  }
+}
+
+// Capture task, before the capture's format: the sensor in the wanted mode. Sharp at the first start writes nothing.
+void ESPVideoCamera::apply_field_() {
+  esp_cam_sensor_format_t now;
+  memset(&now, 0, sizeof(now));
+  if (ioctl(this->capture_fd_, VIDIOC_G_SENSOR_FMT, &now) != 0) return;
+  if (!s_own_saved) {
+    s_own_format = now;
+    s_own_saved = true;
+  }
+  int want = this->field_wanted_.load(std::memory_order_acquire);
+  const esp_cam_sensor_format_t *format = &s_own_format;
+  if (want != 0) {
+    format = tessera_camera_field_format != nullptr ? tessera_camera_field_format(want) : nullptr;
+    if (format == nullptr) {
+      this->field_failed_("this camera has no such mode");
+      want = 0;
+      format = &s_own_format;
+    }
+  }
+  if (want == this->field_active_) return;
+  if (ioctl(this->capture_fd_, VIDIOC_S_SENSOR_FMT, format) != 0) {
+    ESP_LOGW(TAG, "The sensor took no format %s: %s", format->name, strerror(errno));
+    if (want != 0) this->field_failed_("the sensor took no such format");
+    return;
+  }
+  this->field_active_ = want;
+  this->field_since_ms_ = millis();
+  this->field_frames_ = 0;
+  this->field_told_ = false;
+  ESP_LOGI(TAG, "Field of view %s: the sensor's format %s, %ux%u", FIELD_NAMES[want], format->name,
+           (unsigned) format->width, (unsigned) format->height);
+}
+
 bool ESPVideoCamera::start_jpeg_pipeline_() {
   // Stage 1: sensor/ISP capture device. The H.264 consumer asks for the P4's
   // encoder-native optimized YUV420 layout; the JPEG path keeps RGB565.
@@ -1771,6 +1847,8 @@ bool ESPVideoCamera::start_jpeg_pipeline_() {
                   RawVideoPixelFormat::YUV420_OUYY_EVYY
           ? V4L2_PIX_FMT_YUV420
           : V4L2_PIX_FMT_RGB565;
+  if (this->is_raw_csi_)
+    this->apply_field_();
   if (!this->configure_capture_format_(capture_format))
     return false;
   this->hardware_framerate_active_.store(

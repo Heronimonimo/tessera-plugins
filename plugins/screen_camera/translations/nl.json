@@ -12,6 +12,8 @@
   "setting_sensing_hint": "De camera meet het licht in de kamer en merkt beweging op, op het scherm zelf: hiervoor gaat geen beeld van het scherm af. De camera blijft aan zolang dit aan staat.",
   "setting_upside_down": "Camera omgekeerd",
   "setting_upside_down_hint": "Draait het beeld van de camera een halve slag, voor een scherm dat andersom hangt dan hoe het gebouwd is. De plaatjes, de video en de lichtsterkte en beweging volgen allemaal.",
+  "setting_field_of_view": "Beeldveld camera",
+  "setting_field_of_view_hint": "Scherp toont het midden van het camerabeeld, zoals voorheen. Volledig (subsampling) en Volledig (sensorschaal) proberen alles te tonen wat de camera ziet, in een lagere resolutie: alleen op de camera van de Guition-schermen, en testers proberen ze nu, dus meld wat je ziet. Een stand die geen beeld geeft, gaat vanzelf terug naar Scherp. Werkt met het onderdeel Video.",
   "setting_wake": "Beweging wekt het scherm",
   "setting_wake_hint": "Met lichtniveau en beweging aan wekt iemand die voor het scherm beweegt het scherm, zoals een aanraking.",
   "setting_time_out": "Beweging blijft aan",

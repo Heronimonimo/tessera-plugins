@@ -7,7 +7,7 @@ register_plugin() takes the id, version and the screen's texts from the manifest
 """
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.components import binary_sensor, sensor, smart_display
+from esphome.components import binary_sensor, select, sensor, smart_display
 from esphome.const import (
     CONF_ID,
     DEVICE_CLASS_ILLUMINANCE,
@@ -24,6 +24,7 @@ AUTO_LOAD = ["sensor", "binary_sensor"]
 CONF_CAMERA = "camera"
 CONF_ILLUMINANCE = "illuminance"
 CONF_MOTION = "motion"
+CONF_FIELD_OF_VIEW = "field_of_view"
 
 screen_camera_ns = cg.esphome_ns.namespace("screen_camera")
 # ESPHome's camera base (esphome/components/camera/camera.h), which declares no class of its own in Python, and
@@ -45,6 +46,8 @@ CONFIG_SCHEMA = cv.Schema(
             state_class=STATE_CLASS_MEASUREMENT,
         ),
         cv.Optional(CONF_MOTION): binary_sensor.binary_sensor_schema(device_class=DEVICE_CLASS_MOTION),
+        # The setting "Field of view", which the plugin sets back to Sharp when the camera goes back by itself.
+        cv.Optional(CONF_FIELD_OF_VIEW): cv.use_id(select.Select),
     }
 ).extend(cv.COMPONENT_SCHEMA)
 
@@ -59,3 +62,5 @@ async def to_code(config):
         cg.add(var.set_illuminance(await sensor.new_sensor(config[CONF_ILLUMINANCE])))
     if CONF_MOTION in config:
         cg.add(var.set_motion(await binary_sensor.new_binary_sensor(config[CONF_MOTION])))
+    if CONF_FIELD_OF_VIEW in config:
+        cg.add(var.set_field_select(await cg.get_variable(config[CONF_FIELD_OF_VIEW])))

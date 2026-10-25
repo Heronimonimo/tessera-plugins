@@ -100,7 +100,7 @@ void ScreenVideo::serve_() {
       highest = std::max(highest, v.fd);
     }
     timeval wait{0, 10000};
-    if (select(highest + 1, &readable, nullptr, nullptr, &wait) > 0) {
+    if (::select(highest + 1, &readable, nullptr, nullptr, &wait) > 0) {  // POSIX, not esphome::select
       if (FD_ISSET(listener, &readable)) accept_(listener);
       for (auto &v : viewers_)
         if (v.fd >= 0 && FD_ISSET(v.fd, &readable)) read_(v);

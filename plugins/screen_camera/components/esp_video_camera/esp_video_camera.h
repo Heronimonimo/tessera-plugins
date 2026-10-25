@@ -176,6 +176,15 @@ class ESPVideoCamera : public camera::Camera {
                                            std::memory_order_release);
   }
 
+  // The field of view (Screen camera's setting "Field of view"; Tessera's docs/PLATFORM_PLAN.md 4.6): 0 the sensor's
+  // own mode (Sharp), 1 Full (subsampling), 2 Full (sensor scale), the modes the sensor's driver offers
+  // (tessera_camera_field_format; the OV02C10's only, for now). Any thread: the capture task stops, hands the sensor
+  // its format and starts again, and goes back to the sensor's own mode by itself when the driver has no such mode or
+  // no frame comes in it.
+  void set_field(int field);
+  // True once after such a fall back, for the setting to show Sharp again.
+  bool take_field_fallback() { return this->field_fell_back_.exchange(false); }
+
   // camera::Camera -------------------------------------------------------------
   void add_listener(camera::CameraListener *listener) override { this->listeners_.push_back(listener); }
   camera::CameraImageReader *create_image_reader() override;
@@ -387,6 +396,21 @@ class ESPVideoCamera : public camera::Camera {
   std::atomic<int> rt_hflip_{-1};    // V4L2_CID_HFLIP 0/1
   std::atomic<int> rt_quality_{-1};  // V4L2_CID_JPEG_COMPRESSION_QUALITY 1-100, higher is better
   std::atomic<bool> ctrls_dirty_{false};
+
+  // The field of view (set_field): wanted (any thread), and on the capture task the mode in force, since when and how
+  // many frames came in it, and whether its first ten seconds were logged.
+  std::atomic<int> field_wanted_{0};
+  std::atomic<bool> field_fell_back_{false};
+  int field_active_{0};
+  uint32_t field_since_ms_{0};
+  uint32_t field_frames_{0};
+  bool field_told_{true};
+  // Only the raw capture (the part Video) takes another mode; the camera's JPEG device keeps its own.
+  bool field_pending_() const {
+    return this->is_raw_csi_ && this->field_wanted_.load(std::memory_order_acquire) != this->field_active_;
+  }
+  void apply_field_();
+  void field_failed_(const char *why);
 };
 
 }  // namespace esphome::esp_video_camera

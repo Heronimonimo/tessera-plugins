@@ -3,7 +3,7 @@
 # core's dot shows while it does (plugin API 0.17). It drives the board's camera sensor (the feature camera_sensor: the
 # board powers it and names its I2C bus), and brings the camera as `ts_camera` for a plugin that builds on it.
 id: screen_camera
-version: 0.5.1
+version: 0.6.0
 api: "0.19"
 icon: cctv
 maintainer: MaxGramser
@@ -23,6 +23,7 @@ settings:
   - { key: camera_motion_wakes_the_screen, label: setting_wake, hint: setting_wake_hint }
   - { key: camera_motion_timeout, label: setting_time_out, hint: setting_time_out_hint }
   - { key: camera_upside_down, label: setting_upside_down, hint: setting_upside_down_hint }
+  - { key: camera_field_of_view, label: setting_field_of_view, hint: setting_field_of_view_hint }
 
 # The camera as live video with sound in Home Assistant (README.md, "Video"): H.264 from the P4's encoder and Opus from
 # the microphone, on the screen's own device through the tessera_video integration Tessera installs. On when the plugin

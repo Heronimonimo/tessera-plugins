@@ -13,7 +13,28 @@ namespace esphome::screen_video {
 void ScreenVideo::consume_raw_video_frame(const esp_video_camera::RawVideoFrame &frame) {
   if (frame.pixel_format != esp_video_camera::RawVideoPixelFormat::YUV420_OUYY_EVYY || frame.stride_bytes != frame.width)
     return;
+  if (encoder_ != nullptr && (frame.width != made_w_ || frame.height != made_h_)) {
+    // The camera changed its mode (Screen camera's field of view): the encoder, and the cut, for the new size. Its
+    // reference frame goes back to internal RAM first; the new one is smaller or the same for every mode offered.
+    esp_h264_enc_close(encoder_);
+    esp_h264_enc_del(encoder_);
+    encoder_ = nullptr;
+    if (ppa_ != nullptr) {
+      ppa_unregister_client(ppa_);
+      ppa_ = nullptr;
+    }
+    if (crop_ != nullptr) {
+      heap_caps_free(crop_);
+      crop_ = nullptr;
+    }
+    crop_x_ = crop_y_ = 0;
+    encoder_failed_ = false;
+    ESP_LOGI(TAG, "The camera gives %ux%u frames now (%ux%u before): a new encoder", frame.width, frame.height, made_w_,
+             made_h_);
+  }
   if (encoder_ == nullptr && !encoder_failed_) {
+    made_w_ = frame.width;
+    made_h_ = frame.height;
     // The stream's size: the camera's, cut to whole macroblocks, its middle. The camera's frame is the encoder's own
     // YUV420 (a line of U Y Y..., a line of V Y Y..., 3 bytes for 2 pixels): a cut starts on an even line, so the
     // lines keep their U and V, and on an even pixel, so the groups of two stay whole.

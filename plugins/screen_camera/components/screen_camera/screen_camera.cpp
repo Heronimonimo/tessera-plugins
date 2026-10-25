@@ -232,6 +232,12 @@ void ScreenCamera::on_interval(uint32_t now_ms) {
   // The picture's turn follows the screen's rotation, which the app changes without a build.
   frames_.turn(picture_turn(tessera::camera_turn(), upside_down_));
   publish_sensing_();
+  // The camera went back to Sharp by itself (no such mode, or no frame in it): the setting says so.
+  if (camera_ != nullptr && camera_->take_field_fallback()) {
+#ifdef USE_SELECT
+    if (field_select_ != nullptr) field_select_->make_call().set_index(0).perform();
+#endif
+  }
 }
 
 }  // namespace esphome::screen_camera

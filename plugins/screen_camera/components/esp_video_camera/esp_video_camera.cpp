@@ -56,22 +56,25 @@ extern "C" const esp_cam_sensor_format_t *tessera_camera_field_format(int field)
 extern "C" int tessera_camera_field_report(char *out, size_t size) __attribute__((weak));
 
 #if CONFIG_IDF_TARGET_ESP32P4
-// TEST BUILD 4: what the P4's MIPI receiver, CSI bridge and ISP saw when a field of view stalls. The receiver's
-// int_st_* clear when read; the bridge's and ISP's int_raw stay until the driver clears them. Bridge int_raw bit 0:
-// the frame had fewer lines than set (vadr_num greater than real), bit 1 more, bit 2 a frame cut short, bit 3/4 an
-// overrun. ISP int_raw bit 0 a data type error, 3 a size setting error, 5 a line length unlike the setting.
+// What the P4's MIPI receiver, CSI bridge and ISP saw when a field of view stalls (from a Guition tester's test
+// build, Jeroen Peters, 2026-10-25). The receiver's int_st_* clear when read; the bridge's and the ISP's int_raw stay
+// until the driver clears them. Bridge int_raw bit 0: the frame had fewer lines than set, bit 1 more, bit 2 a frame
+// cut short, bits 3 and 4 an overrun. ISP int_raw bit 0 a data type error, 3 a size setting error, 5 a line length
+// unlike the setting.
 static void log_p4_capture_state(const char *field) {
+  // Two lines: the log cut the one line short after the bridge's int_raw (Guition 10.1-inch, 0.6.3).
   ESP_LOGW(TAG,
-           "Field of view %s: the P4 says MIPI main 0x%08x phy_fatal 0x%08x pkt_fatal 0x%08x bndry 0x%08x seq 0x%08x "
-           "crc 0x%08x pld_crc 0x%08x data_id 0x%08x phy 0x%08x stopstate 0x%08x; bridge int_raw 0x%08x frame_cfg "
-           "0x%08x; ISP int_raw 0x%08x int_ena 0x%08x frame_cfg 0x%08x",
+           "Field of view %s: the P4's MIPI receiver says main 0x%08x phy_fatal 0x%08x pkt_fatal 0x%08x bndry 0x%08x "
+           "seq 0x%08x crc 0x%08x pld_crc 0x%08x data_id 0x%08x phy 0x%08x stopstate 0x%08x",
            field, (unsigned) MIPI_CSI_HOST.int_st_main.val, (unsigned) MIPI_CSI_HOST.int_st_phy_fatal.val,
            (unsigned) MIPI_CSI_HOST.int_st_pkt_fatal.val, (unsigned) MIPI_CSI_HOST.int_st_bndry_frame_fatal.val,
            (unsigned) MIPI_CSI_HOST.int_st_seq_frame_fatal.val, (unsigned) MIPI_CSI_HOST.int_st_crc_frame_fatal.val,
            (unsigned) MIPI_CSI_HOST.int_st_pld_crc_fatal.val, (unsigned) MIPI_CSI_HOST.int_st_data_id.val,
-           (unsigned) MIPI_CSI_HOST.int_st_phy.val, (unsigned) MIPI_CSI_HOST.phy_stopstate.val,
-           (unsigned) MIPI_CSI_BRIDGE.int_raw.val, (unsigned) MIPI_CSI_BRIDGE.frame_cfg.val, (unsigned) ISP.int_raw.val,
-           (unsigned) ISP.int_ena.val, (unsigned) ISP.frame_cfg.val);
+           (unsigned) MIPI_CSI_HOST.int_st_phy.val, (unsigned) MIPI_CSI_HOST.phy_stopstate.val);
+  ESP_LOGW(TAG, "Field of view %s: the P4's bridge says int_raw 0x%08x frame_cfg 0x%08x; its ISP int_raw 0x%08x "
+           "int_ena 0x%08x frame_cfg 0x%08x",
+           field, (unsigned) MIPI_CSI_BRIDGE.int_raw.val, (unsigned) MIPI_CSI_BRIDGE.frame_cfg.val,
+           (unsigned) ISP.int_raw.val, (unsigned) ISP.int_ena.val, (unsigned) ISP.frame_cfg.val);
 }
 #endif
 
@@ -797,7 +800,7 @@ void ESPVideoCamera::loop_jpeg_pipeline_() {
     return;
   }
   this->field_frames_++;
-  // TEST BUILD 4: the first frames of a field of view of the driver's, as the capture got them.
+  // The first frames of a field of view of the driver's, as the capture got them.
   if (this->field_active_ != 0 && this->field_frames_ <= 3)
     ESP_LOGI(TAG, "Field of view %s: frame %u, %u bytes (%u expected), %u ms after the change",
              FIELD_NAMES[this->field_active_], (unsigned) this->field_frames_, (unsigned) cap_buf.bytesused,

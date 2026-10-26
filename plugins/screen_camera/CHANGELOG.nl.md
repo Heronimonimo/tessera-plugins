@@ -1,5 +1,12 @@
 # Wijzigingen
 
+## 0.6.3 - 2026-10-26
+- Beeldveld camera op de Guition 10.1-inch: Jeroen Peters vond met zijn testbuilds dat de Full-standen na één beeld
+  stilvallen zodra de regels gehalveerd worden, terwijl alleen de kolommen halveren gewoon blijft lopen. Beide
+  Full-standen vragen nu om elke gehalveerde regel (960 x 544 in plaats van 960 x 528). Valt een Full-stand toch
+  stil, dan zegt de log wat de camera-ingang van de P4 zag (uit zijn testbuild). Testers: probeer beide Full-standen
+  opnieuw en stuur de logregels met "Field of view" en een screenshot.
+
 ## 0.6.2 - 2026-10-25
 - Beeldveld camera op de Guition 4.3-inch (GitHub issue #326): beide Full-standen gaven daar geen beeld. Ze beginnen
   nu vanuit de tabel die Sharp gebruikt, die het starten van de camera aan het scherm laat; de vorige zette de

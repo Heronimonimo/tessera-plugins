@@ -399,8 +399,8 @@ static esp_err_t ov02c10_apply_orientation(esp_cam_sensor_device_t *dev)
     uint8_t y_win = state->base_y_win;
 
     const bool true_view_bit = !state->hmirror;
-    // In a field of view's mode the offsets count binned or skipped pixels and the window has 8 and 16 of them to spare
-    // (968 x 544 for 960 x 528): its table's even offsets stay, the bits alone turn the picture. A Guition tester saw
+    // In a field of view's mode the offsets count binned or skipped pixels and the window has 8 columns to spare (968 x
+    // 544 for 960 x 544): its table's even offsets stay, the bits alone turn the picture. A Guition tester saw
     // the first build's picture moved and striped (2026-10-25); the log reads back what the ISP makes of it.
     const bool shift = !state->field_mode;
     if (((rotate & OV02C10_ROTATE_MIRROR) != 0) != true_view_bit) {
@@ -722,9 +722,11 @@ typedef struct {
     uint8_t val;
 } ov02c10_change_t;
 
-// Every other pair of columns and of lines (odd increment 3, even 1: the Bayer pairs stay whole), 960 x 528 out of the
-// 968 x 544 that leaves: its middle, in whole macroblocks for the video's encoder (a horizontal size must be a multiple
-// of 8, section 2.3), at even offsets (4 and 8) that a mirror or flip leaves where they are (field_mode).
+// Every other pair of columns and of lines (odd increment 3, even 1: the Bayer pairs stay whole), 960 x 544 out of the
+// 968 x 544 that leaves: every line, the columns' middle, in whole macroblocks for the video's encoder (a horizontal
+// size must be a multiple of 8, section 2.3), at even offsets (4 and 0) that a mirror or flip leaves where they are
+// (field_mode). With 528 of the 544 lines asked for, a Guition 10.1-inch gave one frame and stalled whenever the lines
+// were halved, while the columns halved alone ran at 29.8 frames a second (Jeroen Peters' test builds, 2026-10-25).
 // On the 1288x728 table, Sharp's: the same PLL, timing and lane rate as the 1920x1080 table, but that one turns the
 // stream on at its end (0x0100 0x01), while the driver still writes exposure and orientation and stops it again, and on
 // a Guition 4.3-inch no frame came after that (GitHub issue #326); the 1288x728 table leaves the stream to esp_video.
@@ -732,19 +734,28 @@ typedef struct {
 #define OV02C10_HALF_CHANGES                                                                    \
     {0x3800, 0x00}, {0x3801, 0x00}, {0x3802, 0x00}, {0x3803, 0x04},                             \
     {0x3804, 0x07}, {0x3805, 0x8f}, {0x3806, 0x04}, {0x3807, 0x43},                             \
-    {0x3808, 0x03}, {0x3809, 0xc0}, {0x380a, 0x02}, {0x380b, 0x10},                             \
-    {0x3810, 0x00}, {0x3811, 0x04}, {0x3812, 0x00}, {0x3813, 0x08},                             \
+    {0x3808, 0x03}, {0x3809, 0xc0}, {0x380a, 0x02}, {0x380b, 0x20},                             \
+    {0x3810, 0x00}, {0x3811, 0x04}, {0x3812, 0x00}, {0x3813, 0x00},                             \
     {0x3814, 0x03}, {0x3815, 0x01}, {0x3816, 0x03}, {0x3817, 0x01}
-// TEST BUILD 4 (not for release). On a Guition 10.1-inch the lines' stepping (0x3816 3) stalls after a frame, binned
-// or skipped, while the columns stepped alone and a 960 x 528 crop at 1:1 keep running (test build 1). Neither 0x3714
-// 0x28 with 0x4009 0x11, as the sensor's relatives have them binned (test build 2), nor holding the ISP pipeline's
-// exposure and gain (test build 3, which held none: nothing was written before the stall) changed it. Both slots are
-// 0.6.2's modes again; esp_video_camera reads the P4's MIPI receiver, CSI bridge and ISP when they stall.
-// Full (binning): the pairs averaged, columns and lines (0x3820 0xa3: the table's 0xa0 with hbin2_o and vbinf_o; the
-// driver's mirror and flip keep bits 0 and 1; the table's 0x4501 0x00 averages).
-static const ov02c10_change_t s_binned_changes[] = {OV02C10_HALF_CHANGES, {0x3820, 0xa3}, {0x4501, 0x00}};
-// Full (skip): the pairs read, the others skipped: fine patterns may shimmer.
-static const ov02c10_change_t s_skipped_changes[] = {OV02C10_HALF_CHANGES};
+// TEST BUILD 5 (not for release), on 0.6.3. With 960 x 544 too the lines halved stall after a frame, and the P4's
+// MIPI receiver says why: a frame boundary error on virtual channel 0 (int_st_main bit 2, bndry bit 0: a Frame Start
+// and its Frame End that do not match), no PHY, packet or CRC error, and the bridge saw no frame of the wrong height.
+// One way to get that is the next frame starting before this one ended. Both slots bin, as 0.6.3's Full (binning):
+// Full (binning) slot: the frame twice as long (VTS 0x380e/0x380f 2328 instead of 1164: 15 frames a second), the
+// window as 0.6.3's. If this runs, the frame's length is what the halved lines need.
+static const ov02c10_change_t s_binned_changes[] = {OV02C10_HALF_CHANGES, {0x3820, 0xa3}, {0x4501, 0x00},
+                                                    {0x380e, 0x09}, {0x380f, 0x18}};
+// Full (skip) slot: VTS as the table has it, but only Sharp's lines (180..911, 732 of them, 366 halved), 960 x 360
+// out at 4,2: a wide, low picture. If this runs and the slot above does not, it is the halved lines over the whole
+// height that do not fit the frame.
+static const ov02c10_change_t s_skipped_changes[] = {
+    {0x3800, 0x00}, {0x3801, 0x00}, {0x3802, 0x00}, {0x3803, 0xb4},
+    {0x3804, 0x07}, {0x3805, 0x8f}, {0x3806, 0x03}, {0x3807, 0x8f},
+    {0x3808, 0x03}, {0x3809, 0xc0}, {0x380a, 0x01}, {0x380b, 0x68},
+    {0x3810, 0x00}, {0x3811, 0x04}, {0x3812, 0x00}, {0x3813, 0x02},
+    {0x3814, 0x03}, {0x3815, 0x01}, {0x3816, 0x03}, {0x3817, 0x01},
+    {0x3820, 0xa3}, {0x4501, 0x00},
+};
 #define OV02C10_FIELD_REGS 320
 static ov02c10_reginfo_t s_field_regs[2][OV02C10_FIELD_REGS];
 static esp_cam_sensor_format_t s_field_format[2];
@@ -804,15 +815,15 @@ const esp_cam_sensor_format_t *tessera_camera_field_format(int field)
         return &s_field_format[index];
     }
     _Static_assert(sizeof(s_binned_changes) / sizeof(s_binned_changes[0]) <= 32, "changes fit the used marks");
-    _Static_assert(sizeof(s_skipped_changes) / sizeof(s_skipped_changes[0]) <= 32, "changes fit the used marks");
     if (field == 1) {
         return ov02c10_build_field(index, &ov02c10_format_info[1], s_binned_changes,
                                    sizeof(s_binned_changes) / sizeof(s_binned_changes[0]),
-                                   "OV02C10_full_test4_binned_960x528", 960, 528);
+                                   "OV02C10_full_test5_binned_vts2328_960x544", 960, 544);
     }
+    _Static_assert(sizeof(s_skipped_changes) / sizeof(s_skipped_changes[0]) <= 32, "changes fit the used marks");
     return ov02c10_build_field(index, &ov02c10_format_info[1], s_skipped_changes,
                                sizeof(s_skipped_changes) / sizeof(s_skipped_changes[0]),
-                               "OV02C10_full_test4_skipped_960x528", 960, 528);
+                               "OV02C10_full_test5_binned_rows732_960x360", 960, 360);
 }
 
 // What the sensor says it does, for the log ten seconds after a change: 0x3820 (FORMAT1) and the window offsets as

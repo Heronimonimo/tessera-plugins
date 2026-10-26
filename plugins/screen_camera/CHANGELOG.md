@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.3 - 2026-10-26
+- Camera field of view on the Guition 10.1-inch: Jeroen Peters found with his test builds that the Full modes stall
+  after one frame whenever the lines are halved, while the columns halved alone keep running. Both Full modes now
+  ask for every halved line (960 x 544 instead of 960 x 528). When a Full mode still stalls, the log says what the
+  P4's camera input saw (from his test build). Testers: try both Full modes again and send the log lines with
+  "Field of view" and a screenshot.
+
 ## 0.6.2 - 2026-10-25
 - Camera field of view on the Guition 4.3-inch (GitHub issue #326): both Full modes gave no picture there. They now
   start from the table Sharp uses, which leaves starting the camera to the screen; the one before turned the

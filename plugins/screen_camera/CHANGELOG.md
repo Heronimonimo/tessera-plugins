@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.6.4 - 2026-10-26
+- Camera field of view on the Guition: with the lines halved the sensor still stopped after one frame at 960 x 544,
+  and the P4 said why: a frame the sensor started and never ended. How many halved lines the sensor's own image
+  processor closes a frame with is not in its datasheet, so a Full mode now finds out by itself: it tries a row of
+  windows (the height and its offsets) one after the other, each until it runs or stops, keeps the first that runs,
+  and starts from it the next time. If none runs, it goes back to Sharp as before. The log says each window it
+  tried and which one ran, and the P4's report comes in two lines that are no longer cut off. Testers: switch to
+  each Full mode once, wait about a minute, and send all log lines with "Field of view" and a screenshot.
+
 ## 0.6.3 - 2026-10-26
 - Camera field of view on the Guition 10.1-inch: Jeroen Peters found with his test builds that the Full modes stall
   after one frame whenever the lines are halved, while the columns halved alone keep running. Both Full modes now

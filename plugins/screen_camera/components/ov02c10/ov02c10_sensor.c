@@ -737,29 +737,14 @@ typedef struct {
     {0x3808, 0x03}, {0x3809, 0xc0}, {0x380a, 0x02}, {0x380b, 0x20},                             \
     {0x3810, 0x00}, {0x3811, 0x04}, {0x3812, 0x00}, {0x3813, 0x00},                             \
     {0x3814, 0x03}, {0x3815, 0x01}, {0x3816, 0x03}, {0x3817, 0x01}
-// TEST BUILD 5 (not for release), on 0.6.3. With 960 x 544 too the lines halved stall after a frame, and the P4's
-// MIPI receiver says why: a frame boundary error on virtual channel 0 (int_st_main bit 2, bndry bit 0: a Frame Start
-// and its Frame End that do not match), no PHY, packet or CRC error, and the bridge saw no frame of the wrong height.
-// One way to get that is the next frame starting before this one ended. Both slots bin, as 0.6.3's Full (binning):
-// Full (binning) slot: the frame twice as long (VTS 0x380e/0x380f 2328 instead of 1164: 15 frames a second), the
-// window as 0.6.3's. If this runs, the frame's length is what the halved lines need.
-static const ov02c10_change_t s_binned_changes[] = {OV02C10_HALF_CHANGES, {0x3820, 0xa3}, {0x4501, 0x00},
-                                                    {0x380e, 0x09}, {0x380f, 0x18}};
-// Full (skip) slot: VTS as the table has it, but only Sharp's lines (180..911, 732 of them, 366 halved), 960 x 360
-// out at 4,2: a wide, low picture. If this runs and the slot above does not, it is the halved lines over the whole
-// height that do not fit the frame.
-static const ov02c10_change_t s_skipped_changes[] = {
-    {0x3800, 0x00}, {0x3801, 0x00}, {0x3802, 0x00}, {0x3803, 0xb4},
-    {0x3804, 0x07}, {0x3805, 0x8f}, {0x3806, 0x03}, {0x3807, 0x8f},
-    {0x3808, 0x03}, {0x3809, 0xc0}, {0x380a, 0x01}, {0x380b, 0x68},
-    {0x3810, 0x00}, {0x3811, 0x04}, {0x3812, 0x00}, {0x3813, 0x02},
-    {0x3814, 0x03}, {0x3815, 0x01}, {0x3816, 0x03}, {0x3817, 0x01},
-    {0x3820, 0xa3}, {0x4501, 0x00},
-};
+// Full (binning): the pairs averaged, columns and lines (0x3820 0xa3: the table's 0xa0 with hbin2_o and vbinf_o; the
+// driver's mirror and flip keep bits 0 and 1; the table's 0x4501 0x00 averages).
+static const ov02c10_change_t s_binned_changes[] = {OV02C10_HALF_CHANGES, {0x3820, 0xa3}, {0x4501, 0x00}};
+// Full (skip): the pairs read, the others skipped: fine patterns may shimmer.
+static const ov02c10_change_t s_skipped_changes[] = {OV02C10_HALF_CHANGES};
 #define OV02C10_FIELD_REGS 320
 static ov02c10_reginfo_t s_field_regs[2][OV02C10_FIELD_REGS];
 static esp_cam_sensor_format_t s_field_format[2];
-static bool s_field_built[2];
 
 static const esp_cam_sensor_format_t *ov02c10_build_field(int index, const esp_cam_sensor_format_t *base,
                                                           const ov02c10_change_t *changes, size_t count,
@@ -799,31 +784,83 @@ static const esp_cam_sensor_format_t *ov02c10_build_field(int index, const esp_c
     s_field_format[index].height = height;
     s_field_format[index].regs = out;
     s_field_format[index].regs_size = (int)n;
-    s_field_built[index] = true;
     return &s_field_format[index];
 }
 
-// The sensor format for Screen camera's field of view: 1 Full (binning), 2 Full (skip); NULL for any other, or when no
-// OV02C10 answered. Asked for by esp_video_camera on its capture task, which then hands it to the sensor.
-const esp_cam_sensor_format_t *tessera_camera_field_format(int field)
+// TEST BUILD 6 (not for release), on 0.6.4: what a Full mode tries in turn until one runs (esp_video_camera keeps the
+// first that does). 0.6.4's twelve windows (544 to 528 lines, offsets 0 to 8) each gave one whole frame and then the
+// same MIPI frame boundary error (Guition 10.1-inch, 2026-10-27), so the window is not it; what is left is the frame's
+// timing and the rows it starts from. All tries are 960 x 544 at 4,0 (2 with the rows from 0); in order, the fastest
+// first: the rows read from 0 as the sensor's relatives bin them (OV5675, OV8856, OV13858: 0x3803 0 and the window's
+// end a few lines further), with and without their 0x3714 0x28 and 0x4009 0x11; then the frame longer (VTS
+// 0x380e/0x380f, 1164 in the table, 30 frames a second) up to 3492 (10 a second); then the long frames with those two.
+#define OV02C10_TRY_SIBLING 0x01   // 0x3714 0x28, 0x4009 0x11
+#define OV02C10_TRY_ROW0    0x02   // rows 0..1095 (548 halved), isp_y_win 2
+typedef struct {
+    uint16_t vts;
+    uint8_t extra;
+} ov02c10_try_t;
+static const ov02c10_try_t s_tries[] = {
+    {1164, OV02C10_TRY_ROW0},
+    {1164, OV02C10_TRY_ROW0 | OV02C10_TRY_SIBLING},
+    {1300, 0},
+    {1456, 0},
+    {1746, 0},
+    {2328, 0},
+    {3492, 0},
+    {2328, OV02C10_TRY_SIBLING},
+    {2328, OV02C10_TRY_ROW0},
+    {3492, OV02C10_TRY_ROW0 | OV02C10_TRY_SIBLING},
+};
+#define OV02C10_TRIES ((int)(sizeof(s_tries) / sizeof(s_tries[0])))
+static char s_field_name[2][56];
+
+// How many tries a Full mode has; 0 without an OV02C10.
+int tessera_camera_field_tries(void)
 {
-    if (!s_detected || field < 1 || field > 2) {
+    return s_detected ? OV02C10_TRIES : 0;
+}
+
+// The sensor format for Screen camera's field of view, 1 Full (binning) or 2 Full (skip), in its try `attempt`; NULL
+// for any other, or when no OV02C10 answered. Built anew each time (the capture task asks right before it hands the
+// format to the sensor).
+const esp_cam_sensor_format_t *tessera_camera_field_format_try(int field, int attempt)
+{
+    if (!s_detected || field < 1 || field > 2 || attempt < 0 || attempt >= OV02C10_TRIES) {
         return NULL;
     }
     const int index = field - 1;
-    if (s_field_built[index]) {
-        return &s_field_format[index];
+    const ov02c10_change_t *base = field == 1 ? s_binned_changes : s_skipped_changes;
+    const size_t count = field == 1 ? sizeof(s_binned_changes) / sizeof(s_binned_changes[0])
+                                    : sizeof(s_skipped_changes) / sizeof(s_skipped_changes[0]);
+    _Static_assert(sizeof(s_binned_changes) / sizeof(s_binned_changes[0]) + 8 <= 32, "changes fit the used marks");
+    ov02c10_change_t changes[32];
+    const ov02c10_try_t *t = &s_tries[attempt];
+    const bool row0 = (t->extra & OV02C10_TRY_ROW0) != 0;
+    size_t n = 0;
+    for (size_t c = 0; c < count; c++) {
+        changes[n] = base[c];
+        switch (changes[n].reg) {
+        case 0x380a: changes[n].val = 0x02; break;   // 544
+        case 0x380b: changes[n].val = 0x20; break;
+        case 0x3811: changes[n].val = 4; break;
+        case 0x3813: changes[n].val = row0 ? 2 : 0; break;
+        case 0x3803: changes[n].val = row0 ? 0x00 : 0x04; break;
+        case 0x3807: changes[n].val = row0 ? 0x47 : 0x43; break;
+        default: break;
+        }
+        n++;
     }
-    _Static_assert(sizeof(s_binned_changes) / sizeof(s_binned_changes[0]) <= 32, "changes fit the used marks");
-    if (field == 1) {
-        return ov02c10_build_field(index, &ov02c10_format_info[1], s_binned_changes,
-                                   sizeof(s_binned_changes) / sizeof(s_binned_changes[0]),
-                                   "OV02C10_full_test5_binned_vts2328_960x544", 960, 544);
+    changes[n++] = (ov02c10_change_t){0x380e, (uint8_t)(t->vts >> 8)};
+    changes[n++] = (ov02c10_change_t){0x380f, (uint8_t)(t->vts & 0xff)};
+    if (t->extra & OV02C10_TRY_SIBLING) {
+        changes[n++] = (ov02c10_change_t){0x3714, 0x28};
+        changes[n++] = (ov02c10_change_t){0x4009, 0x11};
     }
-    _Static_assert(sizeof(s_skipped_changes) / sizeof(s_skipped_changes[0]) <= 32, "changes fit the used marks");
-    return ov02c10_build_field(index, &ov02c10_format_info[1], s_skipped_changes,
-                               sizeof(s_skipped_changes) / sizeof(s_skipped_changes[0]),
-                               "OV02C10_full_test5_binned_rows732_960x360", 960, 360);
+    snprintf(s_field_name[index], sizeof(s_field_name[index]), "OV02C10_full_%s_960x544_vts%u%s%s",
+             field == 1 ? "binned" : "skipped", (unsigned)t->vts, row0 ? "_row0" : "",
+             (t->extra & OV02C10_TRY_SIBLING) ? "_sib" : "");
+    return ov02c10_build_field(index, &ov02c10_format_info[1], changes, n, s_field_name[index], 960, 544);
 }
 
 // What the sensor says it does, for the log ten seconds after a change: 0x3820 (FORMAT1) and the window offsets as

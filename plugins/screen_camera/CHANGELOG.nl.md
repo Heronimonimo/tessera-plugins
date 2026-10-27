@@ -1,5 +1,14 @@
 # Wijzigingen
 
+## 0.6.4 - 2026-10-26
+- Beeldveld camera op de Guition: met de regels gehalveerd stopte de sensor ook bij 960 x 544 na één beeld, en de P4
+  zei waarom: een beeld dat de sensor begon en nooit afsloot. Met hoeveel gehalveerde regels de beeldverwerking van
+  de sensor een beeld afsluit staat niet in de datasheet, dus een Full-stand zoekt het nu zelf uit: hij probeert een
+  rij vensters (de hoogte en de offsets) na elkaar, elk tot het loopt of stopt, houdt het eerste dat loopt en begint
+  er de volgende keer mee. Loopt er geen, dan gaat hij terug naar Sharp zoals voorheen. De log noemt elk geprobeerd
+  venster en welk liep, en het rapport van de P4 komt in twee regels die niet meer worden afgekapt. Testers: zet elke
+  Full-stand één keer aan, wacht ongeveer een minuut, en stuur alle logregels met "Field of view" en een screenshot.
+
 ## 0.6.3 - 2026-10-26
 - Beeldveld camera op de Guition 10.1-inch: Jeroen Peters vond met zijn testbuilds dat de Full-standen na één beeld
   stilvallen zodra de regels gehalveerd worden, terwijl alleen de kolommen halveren gewoon blijft lopen. Beide

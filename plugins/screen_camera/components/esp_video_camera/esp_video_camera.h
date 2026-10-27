@@ -5,6 +5,7 @@
 #ifdef USE_ESP_IDF
 
 #include "esphome/core/component.h"
+#include "esphome/core/preferences.h"
 #include "esphome/components/camera/camera.h"
 #include "esphome/components/i2c/i2c.h"
 
@@ -405,9 +406,22 @@ class ESPVideoCamera : public camera::Camera {
   uint32_t field_since_ms_{0};
   uint32_t field_frames_{0};
   bool field_told_{true};
+  // The windows a Full mode tries (tessera_camera_field_tries): the one in force, the one to try, how many were tried
+  // since the choice, whether it is still looking (a window runs once FIELD_RUNS_FRAMES came), and per mode the window
+  // that ran last, kept in flash (0xff for none). Capture task, but field_found_ and the save flag, which loop() reads.
+  static constexpr uint32_t FIELD_RUNS_FRAMES = 45;
+  int field_active_try_{-1};
+  int field_try_{0};
+  int field_tried_{0};
+  bool field_searching_{false};
+  std::atomic<bool> field_restart_{false};
+  std::atomic<uint8_t> field_found_[3];
+  std::atomic<bool> field_save_pending_{false};
+  ESPPreferenceObject field_pref_;
   // Only the raw capture (the part Video) takes another mode; the camera's JPEG device keeps its own.
   bool field_pending_() const {
-    return this->is_raw_csi_ && this->field_wanted_.load(std::memory_order_acquire) != this->field_active_;
+    return this->is_raw_csi_ && (this->field_wanted_.load(std::memory_order_acquire) != this->field_active_ ||
+                                 (this->field_active_ != 0 && this->field_try_ != this->field_active_try_));
   }
   void apply_field_();
   void field_failed_(const char *why);

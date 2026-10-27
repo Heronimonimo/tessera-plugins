@@ -787,30 +787,31 @@ static const esp_cam_sensor_format_t *ov02c10_build_field(int index, const esp_c
     return &s_field_format[index];
 }
 
-// TEST BUILD 6 (not for release), on 0.6.4: what a Full mode tries in turn until one runs (esp_video_camera keeps the
-// first that does). 0.6.4's twelve windows (544 to 528 lines, offsets 0 to 8) each gave one whole frame and then the
-// same MIPI frame boundary error (Guition 10.1-inch, 2026-10-27), so the window is not it; what is left is the frame's
-// timing and the rows it starts from. All tries are 960 x 544 at 4,0 (2 with the rows from 0); in order, the fastest
-// first: the rows read from 0 as the sensor's relatives bin them (OV5675, OV8856, OV13858: 0x3803 0 and the window's
-// end a few lines further), with and without their 0x3714 0x28 and 0x4009 0x11; then the frame longer (VTS
-// 0x380e/0x380f, 1164 in the table, 30 frames a second) up to 3492 (10 a second); then the long frames with those two.
-#define OV02C10_TRY_SIBLING 0x01   // 0x3714 0x28, 0x4009 0x11
-#define OV02C10_TRY_ROW0    0x02   // rows 0..1095 (548 halved), isp_y_win 2
+// TEST BUILD 7 (not for release), on 0.6.4: what a Full mode tries in turn until one runs (esp_video_camera keeps the
+// first that does). Test build 6 on the Guition 10.1-inch: every try gave one whole frame and then a MIPI frame
+// boundary error, the frame up to three times longer (VTS 3492) and the rows from 0 alike, so neither the frame's
+// length nor its window is it. OmniVision's OV02C10 datasheet (v2.01, Guition's P4-series repository) has what acts
+// on the frames after the first: power saving between frames (PSV, section 6.9), which the tables switch on (0x3C00
+// 0x0F, r_psv_mode_en) and during which 0x3C20 0x01 resets the MIPI PHY, and the MIPI block's frame packets (table
+// 6-11): 0x484C bit 0 keeps the frame count in the frame start and end packets at 0, 0x484B bit 0 has a frame start
+// after SOF (its default, 1) or after the first HREF (0). All tries are 0.6.4's first window (960 x 544 at 4,0), at
+// the table's VTS 1164 unless said.
+#define OV02C10_TRY_PSV_OFF   0x01   // 0x3C00 0x0B: PSV off, its auto on off too (the register's default)
+#define OV02C10_TRY_PSV_NORST 0x02   // 0x3C20 0x00: PSV keeps the MIPI PHY and its power
+#define OV02C10_TRY_FCNT0     0x04   // 0x484C 0x01: frame count 0 in every frame start and end
+#define OV02C10_TRY_SOF_HREF  0x08   // 0x484B 0x02: the frame starts after the first HREF
 typedef struct {
     uint16_t vts;
     uint8_t extra;
 } ov02c10_try_t;
 static const ov02c10_try_t s_tries[] = {
-    {1164, OV02C10_TRY_ROW0},
-    {1164, OV02C10_TRY_ROW0 | OV02C10_TRY_SIBLING},
-    {1300, 0},
-    {1456, 0},
-    {1746, 0},
-    {2328, 0},
-    {3492, 0},
-    {2328, OV02C10_TRY_SIBLING},
-    {2328, OV02C10_TRY_ROW0},
-    {3492, OV02C10_TRY_ROW0 | OV02C10_TRY_SIBLING},
+    {1164, OV02C10_TRY_PSV_OFF},
+    {1164, OV02C10_TRY_PSV_NORST},
+    {1164, OV02C10_TRY_FCNT0},
+    {1164, OV02C10_TRY_SOF_HREF},
+    {1164, OV02C10_TRY_PSV_OFF | OV02C10_TRY_FCNT0},
+    {1164, OV02C10_TRY_PSV_OFF | OV02C10_TRY_FCNT0 | OV02C10_TRY_SOF_HREF},
+    {2328, OV02C10_TRY_PSV_OFF | OV02C10_TRY_FCNT0},
 };
 #define OV02C10_TRIES ((int)(sizeof(s_tries) / sizeof(s_tries[0])))
 static char s_field_name[2][56];
@@ -836,7 +837,6 @@ const esp_cam_sensor_format_t *tessera_camera_field_format_try(int field, int at
     _Static_assert(sizeof(s_binned_changes) / sizeof(s_binned_changes[0]) + 8 <= 32, "changes fit the used marks");
     ov02c10_change_t changes[32];
     const ov02c10_try_t *t = &s_tries[attempt];
-    const bool row0 = (t->extra & OV02C10_TRY_ROW0) != 0;
     size_t n = 0;
     for (size_t c = 0; c < count; c++) {
         changes[n] = base[c];
@@ -844,22 +844,29 @@ const esp_cam_sensor_format_t *tessera_camera_field_format_try(int field, int at
         case 0x380a: changes[n].val = 0x02; break;   // 544
         case 0x380b: changes[n].val = 0x20; break;
         case 0x3811: changes[n].val = 4; break;
-        case 0x3813: changes[n].val = row0 ? 2 : 0; break;
-        case 0x3803: changes[n].val = row0 ? 0x00 : 0x04; break;
-        case 0x3807: changes[n].val = row0 ? 0x47 : 0x43; break;
+        case 0x3813: changes[n].val = 0; break;
         default: break;
         }
         n++;
     }
     changes[n++] = (ov02c10_change_t){0x380e, (uint8_t)(t->vts >> 8)};
     changes[n++] = (ov02c10_change_t){0x380f, (uint8_t)(t->vts & 0xff)};
-    if (t->extra & OV02C10_TRY_SIBLING) {
-        changes[n++] = (ov02c10_change_t){0x3714, 0x28};
-        changes[n++] = (ov02c10_change_t){0x4009, 0x11};
+    if (t->extra & OV02C10_TRY_PSV_OFF) {
+        changes[n++] = (ov02c10_change_t){0x3c00, 0x0b};
     }
-    snprintf(s_field_name[index], sizeof(s_field_name[index]), "OV02C10_full_%s_960x544_vts%u%s%s",
-             field == 1 ? "binned" : "skipped", (unsigned)t->vts, row0 ? "_row0" : "",
-             (t->extra & OV02C10_TRY_SIBLING) ? "_sib" : "");
+    if (t->extra & OV02C10_TRY_PSV_NORST) {
+        changes[n++] = (ov02c10_change_t){0x3c20, 0x00};
+    }
+    if (t->extra & OV02C10_TRY_FCNT0) {
+        changes[n++] = (ov02c10_change_t){0x484c, 0x01};
+    }
+    if (t->extra & OV02C10_TRY_SOF_HREF) {
+        changes[n++] = (ov02c10_change_t){0x484b, 0x02};
+    }
+    snprintf(s_field_name[index], sizeof(s_field_name[index]), "OV02C10_full_%s_960x544_vts%u%s%s%s%s",
+             field == 1 ? "binned" : "skipped", (unsigned)t->vts,
+             (t->extra & OV02C10_TRY_PSV_OFF) ? "_psvoff" : "", (t->extra & OV02C10_TRY_PSV_NORST) ? "_psvnorst" : "",
+             (t->extra & OV02C10_TRY_FCNT0) ? "_fcnt0" : "", (t->extra & OV02C10_TRY_SOF_HREF) ? "_href" : "");
     return ov02c10_build_field(index, &ov02c10_format_info[1], changes, n, s_field_name[index], 960, 544);
 }
 
